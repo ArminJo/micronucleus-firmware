@@ -1,0 +1,3 @@
+The _no_pullup configurations adds an an additional check and specify ENTRY_POWER_ON as entrymode. 
+No pullup only adds 16 to 18 bytes for an additional check (contained by default in all pre 2.0 versions) and can therefore be used for boards with a pullup.
+ENTRY_POWER_ON adds 18 bytes, but is what you normally need if you use a Digispark board, since it is programmed by detaching from power and attaching to the USB port getting power again.
