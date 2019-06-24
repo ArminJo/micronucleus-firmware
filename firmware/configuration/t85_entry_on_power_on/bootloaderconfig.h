@@ -88,7 +88,7 @@
  *
  *  ENTRY_POWER_ON      Activate the bootloader after power on. This is what yo need
  *                      for normal development with Digispark boards.
- *                      Adds 22 bytes.
+ *                      Adds 18 bytes.
  *
  *  ENTRY_WATCHDOG      Activate the bootloader after a watchdog reset. This can be used
  *                      to enter the bootloader from the user program.
@@ -98,7 +98,7 @@
  *                      pulling the reset pin low. It may be necessary to add an external
  *                      pull-up resistor to the reset pin if this entry method appears to
  *                      behave unreliably.
- *                      Adds 22 bytes.
+ *                      Adds 18 bytes.
  *
  *  ENTRY_JUMPER        Activate the bootloader when a specific pin is pulled low by an 
  *                      external jumper. 
