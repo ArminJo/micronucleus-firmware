@@ -1,5 +1,5 @@
-/* 
- * Project: Micronucleus -  v2.3
+/*
+ * Project: Micronucleus -  v2.4
  *
  * Micronucleus V2.3             (c) 2016 Tim Bo"scke - cpldcpu@gmail.com
  *                               (c) 2014 Shay Green
@@ -24,7 +24,7 @@
 #include "usbdrv/usbdrv.c"
 
 // verify the bootloader address aligns with page size
-#if (defined __AVR_ATtiny841__)||(defined __AVR_ATtiny441__)  
+#if (defined __AVR_ATtiny841__)||(defined __AVR_ATtiny441__)
 #if BOOTLOADER_ADDRESS % ( SPM_PAGESIZE * 4 ) != 0
 #error "BOOTLOADER_ADDRESS in makefile must be a multiple of chip's pagesize"
 #endif
@@ -45,13 +45,13 @@
 // Device configuration reply
 // Length: 6 bytes
 //   Byte 0:  User program memory size, high byte
-//   Byte 1:  User program memory size, low byte   
+//   Byte 1:  User program memory size, low byte
 //   Byte 2:  Flash Pagesize in bytes
-//   Byte 3:  Page write timing in ms. 
+//   Byte 3:  Page write timing in ms.
 //    Bit 7 '0': Page erase time equals page write time
 //    Bit 7 '1': Page erase time equals page write time divided by 4
 //   Byte 4:  SIGNATURE_1
-//   Byte 5:  SIGNATURE_2 
+//   Byte 5:  SIGNATURE_2
 
 PROGMEM const uint8_t configurationReply[6] = { (((uint16_t) PROGMEM_SIZE) >> 8) & 0xff, ((uint16_t) PROGMEM_SIZE) & 0xff,
 SPM_PAGESIZE,
@@ -66,7 +66,7 @@ typedef union {
 
 #if OSCCAL_RESTORE_DEFAULT
   register uint8_t      osccal_default  asm("r2");
-#endif 
+#endif
 
 register uint16_union_t currentAddress asm("r4");  // r4/r5 current progmem address, used for erasing and writing
 register uint16_union_t idlePolls asm("r6");  // r6/r7 idlecounter
@@ -90,7 +90,7 @@ register uint8_t command asm("r3");  // bind command to r3
 #define wdr() asm volatile("wdr")
 
 // Use the old delay routines without NOP padding. This saves memory.
-#define __DELAY_BACKWARD_COMPATIBLE__   
+#define __DELAY_BACKWARD_COMPATIBLE__
 
 /* ------------------------------------------------------------------------ */
 static inline void eraseApplication(void);
@@ -98,6 +98,7 @@ static void writeFlashPage(void);
 static void writeWordToPageBuffer(uint16_t data);
 static uint8_t usbFunctionSetup(uint8_t data[8]);
 static inline void leaveBootloader(void);
+void blinkLED(uint8_t aBlinkCount);
 
 // This function is never called, it is just here to suppress a compiler warning.
 USB_PUBLIC usbMsgLen_t usbFunctionDescriptor(struct usbRequest *rq) {
@@ -111,12 +112,16 @@ static inline void eraseApplication(void) {
     uint16_t ptr = BOOTLOADER_ADDRESS;
 
     while (ptr) {
-#if (defined __AVR_ATtiny841__)||(defined __AVR_ATtiny441__)    
-    ptr -= SPM_PAGESIZE * 4;        
+#if (defined __AVR_ATtiny841__)||(defined __AVR_ATtiny441__)
+    ptr -= SPM_PAGESIZE * 4;
 #else
         ptr -= SPM_PAGESIZE;
-#endif    
+#endif
         boot_page_erase(ptr);
+#if (defined __AVR_ATmega328P__)||(defined __AVR_ATmega168P__)||(defined __AVR_ATmega88P__)
+    // the ATmegaATmega328p/168p/88p don't halt the CPU when writing to RWW flash, so we need to wait here
+    boot_spm_busy_wait();
+#endif
     }
 
     // Reset address to ensure the reset vector is written first.
@@ -125,17 +130,22 @@ static inline void eraseApplication(void) {
 
 // simply write currently stored page in to already erased flash memory
 static inline void writeFlashPage(void) {
-    if (currentAddress.w - 2 < BOOTLOADER_ADDRESS)
+    if (currentAddress.w - 2 < BOOTLOADER_ADDRESS) {
         boot_page_write(currentAddress.w - 2);   // will halt CPU, no waiting required
+#if (defined __AVR_ATmega328P__)||(defined __AVR_ATmega168P__)||(defined __AVR_ATmega88P__)
+    // the ATmega328p/168p/88p don't halt the CPU when writing to RWW flash
+    boot_spm_busy_wait();
+#endif
+    }
 }
 
 // Write a word into the page buffer.
 // Will patch the bootloader reset vector into the main vectortable to ensure
-// the device can not be bricked. Saving user-reset-vector is done in the host 
+// the device can not be bricked. Saving user-reset-vector is done in the host
 // tool, starting with firmware V2
 static void writeWordToPageBuffer(uint16_t data) {
 
-#ifndef ENABLE_UNSAFE_OPTIMIZATIONS     
+#ifndef ENABLE_UNSAFE_OPTIMIZATIONS
 #if BOOTLOADER_ADDRESS < 8192
     // rjmp
     if (currentAddress.w == RESET_VECTOR_OFFSET * 2) {
@@ -147,7 +157,7 @@ static void writeWordToPageBuffer(uint16_t data) {
     data = 0x940c;
   } else if (currentAddress.w == (RESET_VECTOR_OFFSET +1 ) * 2) {
     data = (BOOTLOADER_ADDRESS/2);
-  }    
+  }
   #endif
 #endif
 
@@ -165,6 +175,7 @@ static void writeWordToPageBuffer(uint16_t data) {
 static uint8_t usbFunctionSetup(uint8_t data[8]) {
     usbRequest_t *rq = (void *) data;
 
+    idlePolls.b[1] = 0; // reset idle polls when we get usb traffic
     if (rq->bRequest == cmd_device_info) { // get device info
         usbMsgPtr = (usbMsgPtr_t) configurationReply;
         return sizeof(configurationReply);
@@ -175,9 +186,17 @@ static uint8_t usbFunctionSetup(uint8_t data[8]) {
             currentAddress.b[0] = rq->wIndex.bytes[0] & (~(SPM_PAGESIZE - 1));
             currentAddress.b[1] = rq->wIndex.bytes[1];
 
-            // clear page buffer as a precaution before filling the buffer in case 
-            // a previous write operation failed and there is still something in the buffer.         
+            // clear page buffer as a precaution before filling the buffer in case
+            // a previous write operation failed and there is still something in the buffer.
+#ifdef CTPB
             __SPM_REG = (_BV(CTPB) | _BV(__SPM_ENABLE));
+#else
+  #ifdef RWWSRE
+            __SPM_REG=(_BV(RWWSRE)|_BV(__SPM_ENABLE));
+  #else
+            __SPM_REG=_BV(__SPM_ENABLE);
+  #endif
+#endif
             asm volatile("spm");
 
         }
@@ -194,17 +213,21 @@ static uint8_t usbFunctionSetup(uint8_t data[8]) {
 }
 
 static void initHardware(void) {
+    MCUSR = ~_BV(WDRF); // write 0x07 to MCUSR - this should reset only bit 3/Watchdog System Reset Flag and keep the other flags
+
     // Disable watchdog and set timeout to maximum in case the WDT is fused on
 #ifdef CCP
-  // New ATtinies841/441 use a different unlock sequence and renamed registers
-  MCUSR = ~_BV(WDRF);    
-  CCP = 0xD8; 
-  WDTCSR = 1<<WDP2 | 1<<WDP1 | 1<<WDP0; 
-#else
-    MCUSR = ~_BV(WDRF);
+    // New ATtinies841/441 use a different unlock sequence and renamed registers
+    CCP = 0xD8;
+    WDTCSR = 1<<WDP2 | 1<<WDP1 | 1<<WDP0;
+#elif defined(WDTCR)
     WDTCR = 1 << WDCE | 1 << WDE;
     WDTCR = 1 << WDP2 | 1 << WDP1 | 1 << WDP0;
-#endif  
+#else
+    wdt_reset();
+    WDTCSR|=_BV(WDCE) | _BV(WDE);
+    WDTCSR=0;
+#endif
 
     usbDeviceDisconnect(); /* do this while interrupts are disabled */
     _delay_ms(300);
@@ -218,6 +241,7 @@ static void initHardware(void) {
 static void leaveBootloader(void) __attribute__((__noreturn__));
 static inline void leaveBootloader(void) {
 
+    // bootLoaderExit() is a Macro defined in bootloaderconfig.h and mainly empty except for ENTRY_JUMPER, where it resets the pullup.
     bootLoaderExit();
 
 #if OSCCAL_RESTORE_DEFAULT
@@ -225,17 +249,24 @@ static inline void leaveBootloader(void) {
   nop(); // NOP to avoid CPU hickup during oscillator stabilization
 #endif
 
+#if (defined __AVR_ATmega328P__)||(defined __AVR_ATmega168P__)||(defined __AVR_ATmega88P__)
+  // Tell the system that we want to read from the RWW memory again.
+  boot_rww_enable();
+#endif
+
     asm volatile ("rjmp __vectors - 4");
     // jump to application reset vector at end of flash
 
-    for (;;)
-        ; // Make sure function does not return to help compiler optimize
+    for (;;) { // Make sure function does not return to help compiler optimize
+        ;
+    }
 }
 
 void USB_INTR_VECTOR(void);
-int main(void) {
-    uint8_t osccal_tmp;
 
+int main(void) {
+
+    // bootLoaderInit() is a Macro defined in bootloaderconfig.h and mainly empty except for ENTRY_JUMPER, where it sets the pullup and waits 1 ms.
     bootLoaderInit();
 
     /* save default OSCCAL calibration  */
@@ -253,13 +284,17 @@ int main(void) {
 #endif
     // bootLoaderStartCondition() is a Macro defined in bootloaderconfig.h and mainly is set to true or checks a bit in MCUSR
     if (bootLoaderStartCondition() || (pgm_read_byte(BOOTLOADER_ADDRESS - TINYVECTOR_RESET_OFFSET + 1) == 0xff)) {
-
+        /*
+         * Here boot condition matches or vector table is empty / no program loaded
+         */
         initHardware();
+        // Set LED pin to output, if LED exists
         LED_INIT();
 
         // At default AUTO_EXIT_NO_USB_MS is defined 0
         if (AUTO_EXIT_NO_USB_MS > 0) {
             // At default AUTO_EXIT_MS is set to 6000
+            // bias idle counter to wait for AUTO_EXIT_NO_USB_MS if no reset was detected
             idlePolls.b[1] = ((AUTO_EXIT_MS - AUTO_EXIT_NO_USB_MS) / 5) >> 8;
         } else {
             idlePolls.b[1] = 0;
@@ -267,52 +302,74 @@ int main(void) {
 
         command = cmd_local_nop;
         currentAddress.w = 0;
-#ifdef START_WITHOUT_PULLUP // Adds 14 bytes
-    uint8_t resetDetected = 0;
+
+#if (OSCCAL_HAVE_XTAL == 0) && defined(START_WITHOUT_PULLUP) // Adds 14 bytes
+        uint8_t resetDetected = 0; // Flag to call calibrateOscillatorASM() directly after host reset ends.
 #endif
 
+        /*
+         * 1. Wait for 5 ms or USB transmission (and detect reset)
+         * 2. Interpret and execute USB command
+         * 3. Parse data packet and construct response (usbpoll)
+         * 4. Check for timeout and exit to user program
+         * 5. Blink LED
+         * 6. Resynchronize USB
+         */
         do {
+
             // 15 clockcycles per loop.
             // adjust fastctr for 5ms timeout
-
             uint16_t fastctr = (uint16_t) (F_CPU / (1000.0f * 15.0f / 5.0f));
-            uint8_t resetctr = 100;
-
+            uint8_t resetctr = 100; // start value to detecting reset timing
+            /*
+             * Now wait for 5 ms or USB transmission
+             * If reset from host via USB was detected, then calibrate OSCCAL
+             * If USB transmission was detected, reset idle / USB exit counter
+             */
             do {
+                /*
+                 * If host resets us, both lines are driven to low
+                 */
                 if ((USBIN & USBMASK) != 0) {
+                    // No host reset here, we are unconnected with pullup or receive host data -> wait again for reset
                     resetctr = 100;
 
-#ifdef START_WITHOUT_PULLUP
+#if (OSCCAL_HAVE_XTAL == 0) && defined(START_WITHOUT_PULLUP)
             /*
-             * Call calibrateOscillatorASM() only if USB is attached i.e. reset condition vanishes / SE0 State ends,
-             * otherwise just skip calibrateOscillatorASM and wait for timeout.
+             * Call calibrateOscillatorASM() only if USB is attached and after a reset, otherwise just skip calibrateOscillatorASM and wait for timeout.
+             * If USB has no pullup at VCC, we will end up here if pullup was powered by USB and host reset has ended.
              */
             if (resetDetected) {
-                resetDetected = 0;
-#if (OSCCAL_HAVE_XTAL == 0)           
+                resetDetected = 0; // do it only once after reset
                 calibrateOscillatorASM();
-#endif              
             }
-#endif // START_WITHOUT_PULLUP
+#endif
 
                 }
-                if (!--resetctr) { // reset encountered
-                    usbNewDeviceAddr = 0;   // bits from the reset handling of usbpoll()
+                if (--resetctr == 0) {
+                    // reset timing counter expired -> reset encountered here, both lines were low for around 100 us.
+                    // init 2 V-USB variables as done before in reset handling of usbpoll()
+                    usbNewDeviceAddr = 0;
                     usbDeviceAddr = 0;
 
+#if (OSCCAL_HAVE_XTAL == 0)
 #ifdef START_WITHOUT_PULLUP
-         resetDetected = 1;
-#else         
-#if (OSCCAL_HAVE_XTAL == 0)           
-                    calibrateOscillatorASM(); // this waits for the D- line to toggle and waits forever if the pullup at D- was detached.
-#endif 
-#endif  // START_WITHOUT_PULLUP
+                    resetDetected = 1;  // Call calibrateOscillatorASM() directly after host reset ends and host drives the lines.
+#else
+                    /*
+                     * Called if we received an host reset. This waits for the D- line to toggle.
+                     * It will wait forever, if no host is connected and the pullup at D- was detached.
+                     * In this case we recognize a (dummy) host reset but no toggling at D- will occur.
+                     */
+                    calibrateOscillatorASM();
+#endif
+#endif  // OSCCAL_HAVE_XTAL
 
                 }
 
                 if (USB_INTR_PENDING & (1 << USB_INTR_PENDING_BIT)) {
-                    USB_INTR_VECTOR();
-                    USB_INTR_PENDING = 1 << USB_INTR_PENDING_BIT; // Clear int pending, in case timeout occured during SYNC
+                    USB_INTR_VECTOR(); // call V-USB driver for USB receiving
+                    USB_INTR_PENDING = 1 << USB_INTR_PENDING_BIT; // Clear int pending, in case timeout occurred during SYNC
                     idlePolls.b[1] = 0; // reset idle polls when we get usb traffic
                     break;
                 }
@@ -322,7 +379,7 @@ int main(void) {
             wdr();
 
 #if OSCCAL_SLOW_PROGRAMMING
-      osccal_tmp  = OSCCAL;
+      uint8_t osccal_tmp  = OSCCAL;
       OSCCAL      = osccal_default;
  #endif
             // commands are only evaluated after next USB transmission or after 5 ms passed
@@ -342,7 +399,8 @@ int main(void) {
             }
 
             {
-                // This is usbpoll() minus reset logic and double buffering
+                // This is the old usbpoll() minus reset logic (which is done above) and double buffering (not needed anymore)
+                // Parse data packet and construct response
                 int8_t len;
                 len = usbRxLen - 3;
 
@@ -358,19 +416,22 @@ int main(void) {
                 }
             }
 
+            // Increment idle counter
             idlePolls.w++;
 
             // Try to execute program when bootloader times out
             if (AUTO_EXIT_MS && (idlePolls.w == (AUTO_EXIT_MS / 5))) {
                 if (pgm_read_byte(BOOTLOADER_ADDRESS - TINYVECTOR_RESET_OFFSET + 1) != 0xff)
+                    // Only exit to user program, if program exists
                     break;
             }
 
+            // Switch LED on or off by checking (MSByte or LSByte?) of idle counter with mask 0x4C
             LED_MACRO( idlePolls.b[0] );
 
             // Test whether another interrupt occurred during the processing of USBpoll and commands.
-            // If yes, we missed a data packet on the bus. Wait until the bus was idle for 8.8Âµs to
-            // allow synchronising to the next incoming packet.
+            // If yes, we missed a data packet on the bus. Wait until the bus was idle for 8.8 µs to
+            // allow synchronizing to the next incoming packet.
 
             if (USB_INTR_PENDING & (1 << USB_INTR_PENDING_BIT))  // Usbpoll() collided with data packet
                     {
@@ -390,10 +451,14 @@ int main(void) {
             }
         } while (1);
 
+        /*
+         * USB transmission timeout -> cleanup and call user program
+         */
+        // Set LED pin to input if LED exists
         LED_EXIT();
 
 #ifdef USB_CFG_PULLUP_IOPORTNAME
-        usbDeviceDisconnect(); // if using initHardware(), the port is still active powering the pullup after disconnecting micronucleus.
+        usbDeviceDisconnect(); // if using initHardware() instead, the port will still be active powering the pullup after disconnecting micronucleus.
 #else
         initHardware(); /* Disconnect micronucleus - this set the D- to output and after 300ms to input again. */
 #endif
@@ -404,5 +469,29 @@ int main(void) {
     }
 
     leaveBootloader();
+}
+
+/*
+ * For debugging purposes
+ */
+void blinkLED(uint8_t aBlinkCount) {
+#if LED_MODE!=NONE
+    LED_INIT();
+    for (uint8_t i = 0; i < MCUSR; ++i) {
+#if LED_MODE==ACTIVE_HIGH
+        LED_PORT |= _BV(LED_PIN);
+#else
+        LED_DDR|=_BV(LED_PIN);
+#endif
+        _delay_ms(300);
+#if LED_MODE==ACTIVE_HIGH
+        LED_PORT &= ~_BV(LED_PIN);
+#else
+        LED_DDR&=~_BV(LED_PIN);
+#endif
+        _delay_ms(300);
+    }
+    LED_EXIT();
+#endif
 }
 /* ------------------------------------------------------------------------ */
