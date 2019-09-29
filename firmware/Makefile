@@ -73,7 +73,7 @@ read_fuses:
 	$(UISP) --rd_fuses -B 20
 
 clean:
-	@rm -f main.hex main.bin main.c.lst main.map main.raw *.o usbdrv/*.o main.s usbdrv/oddebug.s usbdrv/usbdrv.s main.lss main.lst
+	@rm -f main.hex main.bin main.c.lst main.map main.raw *.o usbdrv/*.o main.s usbdrv/oddebug.s usbdrv/usbdrv.s usbdrv/oddebug.c.lst main.lss main.lst
 	@rm -f bootloader.* upgrade.hex upgrade.bin upgrade.c.lst upgrade.map main.s upgrade.lss upgrade.lst
 
 distclean: clean
