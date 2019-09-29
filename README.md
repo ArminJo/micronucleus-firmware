@@ -7,6 +7,7 @@ You can easily build your own configuration by adding a new configuration direct
 
 # Revision History
 ### Version 2.4
+- ATtiny167 support with MCUSR bug/problem at `ENTRY_EXT_RESET` workaround.
 - `MCUSR` handling improved.
 - no_pullup targets for low energy applications forever loop fixed.
 - `USB_CFG_PULLUP_IOPORTNAME` disconnect bug fixed.
