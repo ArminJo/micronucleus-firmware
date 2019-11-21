@@ -1,4 +1,11 @@
-@Call ../firmware/SetPath
+@Call SetPath
+@echo.
 @echo Upgrade Digispark Bootloader with spi programming by avrdude
-avrdude -pt85 -cstk500v1 -PCOM6 -b19200 -u -Uflash:w:t85_default.hex:a
+@if exist t85_default.hex  (
+  avrdude -pt85 -cstk500v1 -PCOM6 -b19200 -u -Uflash:w:t85_default.hex:a
+  goto end
+)
+@rem Try another path
+avrdude -pt85 -cstk500v1 -PCOM6 -b19200 -u -Uflash:w:..\firmware\releases\t85_default.hex:a
+:end
 pause
