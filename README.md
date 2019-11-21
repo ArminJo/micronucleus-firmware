@@ -5,6 +5,12 @@ You can easily build your own configuration by adding a new configuration direct
 
 ## This repository contains an avrdude config file in `windows_exe` with ATtiny87 and ATtiny167 data added.
 
+### Program memory comparison for t85_default.hex
+V1.6  6012 Byte free
+V1.11 6330 Byte free
+V2.3  6522 Byte free
+V2.4  6522 Byte free (for all other t85 variants too!)
+
 # Revision History
 ### Version 2.4
 - ATtiny167 support with MCUSR bug/problem at `ENTRY_EXT_RESET` workaround.
