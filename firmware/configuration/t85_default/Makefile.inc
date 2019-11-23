@@ -11,12 +11,12 @@ F_CPU = 16500000
 DEVICE = attiny85
 
 # hexadecimal address for bootloader section to begin. To calculate the best value:
-# - make clean; make main.hex; ### output will list data: 2124 | 1624 (or something like that)
-# - for the size of your device (8kb = 1024 * 8 = 8192) subtract above value = 6068 | 5668
-# - How many pages in is that? 6068 / 64 (tiny85 page size in bytes) = 94.8125 | 102.625
-# - round that down to 94 | 102
-# - our new bootloader address is 94 | 102 * 64 = 6016 | 6528, in hex = 1780 | 1980
-BOOTLOADER_ADDRESS = 1980
+# - make clean; make main.hex; ### output will list data: 1592 (or something like that)
+# - for the size of your device (8kb = 1024 * 8 = 8192) subtract above value = 6598
+# - How many pages in is that? 6598 / 64 (tiny85 page size in bytes) = 103.09377
+# - round that down to 103
+# - our new bootloader address is 103 * 64 = 6592, in hex = 19C0
+BOOTLOADER_ADDRESS = 19C0
 
 FUSEOPT = -U lfuse:w:0xe1:m -U hfuse:w:0xdd:m -U efuse:w:0xfe:m
 FUSEOPT_DISABLERESET = -U lfuse:w:0xe1:m -U efuse:w:0xfe:m -U hfuse:w:0x5d:m

@@ -23,9 +23,13 @@ Please note that Micronucleus is a completely independent project and is not afi
 
 - [Pro Nano 85](http://www.jayconsystems.com/pro-nano-50v-attiny85.html) by Jaconsystems
 
-- [Paperduino](http://paperduino.eu/doku.php) - Mini Arduino board on paper
-
 - [LaborTageBadge2013](http://www.das-labor.org/wiki/LaborTageBadge2013) - Badge with ATtiny85
+
+- [Franzininho](https://github.com/Franzininho/franzininho-diy-board) - Franzininho designed by Fábio Souza and Thalis Antunes for Arduino Day 2017 at São Paulo / Brazil.
+
+- [TinyStick](https://gitlab.com/nonchip/tinystick) - A simple open source Attiny85 board in a "usb stick on PCB" form factor simply exposes ISP and PortB without any onboard LED/button pin hogging. by Kyra 'nonchip' Zimmer
+
+- [ATtami](https://github.com/telavivmakers/at-tami) - using Micronucleus since 2015, for making the 1EU assmbly party.
 
 ## ATtiny 841 ##
 
@@ -37,3 +41,6 @@ Please note that Micronucleus is a completely independent project and is not afi
 
 ## ATtiny 84 ##
 - [Shinewave](https://github.com/GGreenwood/Shinewave) by [Electric Exploits](http://electricexploits.net/) - USB mods for GameCube controllers
+
+## ATtiny 88 ##
+- [MH Tiny88](http://mh.nodebb.com/topic/47/mh-et-live-tiny88-16-0mhz) - A tiny breakout board with an ATtiny 88. Arduino compatible.

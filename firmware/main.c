@@ -370,7 +370,12 @@ int main(void) {
                 if (USB_INTR_PENDING & (1 << USB_INTR_PENDING_BIT)) {
                     USB_INTR_VECTOR(); // call V-USB driver for USB receiving
                     USB_INTR_PENDING = 1 << USB_INTR_PENDING_BIT; // Clear int pending, in case timeout occurred during SYNC
-                    idlePolls.b[1] = 0; // reset idle polls when we get usb traffic
+                    /*
+                     * Commented out - see readme for 2.04.
+                     * Idlepolls is now only reset when traffic to the current endpoint is detected.
+                     * This will let micronucleus timeout also when traffic from other USB devices is present on the bus.
+                     */
+//                    idlePolls.b[1] = 0; // reset idle polls when we get usb traffic
                     break;
                 }
 
@@ -426,7 +431,7 @@ int main(void) {
                     break;
             }
 
-            // Switch LED on or off by checking (MSByte or LSByte?) of idle counter with mask 0x4C
+            // Switch LED on for 4 Idle loops every 64th idle loop - implemented by masking LSByte of idle counter with 0x4C
             LED_MACRO( idlePolls.b[0] );
 
             // Test whether another interrupt occurred during the processing of USBpoll and commands.
