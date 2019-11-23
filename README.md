@@ -1,4 +1,8 @@
 # Firmware for Micronucleus
+### Version 2.4
+[![License: GPL v2](https://img.shields.io/badge/License-GPLv2-blue.svg)](https://www.gnu.org/licenses/gpl-2.0)
+[![Hit Counter](https://hitcounter.pythonanywhere.com/count/tag.svg?url=https%3A%2F%2Fgithub.com%2FArminJo%2Fmicronucleus-firmware)](https://github.com/brentvollebregt/hit-counter)
+
 Since the [micronucleus repository](https://github.com/micronucleus/micronucleus) seems to be abandoned, I forked the firmware part and try to add all improvements and bug fixes I am aware of.<br/>
 To make the code better understandable, I **added around 50 comment lines**.
 
