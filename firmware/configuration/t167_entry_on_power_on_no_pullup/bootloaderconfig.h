@@ -102,9 +102,15 @@
  *  ENTRY_ALWAYS        Always activate the bootloader after reset. Requires the least
  *                      amount of code.
  *
- *  ENTRY_POWER_ON      Activate the bootloader after power on. This is what yo need
+ *  ENTRY_POWER_ON      Activate the bootloader after power on. This is what you need
  *                      for normal development with Digispark boards.
- *                      Adds 22 bytes.
+ *                      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ *                      Since the reset flags are no longer cleared by micronucleus
+ *                      you must clear them with "MCUSR = 0;" in your setup() routine
+ *                      after saving or evaluating them to make this mode work.
+ *                      If you do not reset the flags, the bootloader will be entered even
+ *                      after reset, since the power on reset flag in MCUSR is still set.
+ *                      Adds 18 bytes.
  *
  *  ENTRY_WATCHDOG      Activate the bootloader after a watchdog reset. This can be used
  *                      to enter the bootloader from the user program.

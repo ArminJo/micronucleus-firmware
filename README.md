@@ -10,13 +10,17 @@ You can easily build your own configuration by adding a new configuration direct
 
 ## This repository contains an avrdude config file in `windows_exe` with **ATtiny87** and **ATtiny167** data added.
 
-## Driver installation
+# Driver installation
 For Windows you must install the **Digispark driver** before you can program the board. Download it [here](https://github.com/digistump/DigistumpArduino/releases/download/1.6.7/Digistump.Drivers.zip), open it and run `InstallDrivers.exe`.
 
-## `START_WITHOUT_PULLUP` and `ENTRY_POWER_ON` configuration flags
+# MCUSR
+In this version the reset flags are no longer cleared by micronucleus! If you need them in your program or use the `ENTRY_POWER_ON` boot mode,
+**you must clear them** with `MCUSR = 0;` **after** saving or evaluating them. If you do not reset the flags, and use the `ENTRY_POWER_ON` mode of the bootloader, the bootloader will be entered even after reset, since the power on reset flag in MCUSR is still set!
+
+# `START_WITHOUT_PULLUP` and `ENTRY_POWER_ON` configuration flags
 The `START_WITHOUT_PULLUP` configurations adds an an additional check and specify `ENTRY_POWER_ON` as entrymode giving a bootloader size of 1626 bytes for an ATtiny85.
-This configuration only adds 16 to 18 bytes for an additional check (contained by default in all pre 2.0 versions) and can therefore also be used for boards with a pullup.
-ENTRY_POWER_ON adds 18 bytes to the ATtiny85 default configuration, but is what you normally need if you use a Digispark board, since it is programmed by attaching to the USB port resulting in power up.
+This configuration adds 16 to 18 bytes for an additional check. Since these checks are contained by default in all pre 2.0 versions it it obvious that it can also be used for boards with a pullup.
+ENTRY_POWER_ON adds 18 bytes to the ATtiny85 default configuration, but is what you normally need if you use a Digispark board, since it is programmed by attaching to the USB port resulting in power up. **You must reset the reset flags in setup()** with `MCUSR = 0;` to make it work! 
 
 # Memory footprint
 The actual memory footprint for each configuration can be found in the file [*firmware/build.log*](https://github.com/ArminJo/micronucleus-firmware/blob/master/firmware/build.log).<br/>
