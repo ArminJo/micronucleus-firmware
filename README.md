@@ -22,22 +22,28 @@ The `START_WITHOUT_PULLUP` configurations adds an an additional check and specif
 This configuration adds 16 to 18 bytes for an additional check. Since these checks are contained by default in all pre 2.0 versions it it obvious that it can also be used for boards with a pullup.
 ENTRY_POWER_ON adds 18 bytes to the ATtiny85 default configuration, but is what you normally need if you use a Digispark board, since it is programmed by attaching to the USB port resulting in power up. **You must reset the reset flags in setup()** with `MCUSR = 0;` to make it work! 
 
-# Memory footprint
+# Memory footprint of the new firmware
 The actual memory footprint for each configuration can be found in the file [*firmware/build.log*](https://github.com/ArminJo/micronucleus-firmware/blob/master/firmware/build.log).<br/>
 Bytes used by the mironucleus bootloader can be computed by taking the data size value in *build.log*, 
-and rounding it up to the next multiple of the page size which is e.g. 64 bytes for ATtiny85.<br/>
+and rounding it up to the next multiple of the page size which is e.g. 64 bytes for ATtiny85 and 128 bytes for ATtiny176.<br/>
 Subtracting this (+ 6 byte for postscript) from the total amount of memory will result in the free bytes numbers.
 - Postscript are the few bytes at the end of programmable memory which store tinyVectors.
 
-E.g. for *t85_default.hex* with the new compiler we get 1592 as data size. The next multiple of 64 is 1600 (25 * 64) => (8192 - (1600 + 6)) = 6586.<br/>
+E.g. for *t85_default.hex* with the new compiler we get 1592 as data size. The next multiple of 64 is 1600 (25 * 64) => (8192 - (1600 + 6)) = **6586 bytes are free**.<br/>
 In this case we have 8 bytes left for configuration extensions before using another 64 byte page.
-So the `START_WITHOUT_PULLUP` and `ENTRY_POWER_ON` configurations are reducing the free bytes amount by 64.
+So the `START_WITHOUT_PULLUP` and `ENTRY_POWER_ON` configurations are reducing the free bytes amount by 64 to 6522.
+
+For *t167_default.hex* (as well as for the other t167 configurations) with the new compiler we get 1436 as data size. The next multiple of 128 is 1536 (12 * 128) => (16384 - (1536 + 6)) = 14842 bytes are free.<br/>
 
 ## Bootloader memory comparison of different releases for [*t85_default.hex*](https://github.com/ArminJo/micronucleus-firmware/blob/master/firmware/releases/t85_default.hex).
 - V1.6  6012 Byte free
 - V1.11 6330 Byte free
 - V2.3  6522 Byte free
 - V2.4  6586 Byte free (6522 for all other t85 variants)
+
+# How to update the bootloader to the new version
+To update your old flash consuming bootloader you simply can run one of the window [scripts](https://github.com/ArminJo/micronucleus-firmware/tree/master/utils)
+like e.g. the [Burn_upgrade-t85_default.cmd](https://github.com/ArminJo/micronucleus-firmware/blob/master/utils/Burn_upgrade-t85_default.cmd).
 
 # Revision History
 ### Version 2.4
