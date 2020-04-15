@@ -109,7 +109,7 @@ disasm:	main.bin upgrade.bin
 APP_ADDRESS = 80
 
 # Remove the -fno-* options when you use gcc 3, it does not understand them
-CFLAGS_U = -Wall -Os -fno-move-loop-invariants -fno-tree-scev-cprop -fno-inline-small-functions -I. -Ilibs-device -mmcu=$(DEVICE) -DF_CPU=$(F_CPU) $(DEFINES)
+CFLAGS_U = -Wall -Os -fno-move-loop-invariants -fno-tree-scev-cprop -fno-inline-small-functions -I. -Ilibs-device -mmcu=$(DEVICE) -DF_CPU=$(F_CPU) $(DEFINES) -DBOOTLOADER_ADDRESS=0x$(BOOTLOADER_ADDRESS)
 LDFLAGS_U = -Wl,--relax,--gc-sections -Wl,--section-start=.text=$(APP_ADDRESS),-Map=upgrade.map
 
 

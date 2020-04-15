@@ -53,6 +53,8 @@ You can easily create your own configuration by adding a new *firmware/configura
 
 # Revision History
 ### Version 2.5
+- Fixed destroying bootloader for upgrades with entry condition `ENTRY_EXT_RESET`.
+- Fixed wrong condition for t85 `ENTRYMODE==ENTRY_EXT_RESET`.
 - ATtiny167 support with MCUSR bug/problem at `ENTRY_EXT_RESET` workaround.
 - `MCUSR` handling improved.
 - no_pullup targets for low energy applications forever loop fixed.

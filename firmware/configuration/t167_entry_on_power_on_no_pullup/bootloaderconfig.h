@@ -162,7 +162,7 @@
 #elif ENTRYMODE==ENTRY_EXT_RESET
   #define bootLoaderInit()
   #define bootLoaderExit()
-// special behavior of my ATtiny167: on Power up MCUSR is always 0x07, but reset works as expected
+// Special behavior of my ATtiny167: on Power up MCUSR is always 0x07 BORF | EXTRF | PORF, but reset works as expected, it gives 0x02 = EXTRF
   #define bootLoaderStartCondition() (MCUSR == _BV(EXTRF))
 #elif ENTRYMODE==ENTRY_JUMPER
   // Enable pull up on jumper pin and delay to stabilize input
