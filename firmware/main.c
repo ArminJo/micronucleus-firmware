@@ -229,9 +229,9 @@ static void initHardware(void) {
     WDTCSR=0;
 #endif
 
-    usbDeviceDisconnect(); /* do this while interrupts are disabled */
+    usbDeviceDisconnect(); // Disable pullup resistor by pull down D-
     _delay_ms(300);
-    usbDeviceConnect();
+    usbDeviceConnect(); // Enable pullup resistor by changing D- to input
 
     usbInit();    // Initialize INT settings after reconnect
 }
@@ -371,11 +371,11 @@ int main(void) {
                     USB_INTR_VECTOR(); // call V-USB driver for USB receiving
                     USB_INTR_PENDING = 1 << USB_INTR_PENDING_BIT; // Clear int pending, in case timeout occurred during SYNC
                     /*
-                     * Commented out - see readme for 2.04.
-                     * Idlepolls is now only reset when traffic to the current endpoint is detected.
-                     * This will let micronucleus timeout also when traffic from other USB devices is present on the bus.
+                     * readme for 2.04 says: If you comment it out, idlepolls is only reset when traffic to the current endpoint is detected.
+                     * This will let micronucleus timeout also when traffic from other USB devices is present on the bus,
+                     * but this leads to periodically reconnecting if no user program is existent. This behavior is like the one of the v1.06 bootloader.
                      */
-//                    idlePolls.b[1] = 0; // reset idle polls when we get usb traffic
+                    // idlePolls.b[1] = 0; // reset idle polls when we see usb traffic
                     break;
                 }
 
@@ -463,9 +463,9 @@ int main(void) {
         LED_EXIT();
 
 #ifdef USB_CFG_PULLUP_IOPORTNAME
-        usbDeviceDisconnect(); // if using initHardware() instead, the port will still be active powering the pullup after disconnecting micronucleus.
+        usbDeviceDisconnect(); // if using initHardware() instead, the pullup resistor port will still be active powering the pullup after disconnecting micronucleus.
 #else
-        initHardware(); /* Disconnect micronucleus - this set the D- to output and after 300ms to input again. */
+        initHardware(); // Disconnect micronucleus - Set the D- to output and after 300ms to input again.
 #endif
 
         USB_INTR_ENABLE = 0;

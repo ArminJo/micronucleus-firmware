@@ -74,7 +74,7 @@ read_fuses:
 
 clean:
 	@rm -f main.hex main.bin main.c.lst main.map main.raw *.o usbdrv/*.o main.s usbdrv/oddebug.s usbdrv/usbdrv.s usbdrv/oddebug.c.lst main.lss main.lst
-	@rm -f bootloader.* upgrade.hex upgrade.bin upgrade.c.lst upgrade.map main.s upgrade.lss upgrade.lst
+	@rm -f bootloader.* upgrade.hex upgrade.bin upgrade.c.lst upgrade.map main.s upgrade.lss upgrade.lst upgrade.lss
 
 distclean: clean
 	@rm *~
@@ -83,7 +83,7 @@ distclean: clean
 # file targets:
 main.bin:	$(OBJECTS)
 	@$(CC) $(CFLAGS) -o main.bin $(OBJECTS) $(LDFLAGS)
-	@avr-objdump -d main.bin > main.lss
+	@avr-objdump -d -S main.bin > main.lss
 
 
 main.hex:	main.bin
@@ -103,13 +103,13 @@ main.hex:	main.bin
 disasm:	main.bin upgrade.bin
 	@avr-objdump -d -S main.bin >main.lss
 	@avr-nm -l -S -n main.bin > main.lst
-	@avr-objdump -d upgrade.bin > upgrade.lss
+	@avr-objdump -d -S upgrade.bin > upgrade.lss
 	@avr-nm -l -S -n upgrade.bin > upgrade.lst
 
 APP_ADDRESS = 80
 
 # Remove the -fno-* options when you use gcc 3, it does not understand them
-CFLAGS_U = -Wall -Os -fno-move-loop-invariants -fno-tree-scev-cprop -fno-inline-small-functions -I. -Ilibs-device -mmcu=$(DEVICE) -DF_CPU=$(F_CPU) $(DEFINES) -DBOOTLOADER_ADDRESS=0x$(BOOTLOADER_ADDRESS)
+CFLAGS_U = -Wall -g2 -Os -fno-move-loop-invariants -fno-tree-scev-cprop -fno-inline-small-functions -I. -Ilibs-device -mmcu=$(DEVICE) -DF_CPU=$(F_CPU) $(DEFINES) -DBOOTLOADER_ADDRESS=0x$(BOOTLOADER_ADDRESS)
 LDFLAGS_U = -Wl,--relax,--gc-sections -Wl,--section-start=.text=$(APP_ADDRESS),-Map=upgrade.map
 
 
@@ -119,6 +119,7 @@ upgrade.o: upgrade.c bootloader.h
 
 upgrade.bin:	upgrade.o bootloader.o
 	@$(CC) $(CFLAGS_U) -o upgrade.bin upgrade.o bootloader.o $(LDFLAGS_U)
+	@avr-objdump -d -S upgrade.bin > upgrade.lss
 
 
 upgrade.hex:	upgrade.bin

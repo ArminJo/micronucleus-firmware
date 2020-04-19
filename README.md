@@ -1,9 +1,11 @@
 # Bootloader for Digispark / Micronucleus Firmware
 ### Version 2.5 - based on the firmware of [micronucleus v2.04](https://github.com/micronucleus/micronucleus/releases/tag/2.04) 
 [![License: GPL v2](https://img.shields.io/badge/License-GPLv2-blue.svg)](https://www.gnu.org/licenses/gpl-2.0)
-[![Hit Counter](https://hitcounter.pythonanywhere.com/count/tag.svg?url=https%3A%2F%2Fgithub.com%2FArminJo%2Fmicronucleus-firmware)](https://github.com/brentvollebregt/hit-counter)
+[![Hit Counter](https://hitcounter.pythonanywhere.com/count/tag.svg?url=https://github.com/ArminJo/micronucleus-firmware)](https://github.com/brentvollebregt/hit-counter)
 
 Since the [micronucleus repository](https://github.com/micronucleus/micronucleus) seems to be abandoned, I forked the firmware part and try to add all improvements and bug fixes I am aware of. To make the code better understandable, I **added around 50 comment lines**.
+
+![Digisparks](https://github.com/ArminJo/micronucleus-firmware/blob/master/Digisparks.jpg)
 
 # How to update the bootloader to the new version
 To update your old flash consuming bootloader you can simply run one of the window [scripts](https://github.com/ArminJo/micronucleus-firmware/tree/master/utils)
@@ -49,7 +51,58 @@ If you use the flags in your program or use the `ENTRY_POWER_ON` boot mode, **yo
 ## Create your own configuration
 You can easily create your own configuration by adding a new *firmware/configuration* directory and adjusting *bootloaderconfig.h* and *Makefile.inc*. Before you run the *firmware/make_all.cmd* script, check the arduino binaries path in the `firmware/SetPath.cmd` file.
 
+## Unknown USB Device (Device Descriptor Request Failed) entry in device manager
+The bootloader finishes with an active disconnect from USB and after 300 ms setting back both D- and D+ line ports to input.
+This in turn enables the pullup resistor indicating a low-speed device, which makes the host try to reconnect to the digispark.
+If you have loaded a sketch without USB communication, the host can not find any valid USB device and reflects this in the device manager.
+You can avoid this by actively disconnecting from the host by pulling the D- line (see below) to low.
+E.g. using it as a tone() output pin and generating a short beep at startup will work.
+The old v1 micronucleus versions do not disconnect from the host and therefore do not show this entry.
+
+## Periodically disconnect->connect if no sketch is loaded
+This is a side effect of enabling the bootloader to timeout also when traffic from other USB devices is present on the bus.
+It can be observed e.g. in the old 1.06 version too.
+
 ## This repository contains also an avrdude config file in `windows_exe` with **ATtiny87** and **ATtiny167** data added.
+
+# Pin layout
+### ATtiny85 on Digispark
+
+```
+                       +-\/-+
+ RESET/ADC0 (D5) PB5  1|    |8  VCC
+  USB- ADC3 (D3) PB3  2|    |7  PB2 (D2) INT0/ADC1 - default TX Debug output for ATtinySerialOut
+  USB+ ADC2 (D4) PB4  3|    |6  PB1 (D1) MISO/DO/AIN1/OC0B/OC1A/PCINT1 - (Digispark) LED
+                 GND  4|    |5  PB0 (D0) OC0A/AIN0
+                       +----+
+  USB+ and USB- are each connected to a 3.3 volt Zener to GND and with a 68 Ohm series resistor to the ATtiny pin.
+  On boards with a micro USB connector, the series resistor is 22 Ohm instead of 68 Ohm. 
+  USB- has a 1k pullup resistor to indicate a low-speed device (standard says 1k5).                  
+  USB+ and USB- are each terminated on the host side with 15k to 25k pull-down resistors.
+```
+
+### ATtiny167 on Digispark pro
+Digital Pin numbers in braces are for ATTinyCore library
+
+```
+                  +-\/-+
+RX   6 (D0) PA0  1|    |20  PB0 (D8)  0 OC1AU
+TX   7 (D1) PA1  2|    |19  PB1 (D9)  1 OC1BU - (Digispark) LED
+     8 (D2) PA2  3|    |18  PB2 (D10) 2 OC1AV
+INT1 9 (D3) PA3  4|    |17  PB3 (D11) 4 OC1BV USB-
+           AVCC  5|    |16  GND
+           AGND  6|    |15  VCC
+    10 (D4) PA4  7|    |14  PB4 (D12)   XTAL1
+    11 (D5) PA5  8|    |13  PB5 (D13)   XTAL2
+    12 (D6) PA6  9|    |12  PB6 (D14) 3 INT0  USB+
+     5 (D7) PA7 10|    |11  PB7 (D15)   RESET
+                  +----+
+  USB+ and USB- are each connected to a 3.3 volt Zener to GND and with a 51 Ohm series resistor to the ATtiny pin.
+  USB- has a 1k5 pullup resistor to indicate a low-speed device.
+  USB+ and USB- are each terminated on the host side with 15k to 25k pull-down resistors.
+
+```
+![DigisparkProPinLayout](https://github.com/ArminJo/micronucleus-firmware/blob/master/DigisparkProPinLayout.png)
 
 # Revision History
 ### Version 2.5
@@ -60,3 +113,8 @@ You can easily create your own configuration by adding a new *firmware/configura
 - no_pullup targets for low energy applications forever loop fixed.
 - `USB_CFG_PULLUP_IOPORTNAME` disconnect bug fixed.
 - new `ENTRY_POWER_ON` configuration switch, which enables the program to start immediately after a reset.
+
+## Requests for modifications / extensions
+Please write me a PM including your motivation/problem if you need a modification or an extension.
+
+#### If you find this library useful, please give it a star. 

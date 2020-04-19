@@ -3,7 +3,7 @@ Call SetPath
 if not exist releases MKDIR releases
 if not exist upgrades MKDIR upgrades
 
-Set TARGET=m328p_extclock
+Set TARGET=t85_default
 echo.
 echo **********************************************************
 echo make Configuration %TARGET%
