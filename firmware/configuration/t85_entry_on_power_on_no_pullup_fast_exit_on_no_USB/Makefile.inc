@@ -5,17 +5,17 @@
 # Controller type: ATtiny 85 - 16.5 MHz
 # Configuration:   Default
 # Last Change:     Mar 16,2014
-
-
+ 
+ 
 F_CPU = 16500000
 DEVICE = attiny85
 
 # hexadecimal address for bootloader section to begin. To calculate the best value:
-# - make clean; make main.hex; ### output will list data: 1592 (or something like that)
-# - for the size of your device (8kb = 1024 * 8 = 8192) subtract above value = 6598
-# - How many pages in is that? 6598 / 64 (tiny85 page size in bytes) = 103.09377
-# - round that down to 103
-# - our new bootloader address is 103 * 64 = 6592, in hex = 19C0
+# - make clean; make main.hex; ### output will list data: 2124 | 1624 (or something like that)
+# - for the size of your device (8kb = 1024 * 8 = 8192) subtract above value = 6068 | 5668
+# - How many pages in is that? 6068 / 64 (tiny85 page size in bytes) = 94.8125 | 102.625
+# - round that down to 94 | 102
+# - our new bootloader address is 94 | 102 * 64 = 6016 | 6528, in hex = 1780 | 1980
 BOOTLOADER_ADDRESS = 1980
 
 FUSEOPT = -U lfuse:w:0xe1:m -U hfuse:w:0xdd:m -U efuse:w:0xfe:m
@@ -32,7 +32,7 @@ FUSEOPT_DISABLERESET = -U lfuse:w:0xe1:m -U efuse:w:0xfe:m -U hfuse:w:0x5d:m
 #
 # Fuse high byte:
 # 0xdd = 1 1 0 1   1 1 0 1
-#        ^ ^ ^ ^   ^ \-+-/
+#        ^ ^ ^ ^   ^ \-+-/ 
 #        | | | |   |   +------ BODLEVEL 2..0 (brownout trigger level -> 2.7V)
 #        | | | |   +---------- EESAVE (preserve EEPROM on Chip Erase -> not preserved)
 #        | | | +-------------- WDTON (watchdog timer always on -> disable)
@@ -42,7 +42,7 @@ FUSEOPT_DISABLERESET = -U lfuse:w:0xe1:m -U efuse:w:0xfe:m -U hfuse:w:0x5d:m
 #
 # Fuse high byte ("no reset": external reset disabled, can't program through SPI anymore)
 # 0x5d = 0 1 0 1   1 1 0 1
-#        ^ ^ ^ ^   ^ \-+-/
+#        ^ ^ ^ ^   ^ \-+-/ 
 #        | | | |   |   +------ BODLEVEL 2..0 (brownout trigger level -> 2.7V)
 #        | | | |   +---------- EESAVE (preserve EEPROM on Chip Erase -> not preserved)
 #        | | | +-------------- WDTON (watchdog timer always on -> disable)

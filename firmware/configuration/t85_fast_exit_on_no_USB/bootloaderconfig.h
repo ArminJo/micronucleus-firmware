@@ -4,7 +4,7 @@
  * according to the hardware.
  *
  * Controller type: ATtiny 85 - 16.5 MHz
- * Configuration:   Default configuration + START_WITHOUT_PULLUP
+ * Configuration:   Default configuration
  *       USB D- :   PB3
  *       USB D+ :   PB4
  *       Entry  :   Always
@@ -104,7 +104,7 @@
  *                      pulling the reset pin low. It may be necessary to add an external
  *                      pull-up resistor to the reset pin if this entry method appears to
  *                      behave unreliably.
- *                      Adds 18 bytes.
+ *                      Adds 22 bytes.
  *
  *  ENTRY_JUMPER        Activate the bootloader when a specific pin is pulled low by an
  *                      external jumper.
@@ -117,8 +117,7 @@
  *
  */
 
-//#define ENTRYMODE ENTRY_ALWAYS
-#define ENTRYMODE ENTRY_POWER_ON
+#define ENTRYMODE ENTRY_ALWAYS
 
 #define JUMPER_PIN    PB0
 #define JUMPER_PORT   PORTB
@@ -161,30 +160,29 @@
    #error "No entry mode defined"
 #endif
 
-
 /*
  * Define bootloader timeout value.
  *
  *  The bootloader will only time out if a user program was loaded.
  *
- *  AUTO_EXIT_NO_USB_MS        The bootloader will exit after this delay if no USB is connected.
- *                             Set to 0 to disable
- *                             Adds ~6 bytes.
- *                             (This will wait for an USB SE0 reset from the host)
+ *  AUTO_EXIT_NO_USB_MS        The bootloader will exit after this delay if no USB is connected after the initial 300 ms disconnect and connect.
+ *                             Set to < 120 to disable.
+ *                             Adds 8 bytes.
+ *                             (This will wait for AUTO_EXIT_NO_USB_MS milliseconds for an USB SE0 reset from the host, otherwise exit)
  *
- *  AUTO_EXIT_MS               The bootloader will exit after this delay if no USB communication
- *                             from the host tool was received.
+ *  AUTO_EXIT_MS               The bootloader will exit after this delay if no USB communication from the host tool was received.
  *                             Set to 0 to disable
  *
  *  All values are approx. in milliseconds
  */
 
-#define AUTO_EXIT_NO_USB_MS    0
+// I observed 2 Resets. First is 100ms after initial connecting to USB lasting 65 ms and the second 90 ms later and also 65 ms.
+#define AUTO_EXIT_NO_USB_MS     200 // Values below 120 are ignored
 #define AUTO_EXIT_MS           6000
 
 /* ----------------------- Optional Timeout Config ------------------------ */
 
-#define START_WITHOUT_PULLUP
+//#define START_WITHOUT_PULLUP
 /* If you do not have the 1.5k pullup resistor connected directly from D- to ATtiny VCC
  * to save power for battery operated applications, you must insert a diode
  * between USB V+ and ATiny VCC and connect the resistor directly to USB V+.

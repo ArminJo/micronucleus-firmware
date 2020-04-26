@@ -12,7 +12,7 @@
  */
 
 #define MICRONUCLEUS_VERSION_MAJOR 2
-#define MICRONUCLEUS_VERSION_MINOR 5
+#define MICRONUCLEUS_VERSION_MINOR 6
 
 #include <avr/io.h>
 #include <avr/pgmspace.h>
@@ -69,7 +69,7 @@ typedef union {
 #endif
 
 register uint16_union_t currentAddress asm("r4");  // r4/r5 current progmem address, used for erasing and writing
-register uint16_union_t idlePolls asm("r6");  // r6/r7 idlecounter
+register uint16_union_t idlePolls asm("r6");  // r6/r7 idlecounter - each tick is 5 milliseconds
 
 // command system schedules functions to run in the main loop
 enum {
@@ -175,7 +175,7 @@ static void writeWordToPageBuffer(uint16_t data) {
 static uint8_t usbFunctionSetup(uint8_t data[8]) {
     usbRequest_t *rq = (void *) data;
 
-    idlePolls.b[1] = 0; // reset idle polls when we get usb traffic
+    idlePolls.b[1] = 0; // reset high byte of idle counter when we get usb class or vendor requests
     if (rq->bRequest == cmd_device_info) { // get device info
         usbMsgPtr = (usbMsgPtr_t) configurationReply;
         return sizeof(configurationReply);
@@ -230,7 +230,7 @@ static void initHardware(void) {
 #endif
 
     usbDeviceDisconnect(); // Disable pullup resistor by pull down D-
-    _delay_ms(300);
+    _delay_ms(300); // Even 250 is to fast!
     usbDeviceConnect(); // Enable pullup resistor by changing D- to input
 
     usbInit();    // Initialize INT settings after reconnect
@@ -279,6 +279,7 @@ int main(void) {
     unsigned char stored_osc_calibration = pgm_read_byte(BOOTLOADER_ADDRESS - TINYVECTOR_OSCCAL_OFFSET);
     if (stored_osc_calibration != 0xFF) {
         OSCCAL = stored_osc_calibration;
+        // we changed clock so "wait" for one cycle
         nop();
     }
 #endif
@@ -287,18 +288,21 @@ int main(void) {
         /*
          * Here boot condition matches or vector table is empty / no program loaded
          */
-        initHardware();
-        // Set LED pin to output, if LED exists
-        LED_INIT();
 
-        // At default AUTO_EXIT_NO_USB_MS is defined 0
-        if (AUTO_EXIT_NO_USB_MS > 0) {
-            // At default AUTO_EXIT_MS is set to 6000
-            // bias idle counter to wait for AUTO_EXIT_NO_USB_MS if no reset was detected
-            idlePolls.b[1] = ((AUTO_EXIT_MS - AUTO_EXIT_NO_USB_MS) / 5) >> 8;
-        } else {
-            idlePolls.b[1] = 0;
-        }
+        initHardware(); // USB disconnect by disabling pullup resistor by pull down D-, wait 300ms and reconnect
+
+        LED_INIT(); // Set LED pin to output, if LED exists
+
+#if (AUTO_EXIT_NO_USB_MS > 120) // At default AUTO_EXIT_NO_USB_MS is defined 0
+        /*
+         * Bias idle counter to wait only for AUTO_EXIT_NO_USB_MS if no reset was detected (which is first in USB protocol)
+         * Requires 8 bytes. We have to set both registers, since they are undetermined!
+         */
+        idlePolls.w = ((AUTO_EXIT_MS - AUTO_EXIT_NO_USB_MS) / 5);
+#else
+        // start with 0 to exit after AUTO_EXIT_MS milliseconds (6 seconds) of USB inactivity (not connected or Idle)
+        idlePolls.b[1] = 0;
+#endif
 
         command = cmd_local_nop;
         currentAddress.w = 0;
@@ -316,11 +320,9 @@ int main(void) {
          * 6. Resynchronize USB
          */
         do {
-
-            // 15 clockcycles per loop.
-            // adjust fastctr for 5ms timeout
-            uint16_t fastctr = (uint16_t) (F_CPU / (1000.0f * 15.0f / 5.0f));
-            uint8_t resetctr = 100; // start value to detecting reset timing
+            // Adjust t5msTimeoutCounter for 5ms loop timeout. We have 15 clock cycles per loop.
+            uint16_t t5msTimeoutCounter = (uint16_t) (F_CPU / (1000.0f * 15.0f / 5.0f));
+            uint8_t tResetDownCounter = 100; // start value to detecting reset timing
             /*
              * Now wait for 5 ms or USB transmission
              * If reset from host via USB was detected, then calibrate OSCCAL
@@ -328,43 +330,52 @@ int main(void) {
              */
             do {
                 /*
-                 * If host resets us, both lines are driven to low
+                 * If host resets us, both lines are driven to low (=SE0)
                  */
                 if ((USBIN & USBMASK) != 0) {
-                    // No host reset here, we are unconnected with pullup or receive host data -> wait again for reset
-                    resetctr = 100;
+                    // No host reset here! We are unconnected with pullup or receive host data -> rearm counter
+                    tResetDownCounter = 100;
 
 #if (OSCCAL_HAVE_XTAL == 0) && defined(START_WITHOUT_PULLUP)
-            /*
-             * Call calibrateOscillatorASM() only if USB is attached and after a reset, otherwise just skip calibrateOscillatorASM and wait for timeout.
-             * If USB has no pullup at VCC, we will end up here if pullup was powered by USB and host reset has ended.
-             */
-            if (resetDetected) {
-                resetDetected = 0; // do it only once after reset
-                calibrateOscillatorASM();
-            }
+                    /*
+                     * Call calibrateOscillatorASM() only if USB is attached and after a reset, otherwise just skip calibrateOscillatorASM and wait for timeout.
+                     * If USB has no pullup at VCC, we will end up here if pullup was powered by USB and host reset has ended.
+                     */
+                    if (resetDetected) {
+                        resetDetected = 0; // do it only once after reset
+                        calibrateOscillatorASM();
+#if (AUTO_EXIT_NO_USB_MS > 0)
+                    idlePolls.b[1] = 0; // Reset counter to have 6 seconds timeout since we detected USB connection by end of a reset condition
+#endif
+                    }
 #endif
 
                 }
-                if (--resetctr == 0) {
-                    // reset timing counter expired -> reset encountered here, both lines were low for around 100 us.
+                if (--tResetDownCounter == 0) {
+                    /*
+                     * Reset timing counter expired -> reset encountered here!
+                     * Both lines were low (=SE0) for around 100 us. Standard says: reset is SE0 ≥ 2.5 ms
+                     * I observed 2 Resets. First is 100ms after connecting to USB (above) lasting 65 ms and the second 90 ms later and also 65 ms.
+                     */
                     // init 2 V-USB variables as done before in reset handling of usbpoll()
                     usbNewDeviceAddr = 0;
                     usbDeviceAddr = 0;
 
 #if (OSCCAL_HAVE_XTAL == 0)
-#ifdef START_WITHOUT_PULLUP
-                    resetDetected = 1;  // Call calibrateOscillatorASM() directly after host reset ends and host drives the lines.
+#ifdef START_WITHOUT_PULLUP // if not connected to USB we have an endless USB reset condition
+                    resetDetected = 1;  // Set flag to wait for reset to end before calling calibrateOscillatorASM().
 #else
                     /*
-                     * Called if we received an host reset. This waits for the D- line to toggle.
+                     * Called if we received an host reset. This waits for the D- line to toggle or at least.
                      * It will wait forever, if no host is connected and the pullup at D- was detached.
                      * In this case we recognize a (dummy) host reset but no toggling at D- will occur.
                      */
                     calibrateOscillatorASM();
+#if (AUTO_EXIT_NO_USB_MS > 0)
+                    idlePolls.b[1] = 0; // Reset counter to have 6 seconds timeout since we detected USB connection by getting a reset
+#endif
 #endif
 #endif  // OSCCAL_HAVE_XTAL
-
                 }
 
                 if (USB_INTR_PENDING & (1 << USB_INTR_PENDING_BIT)) {
@@ -379,7 +390,7 @@ int main(void) {
                     break;
                 }
 
-            } while (--fastctr);
+            } while (--t5msTimeoutCounter); // after 5 ms fastctr is 0.
 
             wdr();
 
@@ -397,7 +408,7 @@ int main(void) {
  #endif
 
             if (command == cmd_exit) {
-                if (!fastctr)
+                if (!t5msTimeoutCounter)
                     break;  // Only exit after 5 ms timeout
             } else {
                 command = cmd_local_nop;
@@ -421,21 +432,23 @@ int main(void) {
                 }
             }
 
-            // Increment idle counter
+            // Increment idle counter at least every 5 ms
             idlePolls.w++;
 
+#if (AUTO_EXIT_MS > 0)
             // Try to execute program when bootloader times out
-            if (AUTO_EXIT_MS && (idlePolls.w == (AUTO_EXIT_MS / 5))) {
+            if (idlePolls.w == (AUTO_EXIT_MS / 5)) {
                 if (pgm_read_byte(BOOTLOADER_ADDRESS - TINYVECTOR_RESET_OFFSET + 1) != 0xff)
                     // Only exit to user program, if program exists
                     break;
             }
+#endif
 
             // Switch LED on for 4 Idle loops every 64th idle loop - implemented by masking LSByte of idle counter with 0x4C
             LED_MACRO( idlePolls.b[0] );
 
             // Test whether another interrupt occurred during the processing of USBpoll and commands.
-            // If yes, we missed a data packet on the bus. Wait until the bus was idle for 8.8 �s to
+            // If yes, we missed a data packet on the bus. Wait until the bus was idle for 8.8 µs to
             // allow synchronizing to the next incoming packet.
 
             if (USB_INTR_PENDING & (1 << USB_INTR_PENDING_BIT))  // Usbpoll() collided with data packet

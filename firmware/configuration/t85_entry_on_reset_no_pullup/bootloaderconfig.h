@@ -219,9 +219,10 @@
 /* If you do not have the 1.5k pullup resistor connected directly from D- to ATtiny VCC
  * to save power for battery operated applications, you must insert a diode
  * between USB V+ and ATiny VCC and connect the resistor directly to USB V+.
- * Because of code space savings this results in an endless loop in the calibrateOscillatorASM() function if no USB V+ is attached.
- * To avoid this, uncomment the define.
- * Defining this adds 14 bytes to the code size. This code also works well with standard pullup connection :-).
+ * If not connected to USB we then have an endless USB reset condition,
+ * which must be handled separately by commenting out the define.
+ * This handling adds 14 to 16 bytes to the code size.
+ * This handling also works well with standard / unmodified pullup connection :-).
  */
 #endif
 

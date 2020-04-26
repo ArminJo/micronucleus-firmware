@@ -1,5 +1,5 @@
 # Bootloader for Digispark / Micronucleus Firmware
-### Version 2.5 - based on the firmware of [micronucleus v2.04](https://github.com/micronucleus/micronucleus/releases/tag/2.04) 
+### Version 2.6 - based on the firmware of [micronucleus v2.04](https://github.com/micronucleus/micronucleus/releases/tag/2.04) 
 [![License: GPL v2](https://img.shields.io/badge/License-GPLv2-blue.svg)](https://www.gnu.org/licenses/gpl-2.0)
 [![Hit Counter](https://hitcounter.pythonanywhere.com/count/tag.svg?url=https://github.com/ArminJo/micronucleus-firmware)](https://github.com/brentvollebregt/hit-counter)
 
@@ -39,29 +39,48 @@ For *t167_default.hex* (as well as for the other t167 configurations) with the n
 - V2.04 6522 Byte free
 - V2.5  **6586** Byte free (6522 for all other t85 variants)
 
-# Features
-## MCUSR now available for sketch
-In this version the reset flags in the MCUSR register are no longer cleared by micronucleus and can therefore read out by the sketch!<br/>
-If you use the flags in your program or use the `ENTRY_POWER_ON` boot mode, **you must clear them** with `MCUSR = 0;` **after** saving or evaluating them. If you do not reset the flags, and use the `ENTRY_POWER_ON` mode of the bootloader, the bootloader will be entered even after reset, since the power on reset flag in MCUSR is still set!
+# New features
+## MCUSR content now available at sketch
+In this versions the reset flags in the MCUSR register are no longer cleared by micronucleus and can therefore read out by the sketch!<br/>
+If you use the flags in your program or use the `ENTRY_POWER_ON` boot mode, **you must clear them** with `MCUSR = 0;` **after** saving or evaluating them. If you do not reset the flags, and use the `ENTRY_POWER_ON` mode of the bootloader, the bootloader will be entered even after a reset, since the power on reset flag in MCUSR is still set!
 
-## New `START_WITHOUT_PULLUP` and `ENTRY_POWER_ON` configurations
-- The `START_WITHOUT_PULLUP` configuration adds 16 to 18 bytes for an additional check. It is required for low energy applications, where the pullup is directly connected to the USB-5V. Since this check is contained by default in all pre 2.0 versions,it is obvious that it can also be used for boards with a pullup.
-- The `ENTRY_POWER_ON` configuration adds 18 bytes to the ATtiny85 default configuration, but this behavior is **what you normally need** if you use a Digispark board, since it is programmed by attaching to the USB port resulting in power up. In this configuration **a reset will immediately start your sketch** without any delay. Do not forget to **reset the flags in setup()** with `MCUSR = 0;` to make it work!
+## Implemented [`AUTO_EXIT_NO_USB_MS`](https://github.com/ArminJo/micronucleus-firmware/blob/74fc2e64d629678d114a0bfdea3686c60ab28c96/firmware/configuration/t85_fast_exit_on_no_USB/bootloaderconfig.h#L168) configuration for fast bootloader exit
+If the bootloader is entered, it requires 300 ms to initialize USB connection (disconnect and reconnect). 
+100 ms after this 300 ms initialization, the bootloader receives a reset, if the host application wants to program the device.<br/>
+This enable us to wait for 200 ms after initialization for a reset and if no reset detected to exit the bootloader and start the user program. 
+So the user program is started with a 500 ms delay after power up (or reset) even if we do not specify a special entry condition.<br/>
+The 100 ms time to reset may depend on the type of host CPU etc., so I took 200 ms to be safe. 
+
+## New [`START_WITHOUT_PULLUP`](https://github.com/ArminJo/micronucleus-firmware/blob/74fc2e64d629678d114a0bfdea3686c60ab28c96/firmware/configuration/t85_entry_on_power_on_no_pullup_fast_exit_on_no_USB/bootloaderconfig.h#L186) and [`ENTRY_POWER_ON`](https://github.com/ArminJo/micronucleus-firmware/blob/74fc2e64d629678d114a0bfdea3686c60ab28c96/firmware/configuration/t85_entry_on_power_on/bootloaderconfig.h#L156) configurations
+- The `START_WITHOUT_PULLUP` configuration adds 16 to 18 bytes for an additional check. It is required for low energy applications, where the pullup is directly connected to the USB-5V and not to the CPU-VCC. Since this check was contained by default in all pre 2.0 versions, it is obvious that **it can also be used for boards with a pullup**.
+- The `ENTRY_POWER_ON` configuration adds 18 bytes to the ATtiny85 default configuration, but this behavior is **what you normally need** if you use a Digispark board, since it is programmed by attaching to the USB port resulting in power up.<br/>
+In this configuration **a reset will immediately start your sketch** without any delay.<br/>
+Do not forget to **reset the flags in setup()** with `MCUSR = 0;` to make it work!<br/>
+
+## Recommended [configuration](https://github.com/ArminJo/micronucleus-firmware/tree/master/firmware/configuration/t85_entry_on_power_on_no_pullup_fast_exit_on_no_USB)
+The recommended configuration is *entry_on_power_on_no_pullup_fast_exit_on_no_USB*:
+- Entry on power on, no entry on reset, ie. after a reset the application starts immediately.
+- Start even if pullup is disconnected. Otherwise the bootloader hangs forever, if you commect the Pullup to USB-VCC to save power.
+- Fast exit of bootloader (after 500 ms) if there is no host program sending us data (to upload a new application/sketch).
+
+#### Hex files for these configuration are already available in the [releases](https://github.com/ArminJo/micronucleus-firmware/tree/master/firmware/releases) and [upgrades](https://github.com/ArminJo/micronucleus-firmware/tree/master/firmware/upgrades) folders.
 
 ## Create your own configuration
 You can easily create your own configuration by adding a new *firmware/configuration* directory and adjusting *bootloaderconfig.h* and *Makefile.inc*. Before you run the *firmware/make_all.cmd* script, check the arduino binaries path in the `firmware/SetPath.cmd` file.
+
+# Tips and Tricks
 
 ## Unknown USB Device (Device Descriptor Request Failed) entry in device manager
 The bootloader finishes with an active disconnect from USB and after 300 ms setting back both D- and D+ line ports to input.
 This in turn enables the pullup resistor indicating a low-speed device, which makes the host try to reconnect to the digispark.
 If you have loaded a sketch without USB communication, the host can not find any valid USB device and reflects this in the device manager.
-You can avoid this by actively disconnecting from the host by pulling the D- line (see below) to low.
-E.g. using it as a tone() output pin and generating a short beep at startup will work.
+**You can avoid this by actively disconnecting from the host by pulling the D- line to low.**<br/>
+A short beep at startup with tone(3, 2000, 200) will pull the D- line low and keep the module disconnected.
 The old v1 micronucleus versions do not disconnect from the host and therefore do not show this entry.
 
 ## Periodically disconnect->connect if no sketch is loaded
 This is a side effect of enabling the bootloader to timeout also when traffic from other USB devices is present on the bus.
-It can be observed e.g. in the old 1.06 version too.
+It can be observed e.g. in the old 1.06 version too and can be used to determine if the board is programmed or still empty.
 
 ## This repository contains also an avrdude config file in `windows_exe` with **ATtiny87** and **ATtiny167** data added.
 
@@ -105,6 +124,11 @@ INT1 9 (D3) PA3  4|    |17  PB3 (D11) 4 OC1BV USB-
 ![DigisparkProPinLayout](https://github.com/ArminJo/micronucleus-firmware/blob/master/DigisparkProPinLayout.png)
 
 # Revision History
+### Version 2.6
+- Support of `AUTO_EXIT_NO_USB_MS`.
+- New configurations using `AUTO_EXIT_NO_USB_MS` set to 200 ms.
+- Light refactoring and added documentation.
+
 ### Version 2.5
 - Fixed destroying bootloader for upgrades with entry condition `ENTRY_EXT_RESET`.
 - Fixed wrong condition for t85 `ENTRYMODE==ENTRY_EXT_RESET`.
