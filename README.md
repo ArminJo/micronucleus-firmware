@@ -9,17 +9,23 @@ Since the [micronucleus repository](https://github.com/micronucleus/micronucleus
 
 # How to update the bootloader to the new version
 To update your old flash consuming bootloader you can simply run one of the window [scripts](https://github.com/ArminJo/micronucleus-firmware/tree/master/utils)
-like e.g. the [Burn_upgrade-t85_default.cmd](https://github.com/ArminJo/micronucleus-firmware/blob/master/utils/Burn_upgrade-t85_default.cmd).
+like e.g. the [Burn_upgrade-t85_default.cmd](https://github.com/ArminJo/micronucleus-firmware/tree/master/utils/Burn_upgrade-t85_default.cmd).
 
 # Driver installation
 For Windows you must install the **Digispark driver** before you can program the board. Download it [here](https://github.com/digistump/DigistumpArduino/releases/download/1.6.7/Digistump.Drivers.zip), open it and run `InstallDrivers.exe`.
 
 # Installation of a better optimizing compiler configuration
 **The new Digistmp AVR version 1.6.8 shrinks generated code size by 5 to 15 percent**. Just replace the old Digispark board URL **http://digistump.com/package_digistump_index.json** (e.g.in Arduino *File/Preferences*) by the new  **https://raw.githubusercontent.com/ArminJo/DigistumpArduino/master/package_digistump_index.json** and install the **Digistump AVR Boards** version **1.6.8**.<br/>
-![Boards Manager](https://github.com/ArminJo/DigistumpArduino/blob/master/Digistump1.6.8.jpg)
+![Boards Manager](https://github.com/ArminJo/DigistumpArduino/blob/master/Digistump1.6.8.jpg)<br/>
+If you use the configurations:
+- t85_default
+- t85_entry_on_power_on
+- t85_fast_exit_on_no_USB
+- t85_pullup_at_0
+you can change the lines `.upload.maximum_size=6522` to `.upload.maximum_size=6586` in %localappdata%\Arduino15\packages\digistump\hardware\avr\1.6.8\boards.txt to **enable the additonal 64 bytes** of these configurations. 
 
 # Memory footprint of the new firmware
-The actual memory footprint for each configuration can be found in the file [*firmware/build.log*](https://github.com/ArminJo/micronucleus-firmware/blob/master/firmware/build.log).<br/>
+The actual memory footprint for each configuration can be found in the file [*firmware/build.log*](https://github.com/ArminJo/micronucleus-firmware/tree/master/firmware/build.log).<br/>
 Bytes used by the mironucleus bootloader can be computed by taking the data size value in *build.log*, 
 and rounding it up to the next multiple of the page size which is e.g. 64 bytes for ATtiny85 and 128 bytes for ATtiny176.<br/>
 Subtracting this (+ 6 byte for postscript) from the total amount of memory will result in the free bytes numbers.
@@ -32,26 +38,35 @@ So the `START_WITHOUT_PULLUP` and `ENTRY_POWER_ON` configurations are reducing t
 
 For *t167_default.hex* (as well as for the other t167 configurations) with the new compiler we get 1436 as data size. The next multiple of 128 is 1536 (12 * 128) => (16384 - (1536 + 6)) = 14842 bytes are free.<br/>
 
-## Bootloader memory comparison of different releases for [*t85_default.hex*](https://github.com/ArminJo/micronucleus-firmware/blob/master/firmware/releases/t85_default.hex).
+## Bootloader memory comparison of different releases for [*t85_default.hex*](https://github.com/ArminJo/micronucleus-firmware/tree/master/firmware/releases/t85_default.hex).
 - V1.6  6012 Byte free
 - V1.11 6330 Byte free
 - V2.3  6522 Byte free
 - V2.04 6522 Byte free
-- V2.5  **6586** Byte free (6522 for all other t85 variants)
+- V2.5  **6586** Byte free for
+  - t85_default
+  - t85_entry_on_power_on
+  - t85_fast_exit_on_no_USB
+  - t85_pullup_at_0
+   6522 Byte free for all other t85 configurations
 
 # New features
 ## MCUSR content now available at sketch
 In this versions the reset flags in the MCUSR register are no longer cleared by micronucleus and can therefore read out by the sketch!<br/>
 If you use the flags in your program or use the `ENTRY_POWER_ON` boot mode, **you must clear them** with `MCUSR = 0;` **after** saving or evaluating them. If you do not reset the flags, and use the `ENTRY_POWER_ON` mode of the bootloader, the bootloader will be entered even after a reset, since the power on reset flag in MCUSR is still set!
 
-## Implemented [`AUTO_EXIT_NO_USB_MS`](https://github.com/ArminJo/micronucleus-firmware/blob/74fc2e64d629678d114a0bfdea3686c60ab28c96/firmware/configuration/t85_fast_exit_on_no_USB/bootloaderconfig.h#L168) configuration for fast bootloader exit
+## Implemented [`ENABLE_SAFE_OPTIMIZATIONS`](https://github.com/ArminJo/micronucleus-firmware/tree/master/firmware/crt1.S#L99) configuration to save 12 bytes.
+This configuration is specified in the [Makefile.inc](https://github.com/ArminJo/micronucleus-firmware/tree/master/firmware/configuration/t85_fast_exit_on_no_USB/Makefile.inc#L18) file and will disable several unnecesary instructions in microncleus. These optimizations disables reliable entering the bootloader with jmp 0000, which you should not do anyway - better use the watchdog timer reset functionality.<br/>
+This is enabled for [t85_entry_on_power_on](https://github.com/ArminJo/micronucleus-firmware/tree/master/firmware/configuration/t85_entry_on_power_on), [t85_fast_exit_on_no_USB](https://github.com/ArminJo/micronucleus-firmware/tree/master/firmware/configuration/t85_fast_exit_on_no_USB) and [t85_pullup_at_0](https://github.com/ArminJo/micronucleus-firmware/tree/master/firmware/configuration/t85_pullup_at_0). It brings no benefit for other configurations.
+
+## Implemented [`AUTO_EXIT_NO_USB_MS`](https://github.com/ArminJo/micronucleus-firmware/tree/master/firmware/configuration/t85_fast_exit_on_no_USB/bootloaderconfig.h#L168) configuration for fast bootloader exit
 If the bootloader is entered, it requires 300 ms to initialize USB connection (disconnect and reconnect). 
 100 ms after this 300 ms initialization, the bootloader receives a reset, if the host application wants to program the device.<br/>
 This enable us to wait for 200 ms after initialization for a reset and if no reset detected to exit the bootloader and start the user program. 
 So the user program is started with a 500 ms delay after power up (or reset) even if we do not specify a special entry condition.<br/>
 The 100 ms time to reset may depend on the type of host CPU etc., so I took 200 ms to be safe. 
 
-## New [`START_WITHOUT_PULLUP`](https://github.com/ArminJo/micronucleus-firmware/blob/74fc2e64d629678d114a0bfdea3686c60ab28c96/firmware/configuration/t85_entry_on_power_on_no_pullup_fast_exit_on_no_USB/bootloaderconfig.h#L186) and [`ENTRY_POWER_ON`](https://github.com/ArminJo/micronucleus-firmware/blob/74fc2e64d629678d114a0bfdea3686c60ab28c96/firmware/configuration/t85_entry_on_power_on/bootloaderconfig.h#L156) configurations
+## New [`START_WITHOUT_PULLUP`](https://github.com/ArminJo/micronucleus-firmware/tree/master/firmware/configuration/t85_entry_on_power_on_no_pullup_fast_exit_on_no_USB/bootloaderconfig.h#L186) and [`ENTRY_POWER_ON`](https://github.com/ArminJo/micronucleus-firmware/tree/master/firmware/configuration/t85_entry_on_power_on/bootloaderconfig.h#L156) configurations
 - The `START_WITHOUT_PULLUP` configuration adds 16 to 18 bytes for an additional check. It is required for low energy applications, where the pullup is directly connected to the USB-5V and not to the CPU-VCC. Since this check was contained by default in all pre 2.0 versions, it is obvious that **it can also be used for boards with a pullup**.
 - The `ENTRY_POWER_ON` configuration adds 18 bytes to the ATtiny85 default configuration, but this behavior is **what you normally need** if you use a Digispark board, since it is programmed by attaching to the USB port resulting in power up.<br/>
 In this configuration **a reset will immediately start your sketch** without any delay.<br/>

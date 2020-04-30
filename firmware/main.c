@@ -83,9 +83,6 @@ enum {
 };
 register uint8_t command asm("r3");  // bind command to r3
 
-// Definition of sei and cli without memory barrier keyword to prevent reloading of memory variables
-#define sei() asm volatile("sei")
-#define cli() asm volatile("cli")
 #define nop() asm volatile("nop")
 #define wdr() asm volatile("wdr")
 
@@ -146,12 +143,12 @@ static inline void writeFlashPage(void) {
 static void writeWordToPageBuffer(uint16_t data) {
 
 #ifndef ENABLE_UNSAFE_OPTIMIZATIONS
-#if BOOTLOADER_ADDRESS < 8192
+#  if BOOTLOADER_ADDRESS < 8192
     // rjmp
     if (currentAddress.w == RESET_VECTOR_OFFSET * 2) {
         data = 0xC000 + (BOOTLOADER_ADDRESS / 2) - 1;
     }
-#else
+#  else
   // far jmp
   if (currentAddress.w == RESET_VECTOR_OFFSET * 2) {
     data = 0x940c;
@@ -233,7 +230,7 @@ static void initHardware(void) {
     _delay_ms(300); // Even 250 is to fast!
     usbDeviceConnect(); // Enable pullup resistor by changing D- to input
 
-    usbInit();    // Initialize INT settings after reconnect
+    usbInit();    // Initialize interrupt settings after reconnect but let the global interrupt be disabled
 }
 
 /* ------------------------------------------------------------------------ */
@@ -344,9 +341,9 @@ int main(void) {
                     if (resetDetected) {
                         resetDetected = 0; // do it only once after reset
                         calibrateOscillatorASM();
-#if (AUTO_EXIT_NO_USB_MS > 0)
+#  if (AUTO_EXIT_NO_USB_MS > 0)
                     idlePolls.b[1] = 0; // Reset counter to have 6 seconds timeout since we detected USB connection by end of a reset condition
-#endif
+#  endif
                     }
 #endif
 
@@ -362,19 +359,19 @@ int main(void) {
                     usbDeviceAddr = 0;
 
 #if (OSCCAL_HAVE_XTAL == 0)
-#ifdef START_WITHOUT_PULLUP // if not connected to USB we have an endless USB reset condition
+#  ifdef START_WITHOUT_PULLUP // if not connected to USB we have an endless USB reset condition
                     resetDetected = 1;  // Set flag to wait for reset to end before calling calibrateOscillatorASM().
-#else
+#  else
                     /*
                      * Called if we received an host reset. This waits for the D- line to toggle or at least.
                      * It will wait forever, if no host is connected and the pullup at D- was detached.
                      * In this case we recognize a (dummy) host reset but no toggling at D- will occur.
                      */
                     calibrateOscillatorASM();
-#if (AUTO_EXIT_NO_USB_MS > 0)
+#    if (AUTO_EXIT_NO_USB_MS > 0)
                     idlePolls.b[1] = 0; // Reset counter to have 6 seconds timeout since we detected USB connection by getting a reset
-#endif
-#endif
+#    endif
+#  endif
 #endif  // OSCCAL_HAVE_XTAL
                 }
 
@@ -397,7 +394,7 @@ int main(void) {
 #if OSCCAL_SLOW_PROGRAMMING
       uint8_t osccal_tmp  = OSCCAL;
       OSCCAL      = osccal_default;
- #endif
+#endif
             // commands are only evaluated after next USB transmission or after 5 ms passed
             if (command == cmd_erase_application)
                 eraseApplication();
@@ -405,7 +402,7 @@ int main(void) {
                 writeFlashPage();
 #if OSCCAL_SLOW_PROGRAMMING
       OSCCAL      = osccal_tmp;
- #endif
+#endif
 
             if (command == cmd_exit) {
                 if (!t5msTimeoutCounter)
@@ -481,6 +478,10 @@ int main(void) {
         initHardware(); // Disconnect micronucleus - Set the D- to output and after 300ms to input again.
 #endif
 
+        /*
+         * Disable all previously enabled interrupts.
+         * The global interrupt will be enabled by the startup code of the application.
+         */
         USB_INTR_ENABLE = 0;
         USB_INTR_CFG = 0; /* also reset config bits */
 
@@ -496,17 +497,17 @@ void blinkLED(uint8_t aBlinkCount) {
 #if LED_MODE!=NONE
     LED_INIT();
     for (uint8_t i = 0; i < MCUSR; ++i) {
-#if LED_MODE==ACTIVE_HIGH
+#  if LED_MODE==ACTIVE_HIGH
         LED_PORT |= _BV(LED_PIN);
-#else
+#  else
         LED_DDR|=_BV(LED_PIN);
-#endif
+#  endif
         _delay_ms(300);
-#if LED_MODE==ACTIVE_HIGH
+#  if LED_MODE==ACTIVE_HIGH
         LED_PORT &= ~_BV(LED_PIN);
-#else
+#  else
         LED_DDR&=~_BV(LED_PIN);
-#endif
+#  endif
         _delay_ms(300);
     }
     LED_EXIT();

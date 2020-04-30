@@ -3,9 +3,19 @@
 # License: GNU GPL v2 (see License.txt)
 
 # Controller type: ATtiny 85 - 16.5 MHz
-# Configuration:   Default
-# Last Change:     Mar 16,2014
+# Configuration:   t85_entry_on_power_on
+# Last Change:     4/2020
  
+# Enable safe optimizations. This will disable several unnecesary instructions in microncleus to save around 12 more bytes.
+# These optimizations disables entering the bootloader with jmp 0000, which you should not do anyway - better use the watchdog timer reset functionality.
+# 
+# Disabled features:
+#   * No SREG initialization in CRT, especially no unnecesary reset of interrupt enable, which is disabled after reset. - saves 2 bytes
+#   * No Stackpointer initialization in CRT. Datasheet says: Initial Value RAMEND - saves 8 bytes
+#   * Setting the GIMSK or EIMSK register directly instead of keeping other bits. GICR contains other bits, which must be kept! - saves 2 bytes
+#     We only want one interrupt to be enabled, so keeping the other bits makes no sense.
+
+CFLAGS += -DENABLE_SAFE_OPTIMIZATIONS 
  
 F_CPU = 16500000
 DEVICE = attiny85
@@ -16,7 +26,8 @@ DEVICE = attiny85
 # - How many pages in is that? 6068 / 64 (tiny85 page size in bytes) = 102.625
 # - round that down to 102
 # - our new bootloader address is 102 * 64 = 6528, in hex = 1980
-BOOTLOADER_ADDRESS = 1980
+# - For data size up to 1600 the address is 19C0 for size from 1601 to 1664 the address is 1980
+BOOTLOADER_ADDRESS = 19C0
 
 FUSEOPT = -U lfuse:w:0xe1:m -U hfuse:w:0xdd:m -U efuse:w:0xfe:m
 FUSEOPT_DISABLERESET = -U lfuse:w:0xe1:m -U efuse:w:0xfe:m -U hfuse:w:0x5d:m
