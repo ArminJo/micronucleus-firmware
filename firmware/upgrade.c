@@ -38,7 +38,7 @@ void load_table(uint16_t address, uint16_t words[SPM_PAGESIZE / 2]);
 void erase_page(uint16_t address);
 void write_page(uint16_t address, uint16_t words[SPM_PAGESIZE / 2]);
 
-#define TINYVECTOR_RESET_OFFSET     4
+#define TINYVECTOR_RESET_OFFSET     4 // the exact value does not matter since we erase the whole page
 
 int main(void) {
   pinsOff(0xFF); // pull down all pins
@@ -55,9 +55,8 @@ int main(void) {
   beep();
 
   /*
-   * Do not directly reboot, because the new bootloader does not wait for a new program to be sent if e.g. if the entry condition is ENTRY_EXT_RESET.
-   *
-   * In this case the bootloader jumps to the "program" and this in turn destroys the bootloader.
+   * Do not directly reboot, because the new bootloader may not wait if e.g. if the entry condition is ENTRY_EXT_RESET.
+   * In this case the bootloader jumps to the non existing program and this in turn destroys the bootloader.
    * Line 286 of the bootloader to check for existing program is:
    *   if (bootLoaderStartCondition() || (pgm_read_byte(BOOTLOADER_ADDRESS - TINYVECTOR_RESET_OFFSET + 1) == 0xff)) {
    *

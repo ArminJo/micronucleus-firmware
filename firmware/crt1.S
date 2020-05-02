@@ -105,9 +105,6 @@ __init:
 	out		0x3e, r29
 #endif
 	.section .init9,"ax",@progbits
-;  rcall main
-;  XJMP  __vectors-2
 	XJMP	main
 
 ;	.endfunc
-

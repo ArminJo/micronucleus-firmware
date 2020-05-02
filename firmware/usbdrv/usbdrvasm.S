@@ -117,7 +117,7 @@ RTMODEL "__rt_version", "3"
 #   define polyH    r21
 #   define scratch  r23
 
-#else  /* __IAR_SYSTEMS_ASM__ */ 
+#else  /* __IAR_SYSTEMS_ASM__ */
 /* Register assignments for usbCrc16 on gcc */
 /* Calling conventions on gcc:
  * First parameter passed in r24/r25, second in r22/23 and so on.
@@ -154,7 +154,7 @@ RTMODEL "__rt_version", "3"
 ; unsigned table(unsigned char x)
 ; {
 ; unsigned    value;
-; 
+;
 ;     value = (unsigned)x << 6;
 ;     value ^= (unsigned)x << 7;
 ;     if(parity(x))
@@ -164,7 +164,7 @@ RTMODEL "__rt_version", "3"
 ; unsigned usbCrc16(unsigned char *argPtr, unsigned char argLen)
 ; {
 ; unsigned crc = 0xffff;
-; 
+;
 ;     while(argLen--)
 ;         crc = table(lo8(crc) ^ *argPtr++) ^ hi8(crc);
 ;     return ~crc;
@@ -213,8 +213,8 @@ usbCrc16LoopTest:
     com     resCrcL
     com     resCrcH
     ret
-    
-#else   // USB_USE_FAST_CRC 
+
+#else   // USB_USE_FAST_CRC
 
 ; This implementation is slower, but has less code size
 ;
@@ -257,7 +257,7 @@ usbCrcReady:
     ret
 ; Thanks to Reimar Doeffinger for optimizing this CRC routine!
 
-#endif // USB_USE_FAST_CRC 
+#endif // USB_USE_FAST_CRC
 
 ; extern unsigned usbCrc16Append(unsigned char *data, unsigned char len);
 usbCrc16Append:
@@ -297,7 +297,7 @@ usbCrc16Append:
 #   define cnt16H   r31
 #   define cntH     r18
 
-#else  /* __IAR_SYSTEMS_ASM__ */ 
+#else  /* __IAR_SYSTEMS_ASM__ */
 /* Register assignments for usbMeasureFrameLength on gcc */
 /* Calling conventions on gcc:
  * First parameter passed in r24/r25, second in r22/23 and so on.
