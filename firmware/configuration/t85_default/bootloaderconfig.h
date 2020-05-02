@@ -54,21 +54,22 @@
 
 
 // setup interrupt for Pin Change for D+
-#define USB_INTR_CFG            PCMSK
-#define USB_INTR_CFG_SET        (1 << USB_CFG_DPLUS_BIT)
+#define USB_INTR_CFG            PCMSK // Pin interrupt enable register
+#define USB_INTR_CFG_SET        (1 << USB_CFG_DPLUS_BIT) // mask for pin in pin interrupt enable register
 #define USB_INTR_CFG_CLR        0
-#define USB_INTR_ENABLE         GIMSK
-#define USB_INTR_ENABLE_BIT     PCIE
-#define USB_INTR_PENDING        GIFR
-#define USB_INTR_PENDING_BIT    PCIF
-#define USB_INTR_VECTOR         PCINT0_vect
+#define USB_INTR_ENABLE         GIMSK // Global interrupt enable register
+#define USB_INTR_ENABLE_BIT     PCIE  // Bit position in global interrupt enable register
+#define USB_INTR_PENDING        GIFR  // Register to read interrupt flag
+#define USB_INTR_PENDING_BIT    PCIF  // Bit position in register to read interrupt flag
+#define USB_INTR_VECTOR         PCINT0_vect // The name must be any name of a interrupt vector
 
 /* ------------------------------------------------------------------------- */
 /*       Configuration relevant to the CPU the bootloader is running on      */
 /* ------------------------------------------------------------------------- */
 
 // how many milliseconds should host wait till it sends another erase or write?
-// needs to be above 4.5 (and a whole integer) as avr freezes for 4.5ms
+// needs to be above 4.5 (and a whole integer) as avr freezes maximum for 4.5ms
+// while writing a FLASH page (even for 128 byte page size:-))
 #define MICRONUCLEUS_WRITE_SLEEP 5
 
 
@@ -93,7 +94,7 @@
  *                      you must clear them with "MCUSR = 0;" in your setup() routine
  *                      after saving or evaluating them to make this mode work.
  *                      If you do not reset the flags, the bootloader will be entered even
- *                      after reset, since the power on reset flag in MCUSR is still set.
+ *                      after reset, since the "power on reset flag" PORF in MCUSR is still set.
  *                      Adds 18 bytes.
  *
  *  ENTRY_WATCHDOG      Activate the bootloader after a watchdog reset. This can be used
@@ -113,9 +114,16 @@
  *       JUMPER_PIN     Pin the jumper is connected to. (e.g. PB0)
  *       JUMPER_PORT    Port out register for the jumper (e.g. PORTB)
  *       JUMPER_DDR     Port data direction register for the jumper (e.g. DDRB)
- *       JUMPER_INP     Port inout register for the jumper (e.g. PINB)
+ *       JUMPER_INP     Port input register for the jumper (e.g. PINB)
  *
  */
+
+// Internal implementation, don't change this unless you want to add an entry mode.
+#define ENTRY_ALWAYS    1
+#define ENTRY_WATCHDOG  2
+#define ENTRY_EXT_RESET 3
+#define ENTRY_JUMPER    4
+#define ENTRY_POWER_ON  5
 
 #define ENTRYMODE ENTRY_ALWAYS
 
@@ -123,16 +131,6 @@
 #define JUMPER_PORT   PORTB
 #define JUMPER_DDR    DDRB
 #define JUMPER_INP    PINB
-
-/*
-  Internal implementation, don't change this unless you want to add an entrymode.
-*/
-
-#define ENTRY_ALWAYS    1
-#define ENTRY_WATCHDOG  2
-#define ENTRY_EXT_RESET 3
-#define ENTRY_JUMPER    4
-#define ENTRY_POWER_ON  5
 
 #if ENTRYMODE==ENTRY_ALWAYS
   #define bootLoaderInit()
@@ -143,9 +141,12 @@
   #define bootLoaderExit()
   #define bootLoaderStartCondition() (MCUSR&_BV(WDRF))
 #elif ENTRYMODE==ENTRY_EXT_RESET
+// On my ATtiny85 I have always 0x03 EXTRF | PORF after power on.
+// After reset only EXTRF is NEWLY set.
+// So must reset PORF Flag ALWAYS after checking for entry condition,
+// otherwise entry condition will NEVER be true if application does not reset PORF.
   #define bootLoaderInit()
-  #define bootLoaderExit()
-// On my ATtiny85 I have always 0x03 EXTRF | PORF after power on, but reset works as expected, it gives 0x02 = EXTRF
+  #define bootLoaderExit() (MCUSR &= ~_BV(PORF)) // adds 6 bytes
   #define bootLoaderStartCondition() (MCUSR == _BV(EXTRF))
 #elif ENTRYMODE==ENTRY_JUMPER
   // Enable pull up on jumper pin and delay to stabilize input
@@ -165,13 +166,13 @@
  *
  *  The bootloader will only time out if a user program was loaded.
  *
- *  AUTO_EXIT_NO_USB_MS        The bootloader will exit after this delay if no USB is connected after the initial 300 ms disconnect and connect.
+ *  AUTO_EXIT_NO_USB_MS        The bootloader will exit after this delay if no USB is connected after the initial 300 ms disconnect and connect procedure.
+ *                             Technically: this will wait for AUTO_EXIT_NO_USB_MS milliseconds for an USB SE0 reset from the host, otherwise exit.
  *                             Set to < 120 to disable.
  *                             Adds 8 bytes.
- *                             (This will wait for AUTO_EXIT_NO_USB_MS milliseconds for an USB SE0 reset from the host, otherwise exit)
  *
  *  AUTO_EXIT_MS               The bootloader will exit after this delay if no USB communication from the host tool was received.
- *                             Set to 0 to disable
+ *                             Set to 0 to disable -> no timeout exit of the bootloader (which makes no sense).
  *
  *  All values are approx. in milliseconds
  */
@@ -195,7 +196,7 @@
  /*
  *  Defines the setting of the RC-oscillator calibration after quitting the bootloader. (OSCCAL)
  *
- *  OSCCAL_RESTORE_DEFAULT    Set this to '1' to revert to OSCCAL factore calibration after bootlaoder exit.
+ *  OSCCAL_RESTORE_DEFAULT    Set this to '1' to revert to OSCCAL factory calibration after bootlaoder exit.
  *                            This is 8 MHz +/-2% on most devices or 16 MHz on the ATtiny 85 with activated PLL.
  *                            Adds ~14 bytes.
  *
@@ -234,6 +235,10 @@
  *
  */
 
+#define NONE        0
+#define ACTIVE_HIGH 1
+#define ACTIVE_LOW  2
+
 #define LED_MODE    NONE
 
 #define LED_DDR     DDRB
@@ -250,10 +255,6 @@
  *                            Use to define pattern.
 */
 
-#define NONE        0
-#define ACTIVE_HIGH 1
-#define ACTIVE_LOW  2
-
 #if LED_MODE==ACTIVE_HIGH
   #define LED_INIT(x)   LED_DDR   |= _BV(LED_PIN);
   #define LED_EXIT(x)   {LED_DDR  &=~_BV(LED_PIN);LED_PORT  &=~_BV(LED_PIN);}
@@ -267,21 +268,5 @@
   #define LED_EXIT(x)
   #define LED_MACRO(x)
 #endif
-
-/* --------------------------------------------------------------------------- */
-/* Micronucleus internal configuration. Do not change anything below this line */
-/* --------------------------------------------------------------------------- */
-
-// Microcontroller vectortable entries in the flash
-#define RESET_VECTOR_OFFSET         0
-
-// number of bytes before the boot loader vectors to store the tiny application vector table
-#define TINYVECTOR_RESET_OFFSET     4
-#define TINYVECTOR_OSCCAL_OFFSET    6
-
-/* ------------------------------------------------------------------------ */
-// postscript are the few bytes at the end of programmable memory which store tinyVectors
-#define POSTSCRIPT_SIZE 6
-#define PROGMEM_SIZE (BOOTLOADER_ADDRESS - POSTSCRIPT_SIZE) /* max size of user program */
 
 #endif /* __bootloader_h_included__ */

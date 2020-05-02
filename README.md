@@ -1,5 +1,5 @@
 # Bootloader for Digispark / Micronucleus Firmware
-### Version 2.6 - based on the firmware of [micronucleus v2.04](https://github.com/micronucleus/micronucleus/releases/tag/2.04) 
+### Version 2.5 - based on the firmware of [micronucleus v2.04](https://github.com/micronucleus/micronucleus/releases/tag/2.04) 
 [![License: GPL v2](https://img.shields.io/badge/License-GPLv2-blue.svg)](https://www.gnu.org/licenses/gpl-2.0)
 [![Hit Counter](https://hitcounter.pythonanywhere.com/count/tag.svg?url=https://github.com/ArminJo/micronucleus-firmware)](https://github.com/brentvollebregt/hit-counter)
 
@@ -66,11 +66,19 @@ This enable us to wait for 200 ms after initialization for a reset and if no res
 So the user program is started with a 500 ms delay after power up (or reset) even if we do not specify a special entry condition.<br/>
 The 100 ms time to reset may depend on the type of host CPU etc., so I took 200 ms to be safe. 
 
-## New [`START_WITHOUT_PULLUP`](https://github.com/ArminJo/micronucleus-firmware/tree/master/firmware/configuration/t85_entry_on_power_on_no_pullup_fast_exit_on_no_USB/bootloaderconfig.h#L186) and [`ENTRY_POWER_ON`](https://github.com/ArminJo/micronucleus-firmware/tree/master/firmware/configuration/t85_entry_on_power_on/bootloaderconfig.h#L156) configurations
-- The `START_WITHOUT_PULLUP` configuration adds 16 to 18 bytes for an additional check. It is required for low energy applications, where the pullup is directly connected to the USB-5V and not to the CPU-VCC. Since this check was contained by default in all pre 2.0 versions, it is obvious that **it can also be used for boards with a pullup**.
-- The `ENTRY_POWER_ON` configuration adds 18 bytes to the ATtiny85 default configuration, but this behavior is **what you normally need** if you use a Digispark board, since it is programmed by attaching to the USB port resulting in power up.<br/>
+
+
+## New [`ENTRY_POWER_ON`](https://github.com/ArminJo/micronucleus-firmware/tree/master/firmware/configuration/t85_entry_on_power_on/bootloaderconfig.h#L156) entry condition
+The `ENTRY_POWER_ON` configuration adds 18 bytes to the ATtiny85 default configuration, but this behavior is **what you normally need** if you use a Digispark board, since it is programmed by attaching to the USB port resulting in power up.<br/>
 In this configuration **a reset will immediately start your sketch** without any delay.<br/>
 Do not forget to **reset the flags in setup()** with `MCUSR = 0;` to make it work!<br/>
+
+## Fixed wrong [`ENTRY_EXT_RESET`](https://github.com/ArminJo/micronucleus-firmware/tree/master/firmware/configuration/t85_entry_on_reset_no_pullup/bootloaderconfig.h#L146) behavior
+The ATtiny85 has the bug, that it sets the `External Reset Flag` also on power up. To guarantee a correct behavior for `ENTRY_EXT_RESET` condition, it is checked if only this flag is set **and** the `Power-on Reset Flag` is **always reset** before start of user program. The latter is done to avoid bricking the device by fogetting to reset the `PORF` flag in the user program.<br/>
+For ATtiny167 it is even worse, it sets the `External Reset Flag` and the `Brown-out Reset Flag` also on power up. Here the `BORF` **and** the `PORF` flag is **always reset** before start of user program.<br/>
+
+## New [`START_WITHOUT_PULLUP`](https://github.com/ArminJo/micronucleus-firmware/tree/master/firmware/configuration/t85_entry_on_power_on_no_pullup_fast_exit_on_no_USB/bootloaderconfig.h#L186) option
+The `START_WITHOUT_PULLUP` configuration adds 16 to 18 bytes for an additional check. It is required for low energy applications, where the pullup is directly connected to the USB-5V and not to the CPU-VCC. Since this check was contained by default in all pre 2.0 versions, it is obvious that **it can also be used for boards with a pullup**.
 
 ## Recommended [configuration](https://github.com/ArminJo/micronucleus-firmware/tree/master/firmware/configuration/t85_entry_on_power_on_no_pullup_fast_exit_on_no_USB)
 The recommended configuration is *entry_on_power_on_no_pullup_fast_exit_on_no_USB*:
@@ -139,12 +147,11 @@ INT1 9 (D3) PA3  4|    |17  PB3 (D11) 4 OC1BV USB-
 ![DigisparkProPinLayout](https://github.com/ArminJo/micronucleus-firmware/blob/master/DigisparkProPinLayout.png)
 
 # Revision History
-### Version 2.6
+### Version 2.5
 - Support of `AUTO_EXIT_NO_USB_MS`.
 - New configurations using `AUTO_EXIT_NO_USB_MS` set to 200 ms.
 - Light refactoring and added documentation.
 
-### Version 2.5
 - Fixed destroying bootloader for upgrades with entry condition `ENTRY_EXT_RESET`.
 - Fixed wrong condition for t85 `ENTRYMODE==ENTRY_EXT_RESET`.
 - ATtiny167 support with MCUSR bug/problem at `ENTRY_EXT_RESET` workaround.

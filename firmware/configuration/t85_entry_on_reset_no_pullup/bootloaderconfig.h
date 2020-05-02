@@ -144,9 +144,12 @@
   #define bootLoaderExit()
   #define bootLoaderStartCondition() (MCUSR&_BV(WDRF))
 #elif ENTRYMODE==ENTRY_EXT_RESET
+// On my ATtiny85 I have always 0x03 EXTRF | PORF after power on.
+// After reset only EXTRF is NEWLY set.
+// So must reset PORF Flag ALWAYS after checking for entry condition,
+// otherwise entry condition will NEVER be true if application does not reset PORF.
   #define bootLoaderInit()
-  #define bootLoaderExit()
-// On my ATtiny85 I have always 0x03 EXTRF | PORF after power on, but reset works as expected, it gives 0x02 = EXTRF
+  #define bootLoaderExit() (MCUSR &= ~_BV(PORF)) // adds 6 bytes
   #define bootLoaderStartCondition() (MCUSR == _BV(EXTRF))
 #elif ENTRYMODE==ENTRY_JUMPER
   // Enable pull up on jumper pin and delay to stabilize input

@@ -31,7 +31,7 @@ Size of binary hexfile. Use the "data" size to calculate the bootloader address:
 Building Micronucleus configuration: t167_entry_on_reset_no_pullup 
 Size of binary hexfile. Use the "data" size to calculate the bootloader address: 
    text	   data	    bss	    dec	    hex	filename
-      0	   1436	      0	   1436	    59c	main.hex
+      0	   1442	      0	   1442	    5a2	main.hex
 - 
 Building Micronucleus configuration: t45_default 
 Size of binary hexfile. Use the "data" size to calculate the bootloader address: 
@@ -76,7 +76,7 @@ Size of binary hexfile. Use the "data" size to calculate the bootloader address:
 Building Micronucleus configuration: t85_entry_on_reset_no_pullup 
 Size of binary hexfile. Use the "data" size to calculate the bootloader address: 
    text	   data	    bss	    dec	    hex	filename
-      0	   1624	      0	   1624	    658	main.hex
+      0	   1630	      0	   1630	    65e	main.hex
 - 
 Building Micronucleus configuration: t85_fast_exit_on_no_USB 
 Size of binary hexfile. Use the "data" size to calculate the bootloader address: 
@@ -87,4 +87,9 @@ Building Micronucleus configuration: t85_pullup_at_0
 Size of binary hexfile. Use the "data" size to calculate the bootloader address: 
    text	   data	    bss	    dec	    hex	filename
       0	   1600	      0	   1600	    640	main.hex
+- 
+Building Micronucleus configuration: t85_default 
+Size of binary hexfile. Use the "data" size to calculate the bootloader address: 
+   text	   data	    bss	    dec	    hex	filename
+      0	   1592	      0	   1592	    638	main.hex
 - 
