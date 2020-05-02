@@ -1,6 +1,7 @@
 /*
- * Project: Micronucleus -  v2.4
+ * Project: Micronucleus -  v2.5
  *
+ * Micronucleus V2.5             (c) 2020 Armin Joachimsmeyer armin.joachimsmeyer@gmail.com
  * Micronucleus V2.3             (c) 2016 Tim Bo"scke - cpldcpu@gmail.com
  *                               (c) 2014 Shay Green
  * Original Micronucleus         (c) 2012 Jenna Fox
@@ -8,11 +9,24 @@
  * Based on USBaspLoader-tiny85  (c) 2012 Louis Beaudoin
  * Based on USBaspLoader         (c) 2007 by OBJECTIVE DEVELOPMENT Software GmbH
  *
- * License: GNU GPL v2 (see License.txt)
+ *  This file is part of micronucleus https://github.com/micronucleus/micronucleus.
+ *
+ *  ServoEasing is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/gpl.html>.
  */
 
 #define MICRONUCLEUS_VERSION_MAJOR 2
-#define MICRONUCLEUS_VERSION_MINOR 6
+#define MICRONUCLEUS_VERSION_MINOR 5
 
 #include <avr/io.h>
 #include <avr/pgmspace.h>
@@ -22,6 +36,23 @@
 
 #include "bootloaderconfig.h"
 #include "usbdrv/usbdrv.c"
+
+// Microcontroller vector table entries in the flash
+#define RESET_VECTOR_OFFSET         0 // is 0 for all ATtinies
+
+// number of bytes before the boot loader vectors to store the application reset vector
+#define TINYVECTOR_RESET_OFFSET     4 // need 4 bytes for user reset vector to support devices with more than 8k FLASH
+#if OSCCAL_SAVE_CALIB
+#define TINYVECTOR_OSCCAL_OFFSET    6
+#endif
+
+// Postscript are the few bytes at the end of programmable memory which store user program reset vector and optionally OSCCAL calibration
+//#if OSCCAL_SAVE_CALIB
+#define POSTSCRIPT_SIZE 6
+//#else
+//#define POSTSCRIPT_SIZE 4
+//#endif
+#define PROGMEM_SIZE (BOOTLOADER_ADDRESS - POSTSCRIPT_SIZE) /* max size of user program */
 
 // verify the bootloader address aligns with page size
 #if (defined __AVR_ATtiny841__)||(defined __AVR_ATtiny441__)
@@ -40,6 +71,10 @@
 
 #if ((AUTO_EXIT_MS>0) && (AUTO_EXIT_MS<1000))
 #error "Do not set AUTO_EXIT_MS to below 1s to allow Micronucleus to function properly"
+#endif
+
+#if ((AUTO_EXIT_NO_USB_MS>0) && (AUTO_EXIT_NO_USB_MS<120))
+#warning "Values below 120 ms are not possible for AUTO_EXIT_NO_USB_MS"
 #endif
 
 // Device configuration reply
@@ -69,9 +104,9 @@ typedef union {
 #endif
 
 register uint16_union_t currentAddress asm("r4");  // r4/r5 current progmem address, used for erasing and writing
-register uint16_union_t idlePolls asm("r6");  // r6/r7 idlecounter - each tick is 5 milliseconds
+register uint16_union_t idlePolls asm("r6");  // r6/r7 idle counter - each tick is 5 milliseconds
 
-// command system schedules functions to run in the main loop
+// sLoopCommand used to trigger functions to run in the main loop
 enum {
     cmd_local_nop = 0,
     cmd_device_info = 0,
@@ -81,13 +116,7 @@ enum {
     cmd_exit = 4,
     cmd_write_page = 64  // internal commands start at 64
 };
-register uint8_t command asm("r3");  // bind command to r3
-
-#define nop() asm volatile("nop")
-#define wdr() asm volatile("wdr")
-
-// Use the old delay routines without NOP padding. This saves memory.
-#define __DELAY_BACKWARD_COMPATIBLE__
+register uint8_t sLoopCommand asm("r3");  // bind sLoopCommand to r3
 
 /* ------------------------------------------------------------------------ */
 static inline void eraseApplication(void);
@@ -97,16 +126,18 @@ static uint8_t usbFunctionSetup(uint8_t data[8]);
 static inline void leaveBootloader(void);
 void blinkLED(uint8_t aBlinkCount);
 
-// This function is never called, it is just here to suppress a compiler warning.
+// This function is never called and optimized out, it is just here to suppress a compiler warning.
 USB_PUBLIC usbMsgLen_t usbFunctionDescriptor(struct usbRequest *rq) {
     return 0;
 }
 
-// erase all pages until bootloader, in reverse order (so our vectors stay in place for as long as possible)
-// to minimise the chance of leaving the device in a state where the bootloader wont run, if there's power failure
-// during upload
+/*
+ * erase all pages until bootloader, in reverse order (so our vectors stay in place for as long as possible)
+ * to minimise the chance of leaving the device in a state where the bootloader wont run, if there's power failure
+ * during upload
+ */
 static inline void eraseApplication(void) {
-    uint16_t ptr = BOOTLOADER_ADDRESS;
+    uint16_t ptr = BOOTLOADER_ADDRESS; // from Makefile.inc
 
     while (ptr) {
 #if (defined __AVR_ATtiny841__)||(defined __AVR_ATtiny441__)
@@ -115,6 +146,9 @@ static inline void eraseApplication(void) {
         ptr -= SPM_PAGESIZE;
 #endif
         boot_page_erase(ptr);
+        // using the 2 lines instead saves 6 bytes, but then the bootloader does not work :-(
+        //        __SPM_REG = (__BOOT_PAGE_ERASE);
+        //        asm volatile("spm");
 #if (defined __AVR_ATmega328P__)||(defined __AVR_ATmega168P__)||(defined __AVR_ATmega88P__)
     // the ATmegaATmega328p/168p/88p don't halt the CPU when writing to RWW flash, so we need to wait here
     boot_spm_busy_wait();
@@ -125,7 +159,9 @@ static inline void eraseApplication(void) {
     currentAddress.w = 0;
 }
 
-// simply write currently stored page in to already erased flash memory
+/*
+ * Simply write currently stored page in to already erased flash memory
+ */
 static inline void writeFlashPage(void) {
     if (currentAddress.w - 2 < BOOTLOADER_ADDRESS) {
         boot_page_write(currentAddress.w - 2);   // will halt CPU, no waiting required
@@ -136,13 +172,16 @@ static inline void writeFlashPage(void) {
     }
 }
 
-// Write a word into the page buffer.
-// Will patch the bootloader reset vector into the main vectortable to ensure
-// the device can not be bricked. Saving user-reset-vector is done in the host
-// tool, starting with firmware V2
+/*
+ * Write a word into the page buffer.
+ * Will overwrite the bootloader reset vector sent from the host with our fixed value.
+ * Normally both values are the same, this is only a safety net if transfer was disturbed
+ * to ensure that the device can not be bricked.
+ * ??? Saving user-reset-vector ??? is done in the host tool, starting with firmware V2.
+ */
 static void writeWordToPageBuffer(uint16_t data) {
 
-#ifndef ENABLE_UNSAFE_OPTIMIZATIONS
+#ifndef ENABLE_UNSAFE_OPTIMIZATIONS // adds 10 bytes
 #  if BOOTLOADER_ADDRESS < 8192
     // rjmp
     if (currentAddress.w == RESET_VECTOR_OFFSET * 2) {
@@ -152,7 +191,7 @@ static void writeWordToPageBuffer(uint16_t data) {
   // far jmp
   if (currentAddress.w == RESET_VECTOR_OFFSET * 2) {
     data = 0x940c;
-  } else if (currentAddress.w == (RESET_VECTOR_OFFSET +1 ) * 2) {
+  } else if (currentAddress.w == (RESET_VECTOR_OFFSET + 1 ) * 2) {
     data = (BOOTLOADER_ADDRESS/2);
   }
   #endif
@@ -160,7 +199,7 @@ static void writeWordToPageBuffer(uint16_t data) {
 
 #if OSCCAL_SAVE_CALIB
     if (currentAddress.w == BOOTLOADER_ADDRESS - TINYVECTOR_OSCCAL_OFFSET) {
-        data = OSCCAL;
+        data = OSCCAL; // save current adjusted OSCCAL value in the postscript area
     }
 #endif
 
@@ -168,11 +207,30 @@ static void writeWordToPageBuffer(uint16_t data) {
     currentAddress.w += 2;
 }
 
-/* ------------------------------------------------------------------------ */
+/*
+ * This function is called when the driver receives a SETUP transaction from
+ * the host which is not answered by the driver itself (in practice: class and
+ * vendor requests). All control transfers start with a SETUP transaction where
+ * the host communicates the parameters of the following (optional) data
+ * transfer. The SETUP data is available in the 'data' parameter which can
+ * (and should) be casted to 'usbRequest_t *' for a more user-friendly access
+ * to parameters.
+ *
+ * If the SETUP indicates a control-in transfer, you should provide the
+ * requested data to the driver. There are two ways to transfer this data:
+ * (1) Set the global pointer 'usbMsgPtr' to the base of the static RAM data
+ * block and return the length of the data in 'usbFunctionSetup()'. The driver
+ * will handle the rest.
+ *
+ * For more explanations see usbdrv.h
+ *
+ * Prepares variables and sets sLoopCommand for command to be executed in the main loop
+ *
+ */
 static uint8_t usbFunctionSetup(uint8_t data[8]) {
     usbRequest_t *rq = (void *) data;
 
-    idlePolls.b[1] = 0; // reset high byte of idle counter when we get usb class or vendor requests
+    idlePolls.b[1] = 0; // reset high byte of idle counter when we get usb class or vendor requests to start a new timeout
     if (rq->bRequest == cmd_device_info) { // get device info
         usbMsgPtr = (usbMsgPtr_t) configurationReply;
         return sizeof(configurationReply);
@@ -183,8 +241,8 @@ static uint8_t usbFunctionSetup(uint8_t data[8]) {
             currentAddress.b[0] = rq->wIndex.bytes[0] & (~(SPM_PAGESIZE - 1));
             currentAddress.b[1] = rq->wIndex.bytes[1];
 
-            // clear page buffer as a precaution before filling the buffer in case
-            // a previous write operation failed and there is still something in the buffer.
+            // Clear temporary page buffer in SRAM as a precaution before filling the buffer
+            // in case a previous write operation failed and there is still something in the buffer.
 #ifdef CTPB
             __SPM_REG = (_BV(CTPB) | _BV(__SPM_ENABLE));
 #else
@@ -200,11 +258,12 @@ static uint8_t usbFunctionSetup(uint8_t data[8]) {
     } else if (rq->bRequest == cmd_write_data) { // Write data
         writeWordToPageBuffer(rq->wValue.word);
         writeWordToPageBuffer(rq->wIndex.word);
-        if ((currentAddress.b[0] % SPM_PAGESIZE) == 0)
-            command = cmd_write_page; // ask runloop to write our page
+        if ((currentAddress.b[0] % SPM_PAGESIZE) == 0) {
+            sLoopCommand = cmd_write_page; // ask main loop to write our page
+        }
     } else {
         // Handle cmd_erase_application and cmd_exit
-        command = rq->bRequest & 0x3f;
+        sLoopCommand = rq->bRequest & 0x3f;
     }
     return 0;
 }
@@ -243,7 +302,7 @@ static inline void leaveBootloader(void) {
 
 #if OSCCAL_RESTORE_DEFAULT
   OSCCAL=osccal_default;
-  nop(); // NOP to avoid CPU hickup during oscillator stabilization
+  asm volatile("nop"); // NOP to avoid CPU hickup during oscillator stabilization
 #endif
 
 #if (defined __AVR_ATmega328P__)||(defined __AVR_ATmega168P__)||(defined __AVR_ATmega88P__)
@@ -251,7 +310,9 @@ static inline void leaveBootloader(void) {
   boot_rww_enable();
 #endif
 
-    asm volatile ("rjmp __vectors - 4");
+#define STR_HELPER(x) #x
+#define STR(x) STR_HELPER(x)
+    asm volatile ("rjmp __vectors - " STR(TINYVECTOR_RESET_OFFSET));
     // jump to application reset vector at end of flash
 
     for (;;) { // Make sure function does not return to help compiler optimize
@@ -259,7 +320,7 @@ static inline void leaveBootloader(void) {
     }
 }
 
-void USB_INTR_VECTOR(void);
+void USB_INTR_VECTOR(void); // defined in usbdrvasm.S
 
 int main(void) {
 
@@ -277,7 +338,7 @@ int main(void) {
     if (stored_osc_calibration != 0xFF) {
         OSCCAL = stored_osc_calibration;
         // we changed clock so "wait" for one cycle
-        nop();
+        asm volatile("nop");
     }
 #endif
     // bootLoaderStartCondition() is a Macro defined in bootloaderconfig.h and mainly is set to true or checks a bit in MCUSR
@@ -298,10 +359,10 @@ int main(void) {
         idlePolls.w = ((AUTO_EXIT_MS - AUTO_EXIT_NO_USB_MS) / 5);
 #else
         // start with 0 to exit after AUTO_EXIT_MS milliseconds (6 seconds) of USB inactivity (not connected or Idle)
-        idlePolls.b[1] = 0;
+        idlePolls.b[1] = 0; // only set register 7, register 6 is almost random (determined by the usage before)
 #endif
 
-        command = cmd_local_nop;
+        sLoopCommand = cmd_local_nop; // initialize register 3
         currentAddress.w = 0;
 
 #if (OSCCAL_HAVE_XTAL == 0) && defined(START_WITHOUT_PULLUP) // Adds 14 bytes
@@ -310,7 +371,7 @@ int main(void) {
 
         /*
          * 1. Wait for 5 ms or USB transmission (and detect reset)
-         * 2. Interpret and execute USB command
+         * 2. Interpret and execute USB sLoopCommand
          * 3. Parse data packet and construct response (usbpoll)
          * 4. Check for timeout and exit to user program
          * 5. Blink LED
@@ -389,26 +450,32 @@ int main(void) {
 
             } while (--t5msTimeoutCounter); // after 5 ms fastctr is 0.
 
-            wdr();
+            asm volatile("wdr");
+            // perform cyclically watchdog reset, just in case...
 
 #if OSCCAL_SLOW_PROGRAMMING
-      uint8_t osccal_tmp  = OSCCAL;
-      OSCCAL      = osccal_default;
+            uint8_t osccal_tmp  = OSCCAL;
+            OSCCAL      = osccal_default;
 #endif
-            // commands are only evaluated after next USB transmission or after 5 ms passed
-            if (command == cmd_erase_application)
+            /*
+             * sLoopCommand is only evaluated here and set by usbFunctionSetup()
+             */
+            if (sLoopCommand == cmd_erase_application) {
                 eraseApplication();
-            if (command == cmd_write_page)
+            }
+            if (sLoopCommand == cmd_write_page) {
                 writeFlashPage();
+            }
 #if OSCCAL_SLOW_PROGRAMMING
-      OSCCAL      = osccal_tmp;
+            OSCCAL      = osccal_tmp;
 #endif
 
-            if (command == cmd_exit) {
-                if (!t5msTimeoutCounter)
+            if (sLoopCommand == cmd_exit) {
+                if (!t5msTimeoutCounter) {
                     break;  // Only exit after 5 ms timeout
+                }
             } else {
-                command = cmd_local_nop;
+                sLoopCommand = cmd_local_nop;
             }
 
             {
@@ -435,9 +502,9 @@ int main(void) {
 #if (AUTO_EXIT_MS > 0)
             // Try to execute program when bootloader times out
             if (idlePolls.w == (AUTO_EXIT_MS / 5)) {
-                if (pgm_read_byte(BOOTLOADER_ADDRESS - TINYVECTOR_RESET_OFFSET + 1) != 0xff)
-                    // Only exit to user program, if program exists
-                    break;
+                if (pgm_read_byte(BOOTLOADER_ADDRESS - TINYVECTOR_RESET_OFFSET + 1) != 0xff) {
+                    break; // Only exit to user program, if program exists
+                }
             }
 #endif
 
@@ -448,8 +515,8 @@ int main(void) {
             // If yes, we missed a data packet on the bus. Wait until the bus was idle for 8.8 µs to
             // allow synchronizing to the next incoming packet.
 
-            if (USB_INTR_PENDING & (1 << USB_INTR_PENDING_BIT))  // Usbpoll() collided with data packet
-                    {
+            if (USB_INTR_PENDING & (1 << USB_INTR_PENDING_BIT)) {
+                // Usbpoll() collided with data packet
                 uint8_t ctr;
 
                 // loop takes 5 cycles
