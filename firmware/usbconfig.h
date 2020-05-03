@@ -22,6 +22,8 @@
 
 #include "bootloaderconfig.h"
 
+#define USB_INTR_VECTOR         USB_handler // The name must be any valid function name
+
 /* --------------------------- Functional Range ---------------------------- */
 
 #define USB_CFG_HAVE_INTRIN_ENDPOINT    0
@@ -166,10 +168,10 @@ return;\
  * for each control- and out-endpoint to check for duplicate packets.
  */
 
- 
+
 #ifndef __ASSEMBLER__
 	void calibrateOscillatorASM(void); // from osccalASM.S
-/*  
+/*
   #if AUTO_EXIT_NO_USB_MS>0
     extern uint16_union_t idlePolls;
     #define USB_RESET_HOOK(resetStarts)  if(!resetStarts){ idlePolls.b[1]=0; calibrateOscillatorASM();}
@@ -184,7 +186,7 @@ return;\
 /* define this macro to 1 if you want the function usbMeasureFrameLength()
  * compiled in. This function can be used to calibrate the AVR's RC oscillator.
  */
- 
+
 
 #if USB_CFG_CLOCK_KHZ<16000
     #define USB_USE_FAST_CRC 1
@@ -194,8 +196,8 @@ return;\
 
 /* If the CPU clock is below 16Mhz you have to use the faster CRC routines.
  * otherwise time outs may occur on USB3.0 ports. This adds 20 bytes.
- */ 
- 
+ */
+
 /* The assembler module has two implementations for the CRC algorithm. One is
  * faster, the other is smaller. This CRC routine is only used for transmitted
  * messages where timing is not critical. The faster routine needs 31 cycles

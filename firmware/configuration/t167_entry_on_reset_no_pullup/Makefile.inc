@@ -18,7 +18,7 @@ AVR_ARCHITECTURE_PARAMETER = --binary-architecture avr:35
 # - round that down to 94 - our new bootloader address is 94 * 64 = 6016, in hex = 1780
 #
 # For 167 we have  16384 - 1436 = 14948. 14948 / 128 = 116,78125. 116 * 128 = 14848, in hex 3A00
-# - We can use 3A00 up to a code size of 1536. To save one page we must have a code size of 1408 or less.
+# - For data size up to 1408 the address is 3980 for size from 1409 to 1536 the address is 3A00
 BOOTLOADER_ADDRESS = 3A00
 
 FUSEOPT = # TODO

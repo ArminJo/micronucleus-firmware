@@ -268,23 +268,30 @@ static uint8_t usbFunctionSetup(uint8_t data[8]) {
     return 0;
 }
 
-static void initHardware(void) {
-    MCUSR = ~_BV(WDRF); // write 0x07 to MCUSR - this should reset only bit 3/Watchdog System Reset Flag and keep the other flags
-
-    // Disable watchdog and set timeout to maximum in case the WDT is fused on
+/*
+ * Try to disable watchdog and set timeout to maximum in case the WDT can not be disabled, because it is fused on.
+ * Shortest watchdog timeout is 16 ms.
+ */
+static void inactivateWatchdog(void) {
 #ifdef CCP
     // New ATtinies841/441 use a different unlock sequence and renamed registers
     CCP = 0xD8;
-    WDTCSR = 1<<WDP2 | 1<<WDP1 | 1<<WDP0;
+    WDTCSR = _BV(WDP2) | _BV(WDP1) | _BV(WDP0);
 #elif defined(WDTCR)
-    WDTCR = 1 << WDCE | 1 << WDE;
-    WDTCR = 1 << WDP2 | 1 << WDP1 | 1 << WDP0;
+    WDTCR = _BV(WDCE) | _BV(WDE); // Unlock the watchdog register
+    WDTCR = _BV(WDP2) | _BV(WDP1) | _BV(WDP0); // Do not enable watchdog. Set timeout to 2 seconds, just in case, it is fused on and can not disabled.
 #else
     wdt_reset();
     WDTCSR|=_BV(WDCE) | _BV(WDE);
     WDTCSR=0;
 #endif
+}
 
+/*
+ * USB disconnect by disabling pullup resistor by pull down D-, wait 300ms and reconnect
+ * Initialize interrupt settings after reconnect but let the global interrupt be disabled
+ */
+static void reconnectAndInitUSB(void) {
     usbDeviceDisconnect(); // Disable pullup resistor by pull down D-
     _delay_ms(300); // Even 250 is to fast!
     usbDeviceConnect(); // Enable pullup resistor by changing D- to input
@@ -320,7 +327,7 @@ static inline void leaveBootloader(void) {
     }
 }
 
-void USB_INTR_VECTOR(void); // defined in usbdrvasm.S
+void USB_handler(void); // must match name used in usbconfig.h line 25 and implemented in usbdrvasm.S
 
 int main(void) {
 
@@ -347,7 +354,9 @@ int main(void) {
          * Here boot condition matches or vector table is empty / no program loaded
          */
 
-        initHardware(); // USB disconnect by disabling pullup resistor by pull down D-, wait 300ms and reconnect
+        inactivateWatchdog(); // Sets at least watchdog timeout to 2 seconds.
+
+        reconnectAndInitUSB(); // USB disconnect by disabling pullup resistor by pull down D-, wait 300ms and reconnect, and enable USB interrupts
 
         LED_INIT(); // Set LED pin to output, if LED exists
 
@@ -365,8 +374,8 @@ int main(void) {
         sLoopCommand = cmd_local_nop; // initialize register 3
         currentAddress.w = 0;
 
-#if (OSCCAL_HAVE_XTAL == 0) && defined(START_WITHOUT_PULLUP) // Adds 14 bytes
-        uint8_t resetDetected = 0; // Flag to call calibrateOscillatorASM() directly after host reset ends.
+#if ((OSCCAL_HAVE_XTAL == 0) || (AUTO_EXIT_NO_USB_MS > 0)) && defined(START_WITHOUT_PULLUP) // Adds 14 bytes
+        uint8_t resetDetected = 0; // Flag to call calibrateOscillatorASM() or reset idlePolls directly after host reset ends.
 #endif
 
         /*
@@ -394,20 +403,23 @@ int main(void) {
                     // No host reset here! We are unconnected with pullup or receive host data -> rearm counter
                     tResetDownCounter = 100;
 
-#if (OSCCAL_HAVE_XTAL == 0) && defined(START_WITHOUT_PULLUP)
+#if defined(START_WITHOUT_PULLUP)
+#  if (OSCCAL_HAVE_XTAL == 0) || (AUTO_EXIT_NO_USB_MS > 0)
                     /*
-                     * Call calibrateOscillatorASM() only if USB is attached and after a reset, otherwise just skip calibrateOscillatorASM and wait for timeout.
-                     * If USB has no pullup at VCC, we will end up here if pullup was powered by USB and host reset has ended.
+                     * Call calibrateOscillatorASM() or reset idlePolls only if USB is attached and after a reset, otherwise just skip it and wait for timeout.
+                     * If USB has no pullup at VCC but at USB 5 volt, we will end up here only if USB 5 volt is connected and after host reset has ended.
                      */
                     if (resetDetected) {
                         resetDetected = 0; // do it only once after reset
+#    if (OSCCAL_HAVE_XTAL == 0)
                         calibrateOscillatorASM();
-#  if (AUTO_EXIT_NO_USB_MS > 0)
+#    endif
+#    if (AUTO_EXIT_NO_USB_MS > 0)
                     idlePolls.b[1] = 0; // Reset counter to have 6 seconds timeout since we detected USB connection by end of a reset condition
-#  endif
+#    endif
                     }
+#  endif
 #endif
-
                 }
                 if (--tResetDownCounter == 0) {
                     /*
@@ -419,25 +431,28 @@ int main(void) {
                     usbNewDeviceAddr = 0;
                     usbDeviceAddr = 0;
 
-#if (OSCCAL_HAVE_XTAL == 0)
-#  ifdef START_WITHOUT_PULLUP // if not connected to USB we have an endless USB reset condition
-                    resetDetected = 1;  // Set flag to wait for reset to end before calling calibrateOscillatorASM().
-#  else
+
+#if defined(START_WITHOUT_PULLUP) // if not connected to USB we have an endless USB reset condition, so do actions after end of reset
+#  if (OSCCAL_HAVE_XTAL == 0) || (AUTO_EXIT_NO_USB_MS > 0)
+                    resetDetected = 1;  // Set flag to wait for reset to end before calling calibrateOscillatorASM() or reset idlePolls.
+#  endif  // OSCCAL_HAVE_XTAL
+#else
+#  if (OSCCAL_HAVE_XTAL == 0)
                     /*
                      * Called if we received an host reset. This waits for the D- line to toggle or at least.
                      * It will wait forever, if no host is connected and the pullup at D- was detached.
                      * In this case we recognize a (dummy) host reset but no toggling at D- will occur.
                      */
                     calibrateOscillatorASM();
-#    if (AUTO_EXIT_NO_USB_MS > 0)
-                    idlePolls.b[1] = 0; // Reset counter to have 6 seconds timeout since we detected USB connection by getting a reset
-#    endif
 #  endif
-#endif  // OSCCAL_HAVE_XTAL
+#if (AUTO_EXIT_NO_USB_MS > 0)
+                    idlePolls.b[1] = 0; // Reset counter to have 6 seconds timeout since we detected USB connection by getting a reset
+#endif
+#endif
                 }
 
                 if (USB_INTR_PENDING & (1 << USB_INTR_PENDING_BIT)) {
-                    USB_INTR_VECTOR(); // call V-USB driver for USB receiving
+                    USB_handler(); // call V-USB driver for USB receiving
                     USB_INTR_PENDING = 1 << USB_INTR_PENDING_BIT; // Clear int pending, in case timeout occurred during SYNC
                     /*
                      * readme for 2.04 says: If you comment it out, idlepolls is only reset when traffic to the current endpoint is detected.
@@ -450,8 +465,7 @@ int main(void) {
 
             } while (--t5msTimeoutCounter); // after 5 ms fastctr is 0.
 
-            asm volatile("wdr");
-            // perform cyclically watchdog reset, just in case...
+            asm volatile("wdr"); // perform cyclically watchdog reset, for the case it is fused on and we can not disable it.
 
 #if OSCCAL_SLOW_PROGRAMMING
             uint8_t osccal_tmp  = OSCCAL;
@@ -540,9 +554,9 @@ int main(void) {
         LED_EXIT();
 
 #ifdef USB_CFG_PULLUP_IOPORTNAME
-        usbDeviceDisconnect(); // if using initHardware() instead, the pullup resistor port will still be active powering the pullup after disconnecting micronucleus.
+        usbDeviceDisconnect(); // if using initUSBHardwareAndReconnect() instead, the pullup resistor port will still be active powering the pullup after disconnecting micronucleus.
 #else
-        initHardware(); // Disconnect micronucleus - Set the D- to output and after 300ms to input again.
+        reconnectAndInitUSB(); // Disconnect micronucleus - Set the D- to output and after 300ms to input again.
 #endif
 
         /*

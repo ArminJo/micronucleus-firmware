@@ -61,7 +61,6 @@
 #define USB_INTR_ENABLE_BIT     PCIE
 #define USB_INTR_PENDING        GIFR
 #define USB_INTR_PENDING_BIT    PCIF
-#define USB_INTR_VECTOR         PCINT0_vect
 
 /* ------------------------------------------------------------------------- */
 /*       Configuration relevant to the CPU the bootloader is running on      */
@@ -178,7 +177,7 @@
  */
 
 // I observed 2 Resets. First is 100ms after initial connecting to USB lasting 65 ms and the second 90 ms later and also 65 ms.
-#define AUTO_EXIT_NO_USB_MS     200 // Values below 120 are ignored
+#define AUTO_EXIT_NO_USB_MS     200 // Values below 120 are ignored. Effective timeout is 300 + AUTO_EXIT_NO_USB_MS.
 #define AUTO_EXIT_MS           6000
 
 /* ----------------------- Optional Timeout Config ------------------------ */

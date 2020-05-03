@@ -15,7 +15,8 @@
 #   * Setting the GIMSK or EIMSK register directly instead of keeping other bits. GICR contains other bits, which must be kept! - saves 2 bytes
 #     We only want one interrupt to be enabled, so keeping the other bits makes no sense.
 
-CFLAGS += -DENABLE_SAFE_OPTIMIZATIONS
+# Not needed, since we are not over the page boundary
+#CFLAGS += -DENABLE_SAFE_OPTIMIZATIONS  # This disables reliable jump to 0x0000, which one should avoid anyway.
 
 F_CPU = 16500000
 DEVICE = attiny85
@@ -27,7 +28,7 @@ DEVICE = attiny85
 # - round that down to 103
 # - our new bootloader address is 103 * 64 = 6592, in hex = 19C0
 # - For data size up to 1600 the address is 19C0 for size from 1601 to 1664 the address is 1980
-BOOTLOADER_ADDRESS = 1980
+BOOTLOADER_ADDRESS = 19C0
 
 FUSEOPT = -U lfuse:w:0xe1:m -U hfuse:w:0xdd:m -U efuse:w:0xfe:m
 FUSEOPT_DISABLERESET = -U lfuse:w:0xe1:m -U efuse:w:0xfe:m -U hfuse:w:0x5d:m

@@ -61,7 +61,6 @@
 #define USB_INTR_ENABLE_BIT     PCIE
 #define USB_INTR_PENDING        GIFR
 #define USB_INTR_PENDING_BIT    PCIF
-#define USB_INTR_VECTOR         PCINT0_vect
 
 /* ------------------------------------------------------------------------- */
 /*       Configuration relevant to the CPU the bootloader is running on      */

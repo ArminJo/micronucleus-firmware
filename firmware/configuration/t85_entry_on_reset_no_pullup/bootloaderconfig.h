@@ -61,7 +61,6 @@
 #define USB_INTR_ENABLE_BIT     PCIE
 #define USB_INTR_PENDING        GIFR
 #define USB_INTR_PENDING_BIT    PCIF
-#define USB_INTR_VECTOR         PCINT0_vect
 
 /* ------------------------------------------------------------------------- */
 /*       Configuration relevant to the CPU the bootloader is running on      */
@@ -104,7 +103,7 @@
  *                      pulling the reset pin low. It may be necessary to add an external
  *                      pull-up resistor to the reset pin if this entry method appears to
  *                      behave unreliably.
- *                      Adds 22 bytes.
+ *                      Adds 24 bytes.
  *
  *  ENTRY_JUMPER        Activate the bootloader when a specific pin is pulled low by an
  *                      external jumper.
@@ -142,20 +141,22 @@
 #elif ENTRYMODE==ENTRY_WATCHDOG
   #define bootLoaderInit()
   #define bootLoaderExit()
-  #define bootLoaderStartCondition() (MCUSR&_BV(WDRF))
+  #define bootLoaderStartCondition() (MCUSR & _BV(WDRF))
 #elif ENTRYMODE==ENTRY_EXT_RESET
 // On my ATtiny85 I have always 0x03 EXTRF | PORF after power on.
 // After reset only EXTRF is NEWLY set.
-// So must reset PORF Flag ALWAYS after checking for entry condition,
+// So we must reset at least PORF flag ALWAYS after checking for entry condition,
 // otherwise entry condition will NEVER be true if application does not reset PORF.
+// To be able to interpret MCUSR flags in user program, it is copied to the OCR1C register.
+// In turn we can just clear MCUSR, which saves flash.
   #define bootLoaderInit()
-  #define bootLoaderExit() (MCUSR &= ~_BV(PORF)) // adds 6 bytes
-  #define bootLoaderStartCondition() (MCUSR == _BV(EXTRF))
+  #define bootLoaderExit() {OCR1C=MCUSR; MCUSR = 0;} // Adds 6 bytes
+  #define bootLoaderStartCondition() (MCUSR == _BV(EXTRF)) // Adds 18 bytes
 #elif ENTRYMODE==ENTRY_JUMPER
   // Enable pull up on jumper pin and delay to stabilize input
-  #define bootLoaderInit()   {JUMPER_DDR&=~_BV(JUMPER_PIN);JUMPER_PORT|=_BV(JUMPER_PIN);_delay_ms(1);}
-  #define bootLoaderExit()   {JUMPER_PORT&=~_BV(JUMPER_PIN);}
-  #define bootLoaderStartCondition() (!(JUMPER_INP&_BV(JUMPER_PIN)))
+  #define bootLoaderInit()   {JUMPER_DDR &= ~_BV(JUMPER_PIN); JUMPER_PORT |= _BV(JUMPER_PIN); _delay_ms(1);}
+  #define bootLoaderExit()   {JUMPER_PORT &= ~_BV(JUMPER_PIN);}
+  #define bootLoaderStartCondition() (!(JUMPER_INP & _BV(JUMPER_PIN)))
 #elif ENTRYMODE==ENTRY_POWER_ON
   #define bootLoaderInit()
   #define bootLoaderExit()

@@ -61,7 +61,6 @@
 #define USB_INTR_ENABLE_BIT     PCIE
 #define USB_INTR_PENDING        GIFR
 #define USB_INTR_PENDING_BIT    PCIF
-#define USB_INTR_VECTOR         PCINT0_vect
 
 /* ------------------------------------------------------------------------- */
 /*       Configuration relevant to the CPU the bootloader is running on      */
@@ -141,17 +140,22 @@
 #elif ENTRYMODE==ENTRY_WATCHDOG
   #define bootLoaderInit()
   #define bootLoaderExit()
-  #define bootLoaderStartCondition() (MCUSR&_BV(WDRF))
+  #define bootLoaderStartCondition() (MCUSR & _BV(WDRF))
 #elif ENTRYMODE==ENTRY_EXT_RESET
+// On my ATtiny85 I have always 0x03 EXTRF | PORF after power on.
+// After reset only EXTRF is NEWLY set.
+// So we must reset at least PORF flag ALWAYS after checking for entry condition,
+// otherwise entry condition will NEVER be true if application does not reset PORF.
+// To be able to interpret MCUSR flags in user program, it is copied to the OCR1C register.
+// In turn we can just clear MCUSR, which saves flash.
   #define bootLoaderInit()
-  #define bootLoaderExit()
-// On my ATtiny85 I have always 0x03 EXTRF | PORF after power on, but reset works as expected, it gives 0x02 = EXTRF
-  #define bootLoaderStartCondition() (MCUSR == _BV(EXTRF))
+  #define bootLoaderExit() {OCR1C=MCUSR; MCUSR = 0;} // Adds 6 bytes
+  #define bootLoaderStartCondition() (MCUSR == _BV(EXTRF)) // Adds 18 bytes
 #elif ENTRYMODE==ENTRY_JUMPER
   // Enable pull up on jumper pin and delay to stabilize input
-  #define bootLoaderInit()   {JUMPER_DDR&=~_BV(JUMPER_PIN);JUMPER_PORT|=_BV(JUMPER_PIN);_delay_ms(1);}
-  #define bootLoaderExit()   {JUMPER_PORT&=~_BV(JUMPER_PIN);}
-  #define bootLoaderStartCondition() (!(JUMPER_INP&_BV(JUMPER_PIN)))
+  #define bootLoaderInit()   {JUMPER_DDR &= ~_BV(JUMPER_PIN); JUMPER_PORT |= _BV(JUMPER_PIN); _delay_ms(1);}
+  #define bootLoaderExit()   {JUMPER_PORT &= ~_BV(JUMPER_PIN);}
+  #define bootLoaderStartCondition() (!(JUMPER_INP & _BV(JUMPER_PIN)))
 #elif ENTRYMODE==ENTRY_POWER_ON
   #define bootLoaderInit()
   #define bootLoaderExit()
@@ -177,7 +181,7 @@
  */
 
 // I observed 2 Resets. First is 100ms after initial connecting to USB lasting 65 ms and the second 90 ms later and also 65 ms.
-#define AUTO_EXIT_NO_USB_MS     200 // Values below 120 are ignored
+#define AUTO_EXIT_NO_USB_MS     200 // Values below 120 are ignored. Effective timeout is 300 + AUTO_EXIT_NO_USB_MS.
 #define AUTO_EXIT_MS           6000
 
 /* ----------------------- Optional Timeout Config ------------------------ */
@@ -234,6 +238,10 @@
  *
  */
 
+#define NONE        0
+#define ACTIVE_HIGH 1
+#define ACTIVE_LOW  2
+
 #define LED_MODE    NONE
 
 #define LED_DDR     DDRB
@@ -249,10 +257,6 @@
  *  LED_MACRO                 Called in the main loop with the idle counter as parameter.
  *                            Use to define pattern.
 */
-
-#define NONE        0
-#define ACTIVE_HIGH 1
-#define ACTIVE_LOW  2
 
 #if LED_MODE==ACTIVE_HIGH
   #define LED_INIT(x)   LED_DDR   |= _BV(LED_PIN);

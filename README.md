@@ -53,7 +53,8 @@ For *t167_default.hex* (as well as for the other t167 configurations) with the n
 # New features
 ## MCUSR content now available at sketch
 In this versions the reset flags in the MCUSR register are no longer cleared by micronucleus and can therefore read out by the sketch!<br/>
-If you use the flags in your program or use the `ENTRY_POWER_ON` boot mode, **you must clear them** with `MCUSR = 0;` **after** saving or evaluating them. If you do not reset the flags, and use the `ENTRY_POWER_ON` mode of the bootloader, the bootloader will be entered even after a reset, since the power on reset flag in MCUSR is still set!
+If you use the flags in your program or use the `ENTRY_POWER_ON` boot mode, **you must clear them** with `MCUSR = 0;` **after** saving or evaluating them. If you do not reset the flags, and use the `ENTRY_POWER_ON` mode of the bootloader, the bootloader will be entered even after a reset, since the power on reset flag in MCUSR is still set!<br/>
+For `ENTRY_EXT_RESET` configuration see *Fixed wrong ENTRY_EXT_RESET* below.
 
 ## Implemented [`ENABLE_SAFE_OPTIMIZATIONS`](https://github.com/ArminJo/micronucleus-firmware/tree/master/firmware/crt1.S#L99) configuration to save 12 bytes.
 This configuration is specified in the [Makefile.inc](https://github.com/ArminJo/micronucleus-firmware/tree/master/firmware/configuration/t85_fast_exit_on_no_USB/Makefile.inc#L18) file and will disable several unnecesary instructions in microncleus. These optimizations disables reliable entering the bootloader with jmp 0000, which you should not do anyway - better use the watchdog timer reset functionality.<br/>
@@ -66,16 +67,15 @@ This enable us to wait for 200 ms after initialization for a reset and if no res
 So the user program is started with a 500 ms delay after power up (or reset) even if we do not specify a special entry condition.<br/>
 The 100 ms time to reset may depend on the type of host CPU etc., so I took 200 ms to be safe. 
 
-
-
 ## New [`ENTRY_POWER_ON`](https://github.com/ArminJo/micronucleus-firmware/tree/master/firmware/configuration/t85_entry_on_power_on/bootloaderconfig.h#L156) entry condition
 The `ENTRY_POWER_ON` configuration adds 18 bytes to the ATtiny85 default configuration, but this behavior is **what you normally need** if you use a Digispark board, since it is programmed by attaching to the USB port resulting in power up.<br/>
 In this configuration **a reset will immediately start your sketch** without any delay.<br/>
 Do not forget to **reset the flags in setup()** with `MCUSR = 0;` to make it work!<br/>
 
 ## Fixed wrong [`ENTRY_EXT_RESET`](https://github.com/ArminJo/micronucleus-firmware/tree/master/firmware/configuration/t85_entry_on_reset_no_pullup/bootloaderconfig.h#L146) behavior
-The ATtiny85 has the bug, that it sets the `External Reset Flag` also on power up. To guarantee a correct behavior for `ENTRY_EXT_RESET` condition, it is checked if only this flag is set **and** the `Power-on Reset Flag` is **always reset** before start of user program. The latter is done to avoid bricking the device by fogetting to reset the `PORF` flag in the user program.<br/>
-For ATtiny167 it is even worse, it sets the `External Reset Flag` and the `Brown-out Reset Flag` also on power up. Here the `BORF` **and** the `PORF` flag is **always reset** before start of user program.<br/>
+The ATtiny85 has the bug, that it sets the `External Reset Flag` also on power up. To guarantee a correct behavior for `ENTRY_EXT_RESET` condition, it is checked if only this flag is set **and** all MCUSR flags are **always reset** before start of user program. The latter is done to avoid bricking the device by fogetting to reset the `PORF` flag in the user program.<br/>
+The content of the MCUSR is copied to the OCR1C register before clearing the flags. This enables the user program to interprete it.<br/>
+For ATtiny167 it is even worse, it sets the `External Reset Flag` and the `Brown-out Reset Flag` also on power up. Here the MCUSR content is copied to the ICR1L register before clearing.<br/>
 
 ## New [`START_WITHOUT_PULLUP`](https://github.com/ArminJo/micronucleus-firmware/tree/master/firmware/configuration/t85_entry_on_power_on_no_pullup_fast_exit_on_no_USB/bootloaderconfig.h#L186) option
 The `START_WITHOUT_PULLUP` configuration adds 16 to 18 bytes for an additional check. It is required for low energy applications, where the pullup is directly connected to the USB-5V and not to the CPU-VCC. Since this check was contained by default in all pre 2.0 versions, it is obvious that **it can also be used for boards with a pullup**.

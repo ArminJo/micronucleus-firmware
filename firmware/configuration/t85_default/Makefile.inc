@@ -6,6 +6,7 @@
 # Configuration:   Default
 # Last Change:     4/2020
 
+#CFLAGS += -DENABLE_SAFE_OPTIMIZATIONS  # This disables reliable jump to 0x0000, which one should avoid anyway.
 
 F_CPU = 16500000
 DEVICE = attiny85
