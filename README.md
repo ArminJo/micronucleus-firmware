@@ -3,12 +3,15 @@
 [![License: GPL v2](https://img.shields.io/badge/License-GPLv2-blue.svg)](https://www.gnu.org/licenses/gpl-2.0)
 [![Hit Counter](https://hitcounter.pythonanywhere.com/count/tag.svg?url=https://github.com/ArminJo/micronucleus-firmware)](https://github.com/brentvollebregt/hit-counter)
 
-Since the [micronucleus repository](https://github.com/micronucleus/micronucleus) seems to be abandoned, I forked the firmware part and try to add all improvements and bug fixes I am aware of. To make the code better understandable, I **added around 50 comment lines**.
+Here I forked the firmware part of [micronucleus repository](https://github.com/micronucleus/micronucleus) and try to add all improvements and bug fixes I am aware of. To make the code better understandable, I **added around 60 comment lines**.
 
-![Digisparks](https://github.com/ArminJo/micronucleus-firmware/blob/master/Digisparks.jpg)
+![Digisparks](https://github.com/ArminJo/micronucleus-firmware/blob/master/pictures/Digisparks.jpg)
 
 # How to update the bootloader to the new version
-To update your old flash consuming bootloader you can simply run one of the window [scripts](https://github.com/ArminJo/micronucleus-firmware/tree/master/utils)
+To **update** your old flash consuming **bootloader**, open the Arduino IDE, select *Tools/Programmer: "Micronucleus"* and then run *Tools/Burn Bootloder*.<br/>
+![Burn Bootloader](https://github.com/ArminJo/DigistumpArduino/blob/master/Micronucleus_Burn_Bootloader.jpg)<br/>
+The bootloader is the recommended configuration [`entry_on_power_on_no_pullup_fast_exit_on_no_USB`](https://github.com/ArminJo/micronucleus-firmware#recommended-configuration).<br/>
+Or run one of the window [scripts](https://github.com/ArminJo/micronucleus-firmware/tree/master/utils)
 like e.g. the [Burn_upgrade-t85_default.cmd](https://github.com/ArminJo/micronucleus-firmware/tree/master/utils/Burn_upgrade-t85_default.cmd).
 
 # Driver installation
@@ -16,7 +19,7 @@ For Windows you must install the **Digispark driver** before you can program the
 
 # Installation of a better optimizing compiler configuration
 **The new Digistmp AVR version 1.6.8 shrinks generated code size by 5 to 15 percent**. Just replace the old Digispark board URL **http://digistump.com/package_digistump_index.json** (e.g.in Arduino *File/Preferences*) by the new  **https://raw.githubusercontent.com/ArminJo/DigistumpArduino/master/package_digistump_index.json** and install the **Digistump AVR Boards** version **1.6.8**.<br/>
-![Boards Manager](https://github.com/ArminJo/DigistumpArduino/blob/master/Digistump1.6.8.jpg)<br/>
+![Boards Manager](https://github.com/ArminJo/DigistumpArduino/blob/master/pictures/Digistump1.6.8.jpg)<br/>
 If you use the configurations:
 - t85_default
 - t85_entry_on_power_on
@@ -34,21 +37,21 @@ Subtracting this (+ 6 byte for postscript) from the total amount of memory will 
 E.g. for *t85_default.hex* with the new compiler we get 1592 as data size. The next multiple of 64 is 1600 (25 * 64) => (8192 - (1600 + 6)) = **6586 bytes are free**.<br/>
 In this case we have 8 bytes left for configuration extensions before using another 64 byte page.
 So the `START_WITHOUT_PULLUP` and `ENTRY_POWER_ON` configurations are reducing the free bytes amount by 64 to 6522.<br/><br/>
-![Upload log](https://github.com/ArminJo/DigistumpArduino/blob/master/Bootloader2.5.jpg)
+![Upload log](https://github.com/ArminJo/DigistumpArduino/blob/master/pictures/Bootloader2.5.jpg)
 
 For *t167_default.hex* (as well as for the other t167 configurations) with the new compiler we get 1436 as data size. The next multiple of 128 is 1536 (12 * 128) => (16384 - (1536 + 6)) = 14842 bytes are free.<br/>
 
 ## Bootloader memory comparison of different releases for [*t85_default.hex*](https://github.com/ArminJo/micronucleus-firmware/tree/master/firmware/releases/t85_default.hex).
-- V1.6  6012 Byte free
-- V1.11 6330 Byte free
-- V2.3  6522 Byte free
-- V2.04 6522 Byte free
-- V2.5  **6586** Byte free for
+- V1.6  6012 bytes free
+- V1.11 6330 bytes free
+- V2.3  6522 bytes free
+- V2.04 6522 bytes free
+- V2.5  **6586** bytes free, **1600** bytes used for
   - t85_default
   - t85_entry_on_power_on
   - t85_fast_exit_on_no_USB
   - t85_pullup_at_0
-   6522 Byte free for all other t85 configurations
+   **6522** bytes free, **1664** bytes used for all other t85 configurations
 
 # New features
 ## MCUSR content now available at sketch
@@ -84,7 +87,7 @@ The `START_WITHOUT_PULLUP` configuration adds 16 to 18 bytes for an additional c
 The recommended configuration is *entry_on_power_on_no_pullup_fast_exit_on_no_USB*:
 - Entry on power on, no entry on reset, ie. after a reset the application starts immediately.
 - Start even if pullup is disconnected. Otherwise the bootloader hangs forever, if you commect the Pullup to USB-VCC to save power.
-- Fast exit of bootloader (after 500 ms) if there is no host program sending us data (to upload a new application/sketch).
+- Fast exit of bootloader (after 600 ms) if there is no host program sending us data (to upload a new application/sketch).
 
 #### Hex files for these configuration are already available in the [releases](https://github.com/ArminJo/micronucleus-firmware/tree/master/firmware/releases) and [upgrades](https://github.com/ArminJo/micronucleus-firmware/tree/master/firmware/upgrades) folders.
 
