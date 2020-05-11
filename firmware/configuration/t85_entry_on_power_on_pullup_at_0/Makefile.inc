@@ -15,7 +15,7 @@
 #   * Setting the GIMSK or EIMSK register directly instead of keeping other bits. GICR contains other bits, which must be kept! - saves 2 bytes
 #     We only want one interrupt to be enabled, so keeping the other bits makes no sense.
 
-CFLAGS += -DENABLE_SAFE_OPTIMIZATIONS
+CFLAGS += -DENABLE_SAFE_OPTIMIZATIONS  # This saves 10 bytes and disables reliable jump to 0x0000, which one should avoid anyway.
 
 F_CPU = 16500000
 DEVICE = attiny85
