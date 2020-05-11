@@ -4,7 +4,7 @@
  * according to the hardware.
  *
  * Controller type: ATtiny 85 - 16.5 MHz
- * Configuration:   Default configuration
+ * Configuration:   Default configuration + AUTO_EXIT_NO_USB_MS=300
  *       USB D- :   PB3
  *       USB D+ :   PB4
  *       Entry  :   Always
@@ -47,6 +47,25 @@
  * not need to modify this setting.
  */
 
+/* ----------------------- Optional Hardware Config ------------------------ */
+
+//#define USB_CFG_PULLUP_IOPORTNAME   B
+/* If you connect the 1.5k pullup resistor from D- to a port pin instead of
+ * V+, you can connect and disconnect the device from firmware by calling
+ * the macros usbDeviceConnect() and usbDeviceDisconnect() (see usbdrv.h).
+ * This constant defines the port on which the pullup resistor is connected.
+ */
+//#define USB_CFG_PULLUP_BIT          0
+/* This constant defines the bit number in USB_CFG_PULLUP_IOPORT (defined
+ * above) where the 1.5k pullup resistor is connected. See description
+ * above for details.
+ */
+
+/* ------------- Set up interrupt configuration (CPU specific) --------------   */
+/* The register names change quite a bit in the ATtiny family. Pay attention    */
+/* to the manual. Note that the interrupt flag system is still used even though */
+/* interrupts are disabled. So this has to be configured correctly.             */
+
 /* ------------- Set up interrupt configuration (CPU specific) --------------   */
 /* The register names change quite a bit in the ATtiny family. Pay attention    */
 /* to the manual. Note that the interrupt flag system is still used even though */
@@ -54,20 +73,21 @@
 
 
 // setup interrupt for Pin Change for D+
-#define USB_INTR_CFG            PCMSK
-#define USB_INTR_CFG_SET        (1 << USB_CFG_DPLUS_BIT)
+#define USB_INTR_CFG            PCMSK // Pin interrupt enable register
+#define USB_INTR_CFG_SET        (1 << USB_CFG_DPLUS_BIT) // mask for pin in pin interrupt enable register
 #define USB_INTR_CFG_CLR        0
-#define USB_INTR_ENABLE         GIMSK
-#define USB_INTR_ENABLE_BIT     PCIE
-#define USB_INTR_PENDING        GIFR
-#define USB_INTR_PENDING_BIT    PCIF
+#define USB_INTR_ENABLE         GIMSK // Global interrupt enable register
+#define USB_INTR_ENABLE_BIT     PCIE  // Bit position in global interrupt enable register
+#define USB_INTR_PENDING        GIFR  // Register to read interrupt flag
+#define USB_INTR_PENDING_BIT    PCIF  // Bit position in register to read interrupt flag
 
 /* ------------------------------------------------------------------------- */
 /*       Configuration relevant to the CPU the bootloader is running on      */
 /* ------------------------------------------------------------------------- */
 
 // how many milliseconds should host wait till it sends another erase or write?
-// needs to be above 4.5 (and a whole integer) as avr freezes for 4.5ms
+// needs to be above 4.5 (and a whole integer) as avr freezes maximum for 4.5ms
+// while writing a FLASH page (even for 128 byte page size:-))
 #define MICRONUCLEUS_WRITE_SLEEP 5
 
 
@@ -92,7 +112,7 @@
  *                      you must clear them with "MCUSR = 0;" in your setup() routine
  *                      after saving or evaluating them to make this mode work.
  *                      If you do not reset the flags, the bootloader will be entered even
- *                      after reset, since the power on reset flag in MCUSR is still set.
+ *                      after reset, since the "power on reset flag" PORF in MCUSR is still set.
  *                      Adds 18 bytes.
  *
  *  ENTRY_WATCHDOG      Activate the bootloader after a watchdog reset. This can be used
@@ -103,7 +123,7 @@
  *                      pulling the reset pin low. It may be necessary to add an external
  *                      pull-up resistor to the reset pin if this entry method appears to
  *                      behave unreliably.
- *                      Adds 22 bytes.
+ *                      Adds 24 bytes.
  *
  *  ENTRY_JUMPER        Activate the bootloader when a specific pin is pulled low by an
  *                      external jumper.
@@ -112,9 +132,16 @@
  *       JUMPER_PIN     Pin the jumper is connected to. (e.g. PB0)
  *       JUMPER_PORT    Port out register for the jumper (e.g. PORTB)
  *       JUMPER_DDR     Port data direction register for the jumper (e.g. DDRB)
- *       JUMPER_INP     Port inout register for the jumper (e.g. PINB)
+ *       JUMPER_INP     Port input register for the jumper (e.g. PINB)
  *
  */
+
+// Internal implementation, don't change this unless you want to add an entry mode.
+#define ENTRY_ALWAYS    1
+#define ENTRY_WATCHDOG  2
+#define ENTRY_EXT_RESET 3
+#define ENTRY_JUMPER    4
+#define ENTRY_POWER_ON  5
 
 #define ENTRYMODE ENTRY_ALWAYS
 
@@ -122,16 +149,6 @@
 #define JUMPER_PORT   PORTB
 #define JUMPER_DDR    DDRB
 #define JUMPER_INP    PINB
-
-/*
-  Internal implementation, don't change this unless you want to add an entrymode.
-*/
-
-#define ENTRY_ALWAYS    1
-#define ENTRY_WATCHDOG  2
-#define ENTRY_EXT_RESET 3
-#define ENTRY_JUMPER    4
-#define ENTRY_POWER_ON  5
 
 #if ENTRYMODE==ENTRY_ALWAYS
   #define bootLoaderInit()
@@ -200,7 +217,7 @@
  /*
  *  Defines the setting of the RC-oscillator calibration after quitting the bootloader. (OSCCAL)
  *
- *  OSCCAL_RESTORE_DEFAULT    Set this to '1' to revert to OSCCAL factore calibration after bootlaoder exit.
+ *  OSCCAL_RESTORE_DEFAULT    Set this to '1' to revert to OSCCAL factory calibration after bootlaoder exit.
  *                            This is 8 MHz +/-2% on most devices or 16 MHz on the ATtiny 85 with activated PLL.
  *                            Adds ~14 bytes.
  *
@@ -257,7 +274,7 @@
  *  LED_EXIT                  Called once during bootloader exit
  *  LED_MACRO                 Called in the main loop with the idle counter as parameter.
  *                            Use to define pattern.
-*/
+ */
 
 #if LED_MODE==ACTIVE_HIGH
   #define LED_INIT(x)   LED_DDR   |= _BV(LED_PIN);
@@ -272,21 +289,5 @@
   #define LED_EXIT(x)
   #define LED_MACRO(x)
 #endif
-
-/* --------------------------------------------------------------------------- */
-/* Micronucleus internal configuration. Do not change anything below this line */
-/* --------------------------------------------------------------------------- */
-
-// Microcontroller vectortable entries in the flash
-#define RESET_VECTOR_OFFSET         0
-
-// number of bytes before the boot loader vectors to store the tiny application vector table
-#define TINYVECTOR_RESET_OFFSET     4
-#define TINYVECTOR_OSCCAL_OFFSET    6
-
-/* ------------------------------------------------------------------------ */
-// postscript are the few bytes at the end of programmable memory which store tinyVectors
-#define POSTSCRIPT_SIZE 6
-#define PROGMEM_SIZE (BOOTLOADER_ADDRESS - POSTSCRIPT_SIZE) /* max size of user program */
 
 #endif /* __bootloader_h_included__ */

@@ -28,6 +28,8 @@
 #define MICRONUCLEUS_VERSION_MAJOR 2
 #define MICRONUCLEUS_VERSION_MINOR 5
 
+#define RECONNECT_DELAY_MILLIS 300 // Time between disconnect and connect. Even 250 is to fast!
+
 #include <avr/io.h>
 #include <avr/pgmspace.h>
 #include <avr/wdt.h>
@@ -293,7 +295,7 @@ static void inactivateWatchdog(void) {
  */
 static void reconnectAndInitUSB(void) {
     usbDeviceDisconnect(); // Disable pullup resistor by pull down D-
-    _delay_ms(300); // Even 250 is to fast!
+    _delay_ms(RECONNECT_DELAY_MILLIS); // Even 250 is to fast!
     usbDeviceConnect(); // Enable pullup resistor by changing D- to input
 
     usbInit();    // Initialize interrupt settings after reconnect but let the global interrupt be disabled
@@ -554,9 +556,9 @@ int main(void) {
         LED_EXIT();
 
 #ifdef USB_CFG_PULLUP_IOPORTNAME
-        usbDeviceDisconnect(); // if using initUSBHardwareAndReconnect() instead, the pullup resistor port will still be active powering the pullup after disconnecting micronucleus.
+        usbDeviceDisconnect(); // Changing USB_PULLUP_OUT to input() to avoid to drive the pullup resistor, and set level to low.
 #else
-        reconnectAndInitUSB(); // Disconnect micronucleus - Set the D- to output and after 300ms to input again.
+        usbDeviceConnect(); // Changing D- to input().
 #endif
 
         /*

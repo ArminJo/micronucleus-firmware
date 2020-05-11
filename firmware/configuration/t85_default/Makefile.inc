@@ -6,7 +6,7 @@
 # Configuration:   Default
 # Last Change:     4/2020
 
-#CFLAGS += -DENABLE_SAFE_OPTIMIZATIONS  # This disables reliable jump to 0x0000, which one should avoid anyway.
+#CFLAGS += -DENABLE_SAFE_OPTIMIZATIONS  # This saves 10 bytes and disables reliable jump to 0x0000, which one should avoid anyway.
 
 F_CPU = 16500000
 DEVICE = attiny85
@@ -15,8 +15,7 @@ DEVICE = attiny85
 # - make clean; make main.hex; ### output will list data: 1592 (or something like that)
 # - for the size of your device (8kb = 1024 * 8 = 8192) subtract above value = 6598
 # - How many pages in is that? 6598 / 64 (tiny85 page size in bytes) = 103.09377
-# - round that down to 103
-# - our new bootloader address is 103 * 64 = 6592, in hex = 19C0
+# - round that down to 103 - our new bootloader address is 103 * 64 = 6592, in hex = 19C0
 # - For data size up to 1600 the address is 19C0 for size from 1601 to 1664 the address is 1980
 BOOTLOADER_ADDRESS = 19C0
 

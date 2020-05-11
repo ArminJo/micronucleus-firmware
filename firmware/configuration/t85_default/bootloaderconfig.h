@@ -47,11 +47,24 @@
  * not need to modify this setting.
  */
 
+/* ----------------------- Optional Hardware Config ------------------------ */
+
+//#define USB_CFG_PULLUP_IOPORTNAME   B
+/* If you connect the 1.5k pullup resistor from D- to a port pin instead of
+ * V+, you can connect and disconnect the device from firmware by calling
+ * the macros usbDeviceConnect() and usbDeviceDisconnect() (see usbdrv.h).
+ * This constant defines the port on which the pullup resistor is connected.
+ */
+//#define USB_CFG_PULLUP_BIT          0
+/* This constant defines the bit number in USB_CFG_PULLUP_IOPORT (defined
+ * above) where the 1.5k pullup resistor is connected. See description
+ * above for details.
+ */
+
 /* ------------- Set up interrupt configuration (CPU specific) --------------   */
 /* The register names change quite a bit in the ATtiny family. Pay attention    */
 /* to the manual. Note that the interrupt flag system is still used even though */
 /* interrupts are disabled. So this has to be configured correctly.             */
-
 
 // setup interrupt for Pin Change for D+
 #define USB_INTR_CFG            PCMSK // Pin interrupt enable register
@@ -255,7 +268,7 @@
  *  LED_EXIT                  Called once during bootloader exit
  *  LED_MACRO                 Called in the main loop with the idle counter as parameter.
  *                            Use to define pattern.
-*/
+ */
 
 #if LED_MODE==ACTIVE_HIGH
   #define LED_INIT(x)   LED_DDR   |= _BV(LED_PIN);

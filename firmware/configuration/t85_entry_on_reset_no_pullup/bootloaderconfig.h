@@ -4,7 +4,7 @@
  * according to the hardware.
  *
  * Controller type: ATtiny 85 - 16.5 MHz
- * Configuration:   Default configuration + START_WITHOUT_PULLUP
+ * Configuration:   Default configuration + ENTRY_EXT_RESET + START_WITHOUT_PULLUP
  *       USB D- :   PB3
  *       USB D+ :   PB4
  *       Entry  :   Always
@@ -47,6 +47,25 @@
  * not need to modify this setting.
  */
 
+/* ----------------------- Optional Hardware Config ------------------------ */
+
+//#define USB_CFG_PULLUP_IOPORTNAME   B
+/* If you connect the 1.5k pullup resistor from D- to a port pin instead of
+ * V+, you can connect and disconnect the device from firmware by calling
+ * the macros usbDeviceConnect() and usbDeviceDisconnect() (see usbdrv.h).
+ * This constant defines the port on which the pullup resistor is connected.
+ */
+//#define USB_CFG_PULLUP_BIT          0
+/* This constant defines the bit number in USB_CFG_PULLUP_IOPORT (defined
+ * above) where the 1.5k pullup resistor is connected. See description
+ * above for details.
+ */
+
+/* ------------- Set up interrupt configuration (CPU specific) --------------   */
+/* The register names change quite a bit in the ATtiny family. Pay attention    */
+/* to the manual. Note that the interrupt flag system is still used even though */
+/* interrupts are disabled. So this has to be configured correctly.             */
+
 /* ------------- Set up interrupt configuration (CPU specific) --------------   */
 /* The register names change quite a bit in the ATtiny family. Pay attention    */
 /* to the manual. Note that the interrupt flag system is still used even though */
@@ -54,20 +73,21 @@
 
 
 // setup interrupt for Pin Change for D+
-#define USB_INTR_CFG            PCMSK
-#define USB_INTR_CFG_SET        (1 << USB_CFG_DPLUS_BIT)
+#define USB_INTR_CFG            PCMSK // Pin interrupt enable register
+#define USB_INTR_CFG_SET        (1 << USB_CFG_DPLUS_BIT) // mask for pin in pin interrupt enable register
 #define USB_INTR_CFG_CLR        0
-#define USB_INTR_ENABLE         GIMSK
-#define USB_INTR_ENABLE_BIT     PCIE
-#define USB_INTR_PENDING        GIFR
-#define USB_INTR_PENDING_BIT    PCIF
+#define USB_INTR_ENABLE         GIMSK // Global interrupt enable register
+#define USB_INTR_ENABLE_BIT     PCIE  // Bit position in global interrupt enable register
+#define USB_INTR_PENDING        GIFR  // Register to read interrupt flag
+#define USB_INTR_PENDING_BIT    PCIF  // Bit position in register to read interrupt flag
 
 /* ------------------------------------------------------------------------- */
 /*       Configuration relevant to the CPU the bootloader is running on      */
 /* ------------------------------------------------------------------------- */
 
 // how many milliseconds should host wait till it sends another erase or write?
-// needs to be above 4.5 (and a whole integer) as avr freezes for 4.5ms
+// needs to be above 4.5 (and a whole integer) as avr freezes maximum for 4.5ms
+// while writing a FLASH page (even for 128 byte page size:-))
 #define MICRONUCLEUS_WRITE_SLEEP 5
 
 
@@ -92,7 +112,7 @@
  *                      you must clear them with "MCUSR = 0;" in your setup() routine
  *                      after saving or evaluating them to make this mode work.
  *                      If you do not reset the flags, the bootloader will be entered even
- *                      after reset, since the power on reset flag in MCUSR is still set.
+ *                      after reset, since the "power on reset flag" PORF in MCUSR is still set.
  *                      Adds 18 bytes.
  *
  *  ENTRY_WATCHDOG      Activate the bootloader after a watchdog reset. This can be used
@@ -112,27 +132,23 @@
  *       JUMPER_PIN     Pin the jumper is connected to. (e.g. PB0)
  *       JUMPER_PORT    Port out register for the jumper (e.g. PORTB)
  *       JUMPER_DDR     Port data direction register for the jumper (e.g. DDRB)
- *       JUMPER_INP     Port inout register for the jumper (e.g. PINB)
+ *       JUMPER_INP     Port input register for the jumper (e.g. PINB)
  *
  */
 
-//#define ENTRYMODE ENTRY_ALWAYS
+// Internal implementation, don't change this unless you want to add an entry mode.
+#define ENTRY_ALWAYS    1
+#define ENTRY_WATCHDOG  2
+#define ENTRY_EXT_RESET 3
+#define ENTRY_JUMPER    4
+#define ENTRY_POWER_ON  5
+
 #define ENTRYMODE ENTRY_EXT_RESET
 
 #define JUMPER_PIN    PB0
 #define JUMPER_PORT   PORTB
 #define JUMPER_DDR    DDRB
 #define JUMPER_INP    PINB
-
-/*
-  Internal implementation, don't change this unless you want to add an entrymode.
-*/
-
-#define ENTRY_ALWAYS    1
-#define ENTRY_WATCHDOG  2
-#define ENTRY_EXT_RESET 3
-#define ENTRY_JUMPER    4
-#define ENTRY_POWER_ON  5
 
 #if ENTRYMODE==ENTRY_ALWAYS
   #define bootLoaderInit()
@@ -165,33 +181,43 @@
    #error "No entry mode defined"
 #endif
 
-
 /*
  * Define bootloader timeout value.
  *
  *  The bootloader will only time out if a user program was loaded.
  *
- *  AUTO_EXIT_NO_USB_MS        The bootloader will exit after this delay if no USB is connected.
- *                             Set to 0 to disable
- *                             Adds ~6 bytes.
- *                             (This will wait for an USB SE0 reset from the host)
+ *  AUTO_EXIT_NO_USB_MS        The bootloader will exit after this delay if no USB is connected after the initial 300 ms disconnect and connect.
+ *                             Set to < 120 to disable.
+ *                             Adds 8 bytes.
+ *                             (This will wait for AUTO_EXIT_NO_USB_MS milliseconds for an USB SE0 reset from the host, otherwise exit)
  *
- *  AUTO_EXIT_MS               The bootloader will exit after this delay if no USB communication
- *                             from the host tool was received.
+ *  AUTO_EXIT_MS               The bootloader will exit after this delay if no USB communication from the host tool was received.
  *                             Set to 0 to disable
  *
  *  All values are approx. in milliseconds
  */
 
-#define AUTO_EXIT_NO_USB_MS    0
+// I observed 2 resets. First is 100 ms after initial connecting to USB lasting 65 ms and the second 90 ms later and also 65 ms.
+// On my old HP laptop I have different timing: First reset is 220 ms after initial connecting to USB lasting 300 ms and the second is missing.
+#define AUTO_EXIT_NO_USB_MS       0 // Values below 120 are ignored. Effective timeout is 300 + AUTO_EXIT_NO_USB_MS.
 #define AUTO_EXIT_MS           6000
 
 /* ----------------------- Optional Timeout Config ------------------------ */
 
+#define START_WITHOUT_PULLUP
+/* If you do not have the 1.5k pullup resistor connected directly from D- to ATtiny VCC
+ * to save power for battery operated applications, you must insert a diode
+ * between USB V+ and ATiny VCC and connect the resistor directly to USB V+.
+ * If not connected to USB we then have an endless USB reset condition,
+ * which must be handled separately by commenting out the define.
+ * This handling adds 14 to 16 bytes to the code size.
+ * This handling also works well with standard / unmodified pullup connection :-).
+ */
+
  /*
  *  Defines the setting of the RC-oscillator calibration after quitting the bootloader. (OSCCAL)
  *
- *  OSCCAL_RESTORE_DEFAULT    Set this to '1' to revert to OSCCAL factore calibration after bootlaoder exit.
+ *  OSCCAL_RESTORE_DEFAULT    Set this to '1' to revert to OSCCAL factory calibration after bootlaoder exit.
  *                            This is 8 MHz +/-2% on most devices or 16 MHz on the ATtiny 85 with activated PLL.
  *                            Adds ~14 bytes.
  *
@@ -217,19 +243,6 @@
 #define OSCCAL_SAVE_CALIB 1
 #define OSCCAL_HAVE_XTAL 0
 
-#if OSCCAL_HAVE_XTAL == 0
-// only needed for ATtinies without external crystal oscillator.
-#define START_WITHOUT_PULLUP
-/* If you do not have the 1.5k pullup resistor connected directly from D- to ATtiny VCC
- * to save power for battery operated applications, you must insert a diode
- * between USB V+ and ATiny VCC and connect the resistor directly to USB V+.
- * If not connected to USB we then have an endless USB reset condition,
- * which must be handled separately by commenting out the define.
- * This handling adds 14 to 16 bytes to the code size.
- * This handling also works well with standard / unmodified pullup connection :-).
- */
-#endif
-
 /*
  *  Defines handling of an indicator LED while the bootloader is active.
  *
@@ -242,6 +255,10 @@
  *  LED_DDR,LED_PORT,LED_PIN  Where is your LED connected?
  *
  */
+
+#define NONE        0
+#define ACTIVE_HIGH 1
+#define ACTIVE_LOW  2
 
 #define LED_MODE    NONE
 
@@ -257,11 +274,7 @@
  *  LED_EXIT                  Called once during bootloader exit
  *  LED_MACRO                 Called in the main loop with the idle counter as parameter.
  *                            Use to define pattern.
-*/
-
-#define NONE        0
-#define ACTIVE_HIGH 1
-#define ACTIVE_LOW  2
+ */
 
 #if LED_MODE==ACTIVE_HIGH
   #define LED_INIT(x)   LED_DDR   |= _BV(LED_PIN);
@@ -276,21 +289,5 @@
   #define LED_EXIT(x)
   #define LED_MACRO(x)
 #endif
-
-/* --------------------------------------------------------------------------- */
-/* Micronucleus internal configuration. Do not change anything below this line */
-/* --------------------------------------------------------------------------- */
-
-// Microcontroller vectortable entries in the flash
-#define RESET_VECTOR_OFFSET         0
-
-// number of bytes before the boot loader vectors to store the tiny application vector table
-#define TINYVECTOR_RESET_OFFSET     4
-#define TINYVECTOR_OSCCAL_OFFSET    6
-
-/* ------------------------------------------------------------------------ */
-// postscript are the few bytes at the end of programmable memory which store tinyVectors
-#define POSTSCRIPT_SIZE 6
-#define PROGMEM_SIZE (BOOTLOADER_ADDRESS - POSTSCRIPT_SIZE) /* max size of user program */
 
 #endif /* __bootloader_h_included__ */

@@ -16,7 +16,7 @@
 #     We only want one interrupt to be enabled, so keeping the other bits makes no sense.
 
 # Not needed, since we are not over the page boundary
-#CFLAGS += -DENABLE_SAFE_OPTIMIZATIONS  # This disables reliable jump to 0x0000, which one should avoid anyway.
+#CFLAGS += -DENABLE_SAFE_OPTIMIZATIONS  # This saves 10 bytes and disables reliable jump to 0x0000, which one should avoid anyway.
 
 F_CPU = 16500000
 DEVICE = attiny85

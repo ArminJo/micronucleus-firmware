@@ -97,8 +97,8 @@ __init:
 	clr		R1
 
 #if ! defined(ENABLE_UNSAFE_OPTIMIZATIONS) && ! defined(ENABLE_SAFE_OPTIMIZATIONS)
-	out		0x3f,r1 // reset status register especially the interrupt enable bit, but the interrupt enable bit is always in a disable state after reset!
-// set stackpointer. Datasheet says: Initial Value RAMEND
+	out		0x3f,r1 // 2 bytes - reset status register especially the interrupt enable bit, but the interrupt enable bit is always in a disable state after reset!
+// set stackpointer. Datasheet says: Initial Value RAMEND, 8 bytes
 	ldi		r28,lo8(__stack)
 	ldi		r29,hi8(__stack)
 	out		0x3d, r28

@@ -46,12 +46,32 @@ For *t167_default.hex* (as well as for the other t167 configurations) with the n
 - V1.11 6330 bytes free
 - V2.3  6522 bytes free
 - V2.04 6522 bytes free
-- V2.5  **6586** bytes free, **1600** bytes used for
-  - t85_default
-  - t85_entry_on_power_on
-  - t85_fast_exit_on_no_USB
-  - t85_pullup_at_0
-   **6522** bytes free, **1664** bytes used for all other t85 configurations
+- V2.5  **6586** bytes free
+
+| Configuration | Available FLASH | Bootloader size | Non default config flags set |
+|---------------|-----------------|-----------------|------------------------------|
+| t85_default | 6586 | 1584 | - |
+| t85_entry_on_power_on | 6586 | 1592 | ENTRY_POWER_ON, ENABLE_SAFE_OPTIMIZATIONS |
+| t85_fast_exit_on_no_USB | 6586 | 1592 | AUTO_EXIT_NO_USB_MS=300, ENABLE_SAFE_OPTIMIZATIONS |
+| t85_entry_on_power_on_pullup_at_0 | 6586 | 1598 | ENTRY_POWER_ON, USB_CFG_PULLUP_IOPORTNAME + USB_CFG_PULLUP_BIT, ENABLE_SAFE_OPTIMIZATIONS |
+|  |  |  |  |
+| t85_entry_on_power_on_no_pullup | 6522 | 1616 | ENTRY_POWER_ON, START_WITHOUT_PULLUP |
+| t85_entry_on_power_on_no_pullup_fast_exit_on_no_USB | 6522 | 1624 | ENTRY_POWER_ON, START_WITHOUT_PULLUP, AUTO_EXIT_NO_USB_MS=300 |
+| t85_entry_on_reset_no_pullup | 6522 | 1622 | ENTRY_EXT_RESET, START_WITHOUT_PULLUP |
+| t85_aggressive | 6714 | 1414 | OSCCAL_SAVE_CALIB=0, ENABLE_UNSAFE_OPTIMIZATIONS |
+|  |  |  |  |
+| t167_default | 14842 | 1410 | - |
+| t167_entry_on_power_on_no_pullup | 14842 | 1428 |  |
+| t167_entry_on_power_on_no_pullup_fast_exit_on_no_USB | 14842 | 1436 | ENTRY_POWER_ON, START_WITHOUT_PULLUP, AUTO_EXIT_NO_USB_MS=300, LED_MODE=ACTIVE_HIGH |
+| t167_entry_on_reset_no_pullup | 14842 | 1436 | ENTRY_EXT_RESET, START_WITHOUT_PULLUP |
+|  |  |  |  |
+| Nanite841 |  | 1608 |  |
+| BitBoss |  | 1606 |  |
+| t84_default |  | 1534 |  |
+|  |  |  |  |
+| m168p_extclock |  | 1438 |  |
+| m328p_extclock |  | 1438 |  |
+
 
 # New features
 ## MCUSR content now available at sketch
@@ -59,7 +79,7 @@ In this versions the reset flags in the MCUSR register are no longer cleared by 
 If you use the flags in your program or use the `ENTRY_POWER_ON` boot mode, **you must clear them** with `MCUSR = 0;` **after** saving or evaluating them. If you do not reset the flags, and use the `ENTRY_POWER_ON` mode of the bootloader, the bootloader will be entered even after a reset, since the power on reset flag in MCUSR is still set!<br/>
 For `ENTRY_EXT_RESET` configuration see *Fixed wrong ENTRY_EXT_RESET* below.
 
-## Implemented [`ENABLE_SAFE_OPTIMIZATIONS`](https://github.com/ArminJo/micronucleus-firmware/tree/master/firmware/crt1.S#L99) configuration to save 12 bytes.
+## Implemented [`ENABLE_SAFE_OPTIMIZATIONS`](https://github.com/ArminJo/micronucleus-firmware/tree/master/firmware/crt1.S#L99) configuration to save 10 bytes.
 This configuration is specified in the [Makefile.inc](https://github.com/ArminJo/micronucleus-firmware/tree/master/firmware/configuration/t85_fast_exit_on_no_USB/Makefile.inc#L18) file and will disable several unnecesary instructions in microncleus. These optimizations disables reliable entering the bootloader with jmp 0000, which you should not do anyway - better use the watchdog timer reset functionality.<br/>
 This is enabled for [t85_entry_on_power_on](https://github.com/ArminJo/micronucleus-firmware/tree/master/firmware/configuration/t85_entry_on_power_on), [t85_fast_exit_on_no_USB](https://github.com/ArminJo/micronucleus-firmware/tree/master/firmware/configuration/t85_fast_exit_on_no_USB) and [t85_pullup_at_0](https://github.com/ArminJo/micronucleus-firmware/tree/master/firmware/configuration/t85_pullup_at_0). It brings no benefit for other configurations.
 

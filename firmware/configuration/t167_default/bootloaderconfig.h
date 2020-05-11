@@ -1,4 +1,4 @@
- /* Name: bootloaderconfig.h
+/* Name: bootloaderconfig.h
  * Micronucleus configuration file.
  * This file (together with some settings in Makefile.inc) configures the boot loader
  * according to the hardware.
@@ -131,18 +131,14 @@
  *
  */
 
-//#define ENTRYMODE ENTRY_ALWAYS
-#define ENTRYMODE ENTRY_POWER_ON
+#define ENTRYMODE ENTRY_ALWAYS
 
 #define JUMPER_PIN    PB0
 #define JUMPER_PORT   PORTB
 #define JUMPER_DDR    DDRB
 #define JUMPER_INP    PINB
 
-/*
-  Internal implementation, don't change this unless you want to add an entrymode.
-*/
-
+//Internal implementation, don't change this unless you want to add an entrymode.
 #define ENTRY_ALWAYS    1
 #define ENTRY_WATCHDOG  2
 #define ENTRY_EXT_RESET 3
