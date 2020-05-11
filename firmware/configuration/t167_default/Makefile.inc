@@ -12,11 +12,11 @@ DEVICE = attiny167
 AVR_ARCHITECTURE_PARAMETER = --binary-architecture avr:35
 
 # hexadecimal address for bootloader section to begin. To calculate the best value:
-# - make clean; make main.hex; ### output will list data: 1410 (or something like that)
-# - for the size of your device (16kb = 1024 * 16 = 16384) subtract above value 1410 = 14974
-# - How many pages in is that? 14974 / 128 (tiny167 page size in bytes) = 116.984
-# - round that down to 116 - our new bootloader address is 116 * 128 = 14848, in hex 3A00
-# - For data size up to 1408 the address is 3980 for size from 1409 to 1536 the address is 3A00
+# - make clean; make main.hex; ### output will list data: 1390 (or something like that)
+# - for the size of your device (16kb = 1024 * 16 = 16384) subtract above value = 14994
+# - How many pages in is that? 14994 / 128 (tiny167 page size in bytes) = 117.140
+# - round that down to 117 - our new bootloader address is 117 * 128 = 14976, in hex 3A80
+# - For data size up to 1408 the address is 3A80 for size from 1409 to 1536 the address is 3A00
 BOOTLOADER_ADDRESS = 3A00
 
 FUSEOPT = # TODO
