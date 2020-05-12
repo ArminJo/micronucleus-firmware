@@ -20,30 +20,16 @@ For Windows you must install the **Digispark driver** before you can program the
 # Installation of a better optimizing compiler configuration
 **The new Digistmp AVR version 1.6.8 shrinks generated code size by 5 to 15 percent**. Just replace the old Digispark board URL **http://digistump.com/package_digistump_index.json** (e.g.in Arduino *File/Preferences*) by the new  **https://raw.githubusercontent.com/ArminJo/DigistumpArduino/master/package_digistump_index.json** and install the **Digistump AVR Boards** version **1.6.8**.<br/>
 ![Boards Manager](https://github.com/ArminJo/DigistumpArduino/blob/master/pictures/Digistump1.6.8.jpg)<br/>
-If you use the configurations:
-- t85_default
-- t85_entry_on_power_on
-- t85_fast_exit_on_no_USB
-- t85_pullup_at_0
-you can change the lines `.upload.maximum_size=6522` to `.upload.maximum_size=6586` in %localappdata%\Arduino15\packages\digistump\hardware\avr\1.6.8\boards.txt to **enable the additonal 64 bytes** of these configurations. 
 
 # Configuration overview is [here](firmware/configuration#configuration-overview)
 
-# Memory footprint of the new firmware
-The actual memory footprint for each configuration can be found in the file [*firmware/build.log*](firmware/build.log).<br/>
-Bytes used by the mironucleus bootloader can be computed by taking the data size value in *build.log*, 
-and rounding it up to the next multiple of the page size which is e.g. 64 bytes for ATtiny85 and 128 bytes for ATtiny176.<br/>
-Subtracting this (+ 6 byte for postscript) from the total amount of memory will result in the free bytes numbers.
-- Postscript are the few bytes at the end of programmable memory which store tinyVectors.
+# New features
+## MCUSR content now available in sketch
+In this versions the reset flags in the MCUSR register are no longer cleared by micronucleus and can therefore read out by the sketch!<br/>
+If you use the flags in your program or use the `ENTRY_POWER_ON` boot mode, **you must clear them** with `MCUSR = 0;` **after** saving or evaluating them. If you do not reset the flags, and use the `ENTRY_POWER_ON` mode of the bootloader, the bootloader will be entered even after a reset, since the power on reset flag in MCUSR is still set!<br/>
+For `ENTRY_EXT_RESET` configuration see *Fixed wrong ENTRY_EXT_RESET* below.
 
-E.g. for *t85_default.hex* with the new compiler we get 1592 as data size. The next multiple of 64 is 1600 (25 * 64) => (8192 - (1600 + 6)) = **6586 bytes are free**.<br/>
-In this case we have 8 bytes left for configuration extensions before using another 64 byte page.
-So the `START_WITHOUT_PULLUP` and `ENTRY_POWER_ON` configurations are reducing the free bytes amount by 64 to 6522.<br/><br/>
-![Upload log](https://github.com/ArminJo/DigistumpArduino/blob/master/pictures/Bootloader2.5.jpg)
-
-For *t167_default.hex* (as well as for the other t167 configurations) with the new compiler we get 1436 as data size. The next multiple of 128 is 1536 (12 * 128) => (16384 - (1536 + 6)) = 14842 bytes are free.<br/>
-
-## Bootloader memory comparison of different releases for [*t85_default.hex*](firmware/releases/t85_default.hex).
+# Bootloader memory comparison of different releases for [*t85_default.hex*](firmware/releases/t85_default.hex).
 - V1.6  6012 bytes free
 - V1.11 6330 bytes free
 - V2.3  6522 bytes free
@@ -99,6 +85,9 @@ The value of the USB pullup resistor on a genuine Digispark Micro-USB is 1 kOhm 
 
 # Revision History
 ### Version 2.5
+- Saved 22 bytes by converting USB_INTR_VECTOR in *usbdrvasm165.inc* from ISR with pushes to a plain function.
+- Saved 2 bytes by improving small version of usbCrc16 in *usbdrvasm.S*.
+- Saved 4 bytes by inlining usbCrc16 in *usbdrvasm.S*.
 - Renamed `AUTO_EXIT_NO_USB_MS` to `FAST_EXIT_NO_USB_MS` and implemented it.
 - New configurations using `FAST_EXIT_NO_USB_MS` set to 300 ms.
 - Light refactoring and added documentation.
@@ -112,8 +101,3 @@ The value of the USB pullup resistor on a genuine Digispark Micro-USB is 1 kOhm 
 - no_pullup targets for low energy applications forever loop fixed.
 - `USB_CFG_PULLUP_IOPORTNAME` disconnect bug fixed.
 - New `ENTRY_POWER_ON` configuration switch, which enables the program to start immediately after a reset.
-
-## Requests for modifications / extensions
-Please write me a PM including your motivation/problem if you need a modification or an extension.
-
-#### If you find this library useful, please give it a star. 

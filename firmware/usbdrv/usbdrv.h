@@ -323,8 +323,8 @@ USB_PUBLIC void usbFunctionWriteOut(uchar *data, uchar len);
 #define usbDeviceDisconnect()   ((USB_PULLUP_DDR &= ~(1<<USB_CFG_PULLUP_BIT)), \
                                   (USB_PULLUP_OUT &= ~(1<<USB_CFG_PULLUP_BIT)))
 #else /* USB_CFG_PULLUP_IOPORTNAME */
-#define usbDeviceConnect()      (USBDDR &= ~(1<<USBMINUS))
-#define usbDeviceDisconnect()   (USBDDR |= (1<<USBMINUS))
+#define usbDeviceConnect()      (USBDDR &= ~(1<<USBMINUS)) // Set to input
+#define usbDeviceDisconnect()   (USBDDR |= (1<<USBMINUS))  // Set to output
 #endif /* USB_CFG_PULLUP_IOPORTNAME */
 /* The macros usbDeviceConnect() and usbDeviceDisconnect() (intended to look
  * like a function) connect resp. disconnect the device from the host's USB.
@@ -338,6 +338,7 @@ USB_PUBLIC void usbFunctionWriteOut(uchar *data, uchar len);
  *     USB_INTR_ENABLE &= ~(1 << USB_INTR_ENABLE_BIT)
  * or use cli() to disable interrupts globally.
  */
+#if defined(USB_CRC_16_REQUIRED)
 extern unsigned usbCrc16(unsigned data, uchar len);
 #define usbCrc16(data, len) usbCrc16((unsigned)(data), len)
 /* This function calculates the binary complement of the data CRC used in
@@ -346,6 +347,7 @@ extern unsigned usbCrc16(unsigned data, uchar len);
  * data. We enforce 16 bit calling conventions for compatibility with IAR's
  * tiny memory model.
  */
+#endif
 extern unsigned usbCrc16Append(unsigned data, uchar len);
 #define usbCrc16Append(data, len)    usbCrc16Append((unsigned)(data), len)
 /* This function is equivalent to usbCrc16() above, except that it appends

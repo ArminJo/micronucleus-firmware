@@ -114,6 +114,13 @@
 /* #define USB_RX_USER_HOOK(data, len)     if(usbRxToken == (uchar)USBPID_SETUP) blinkLED(); */
 
 // Check CRC of all received data
+
+//#define USB_CRC_16_REQUIRED
+/*
+ * If no CRC16 is required (default) we extend the usbCrc16() function to be the usbCrc16Append() function
+ * This saves one call and one return. Gains 4 bytes.
+ */
+
 /*
 #define USB_RX_USER_HOOK( data, len ) { \
 if ( usbCrc16( data, len + 2 ) != 0x4FFE )\

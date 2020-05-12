@@ -144,8 +144,8 @@
   #define bootLoaderStartCondition() (MCUSR&_BV(EXTRF))
 #elif ENTRYMODE==ENTRY_JUMPER
   // Enable pull up on jumper pin and delay to stabilize input
-  #define bootLoaderInit()   {JUMPER_DDR&=~_BV(JUMPER_PIN);JUMPER_PORT|=_BV(JUMPER_PIN);_delay_ms(1);}
-  #define bootLoaderExit()   {JUMPER_PORT&=~_BV(JUMPER_PIN);}
+  #define bootLoaderInit()   {JUMPER_DDR &= ~_BV(JUMPER_PIN);JUMPER_PORT |= _BV(JUMPER_PIN);_delay_ms(1);}
+  #define bootLoaderExit()   {JUMPER_PORT &= ~_BV(JUMPER_PIN);}
   #define bootLoaderStartCondition() (!(JUMPER_INP&_BV(JUMPER_PIN)))
 #else
    #error "No entry mode defined"
@@ -234,13 +234,13 @@
 #define ACTIVE_LOW  2
 
 #if LED_MODE==ACTIVE_HIGH
-  #define LED_INIT(x)   LED_DDR   |= _BV(LED_PIN);
-  #define LED_EXIT(x)   {LED_DDR  &=~_BV(LED_PIN);LED_PORT  &=~_BV(LED_PIN);}
-  #define LED_MACRO(x)  if ( x & 0x4c ) {LED_PORT&=~_BV(LED_PIN);} else {LED_PORT|=_BV(LED_PIN);}
+  #define LED_INIT(x)   LED_DDR |= _BV(LED_PIN);
+  #define LED_EXIT(x)   {LED_DDR &= ~_BV(LED_PIN);LED_PORT &= ~_BV(LED_PIN);}
+  #define LED_MACRO(x)  if ( x & 0x4c ) {LED_PORT &= ~_BV(LED_PIN);} else {LED_PORT |= _BV(LED_PIN);}
 #elif LED_MODE==ACTIVE_LOW
-  #define LED_INIT(x)   LED_PORT &=~_BV(LED_PIN);
-  #define LED_EXIT(x)   LED_DDR  &=~_BV(LED_PIN);
-  #define LED_MACRO(x)  if ( x & 0x4c ) {LED_DDR&=~_BV(LED_PIN);} else {LED_DDR|=_BV(LED_PIN);}
+  #define LED_INIT(x)   LED_PORT &= ~_BV(LED_PIN);
+  #define LED_EXIT(x)   LED_DDR &= ~_BV(LED_PIN);
+  #define LED_MACRO(x)  if ( x & 0x4c ) {LED_DDR &= ~_BV(LED_PIN);} else {LED_DDR |= _BV(LED_PIN);}
 #elif LED_MODE==NONE
   #define LED_INIT(x)
   #define LED_EXIT(x)

@@ -4,7 +4,7 @@
  * according to the hardware.
  *
  * Controller type: ATtiny 85 - 16.5 MHz
- * Configuration:   Default configuration
+ * Configuration:   Default configuration + ENTRY_POWER_ON + START_WITHOUT_PULLUP + FAST_EXIT_NO_USB_MS=300
  *       USB D- :   PB3
  *       USB D+ :   PB4
  *       Entry  :   Always
@@ -65,6 +65,12 @@
 /* The register names change quite a bit in the ATtiny family. Pay attention    */
 /* to the manual. Note that the interrupt flag system is still used even though */
 /* interrupts are disabled. So this has to be configured correctly.             */
+
+/* ------------- Set up interrupt configuration (CPU specific) --------------   */
+/* The register names change quite a bit in the ATtiny family. Pay attention    */
+/* to the manual. Note that the interrupt flag system is still used even though */
+/* interrupts are disabled. So this has to be configured correctly.             */
+
 
 // setup interrupt for Pin Change for D+
 #define USB_INTR_CFG            PCMSK // Pin interrupt enable register
@@ -137,7 +143,7 @@
 #define ENTRY_JUMPER    4
 #define ENTRY_POWER_ON  5
 
-#define ENTRYMODE ENTRY_ALWAYS
+#define ENTRYMODE ENTRY_POWER_ON
 
 #define JUMPER_PIN    PB0
 #define JUMPER_PORT   PORTB
@@ -193,7 +199,7 @@
 
 // I observed 2 resets. First is 100 ms after initial connecting to USB lasting 65 ms and the second 90 ms later and also 65 ms.
 // On my old HP laptop I have different timing: First reset is 220 ms after initial connecting to USB lasting 300 ms and the second is missing.
-#define FAST_EXIT_NO_USB_MS       0 // Values below 120 are ignored. Effective timeout is 300 + FAST_EXIT_NO_USB_MS.
+#define FAST_EXIT_NO_USB_MS     300 // Values below 120 are ignored. Effective timeout is 300 + FAST_EXIT_NO_USB_MS.
 #define AUTO_EXIT_MS           6000
 
 /* ----------------------- Optional Timeout Config ------------------------ */
@@ -254,7 +260,7 @@
 #define ACTIVE_HIGH 1
 #define ACTIVE_LOW  2
 
-#define LED_MODE    NONE
+#define LED_MODE    ACTIVE_HIGH
 
 #define LED_DDR     DDRB
 #define LED_PORT    PORTB

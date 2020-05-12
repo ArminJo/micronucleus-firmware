@@ -46,7 +46,7 @@
  * Since F_CPU should be defined to your actual clock rate anyway, you should
  * not need to modify this setting.
  */
- 
+
 /* ----------------------- Optional Hardware Config ------------------------ */
 
 //#define USB_CFG_PULLUP_IOPORTNAME   B
@@ -260,7 +260,7 @@
 #define ACTIVE_HIGH 1
 #define ACTIVE_LOW  2
 
-#define LED_MODE    NONE
+#define LED_MODE    ACTIVE_HIGH
 
 #define LED_DDR     DDRB
 #define LED_PORT    PORTB
@@ -277,13 +277,13 @@
  */
 
 #if LED_MODE==ACTIVE_HIGH
-  #define LED_INIT(x)   LED_DDR   |= _BV(LED_PIN);
-  #define LED_EXIT(x)   {LED_DDR  &=~_BV(LED_PIN);LED_PORT  &=~_BV(LED_PIN);}
-  #define LED_MACRO(x)  if ( x & 0x4c ) {LED_PORT&=~_BV(LED_PIN);} else {LED_PORT|=_BV(LED_PIN);}
+  #define LED_INIT(x)   LED_DDR |= _BV(LED_PIN);
+  #define LED_EXIT(x)   LED_PORT &= ~_BV(LED_PIN);
+  #define LED_MACRO(x)  if ( x & 0x4c ) {LED_PORT &= ~_BV(LED_PIN);} else {LED_PORT |= _BV(LED_PIN);}
 #elif LED_MODE==ACTIVE_LOW
-  #define LED_INIT(x)   LED_PORT &=~_BV(LED_PIN);
-  #define LED_EXIT(x)   LED_DDR  &=~_BV(LED_PIN);
-  #define LED_MACRO(x)  if ( x & 0x4c ) {LED_DDR&=~_BV(LED_PIN);} else {LED_DDR|=_BV(LED_PIN);}
+  #define LED_INIT(x)   LED_PORT &= ~_BV(LED_PIN);
+  #define LED_EXIT(x)   LED_DDR &= ~_BV(LED_PIN);
+  #define LED_MACRO(x)  if ( x & 0x4c ) {LED_DDR &= ~_BV(LED_PIN);} else {LED_DDR |= _BV(LED_PIN);}
 #elif LED_MODE==NONE
   #define LED_INIT(x)
   #define LED_EXIT(x)

@@ -26,7 +26,7 @@
  */
 
 #define MICRONUCLEUS_VERSION_MAJOR 2
-#define MICRONUCLEUS_VERSION_MINOR 5
+#define MICRONUCLEUS_VERSION_MINOR 5 // 165 (0xA5) is shown in W10 Device manager in BCD but as :5 instead of A5
 
 #define RECONNECT_DELAY_MILLIS 300 // Time between disconnect and connect. Even 250 is to fast!
 
@@ -148,9 +148,16 @@ static inline void eraseApplication(void) {
         ptr -= SPM_PAGESIZE;
 #endif
         boot_page_erase(ptr);
-        // using the 2 lines instead saves 6 bytes, but then the bootloader does not work :-(
-        //        __SPM_REG = (__BOOT_PAGE_ERASE);
-        //        asm volatile("spm");
+        /*
+         * Compiles to:
+         * 83 e0           ldi r24, 0x03   ; 3
+         * 80 93 57 00     sts 0x0057, r24 ; 0x800057
+         * e8 95           spm
+         *
+         * using the 2 lines instead saves 2 bytes, but then the bootloader does not work :-(
+         * __SPM_REG = (__BOOT_PAGE_ERASE);
+         * asm volatile("spm" : : "z" ((uint16_t)(ptr))); // the value of ptr is used and can not be optimized away
+         */
 #if (defined __AVR_ATmega328P__)||(defined __AVR_ATmega168P__)||(defined __AVR_ATmega88P__)
     // the ATmegaATmega328p/168p/88p don't halt the CPU when writing to RWW flash, so we need to wait here
     boot_spm_busy_wait();
@@ -248,9 +255,9 @@ static uint8_t usbFunctionSetup(uint8_t data[8]) {
 #ifdef CTPB
             __SPM_REG = (_BV(CTPB) | _BV(__SPM_ENABLE));
 #else
-  #ifdef RWWSRE
-            __SPM_REG=(_BV(RWWSRE)|_BV(__SPM_ENABLE));
-  #else
+#ifdef RWWSRE
+            __SPM_REG = (_BV(RWWSRE) | _BV(__SPM_ENABLE));
+#else
             __SPM_REG=_BV(__SPM_ENABLE);
   #endif
 #endif
@@ -284,7 +291,7 @@ static void inactivateWatchdog(void) {
     WDTCR = _BV(WDP2) | _BV(WDP1) | _BV(WDP0); // Do not enable watchdog. Set timeout to 2 seconds, just in case, it is fused on and can not disabled.
 #else
     wdt_reset();
-    WDTCSR|=_BV(WDCE) | _BV(WDE);
+    WDTCSR |= _BV(WDCE) | _BV(WDE);
     WDTCSR=0;
 #endif
 }
@@ -433,7 +440,6 @@ int main(void) {
                     usbNewDeviceAddr = 0;
                     usbDeviceAddr = 0;
 
-
 #if defined(START_WITHOUT_PULLUP) // if not connected to USB we have an endless USB reset condition, so do actions after end of reset
 #  if (OSCCAL_HAVE_XTAL == 0) || (FAST_EXIT_NO_USB_MS > 0)
                     resetDetected = 1;  // Set flag to wait for reset to end before calling calibrateOscillatorASM() or reset idlePolls.
@@ -467,7 +473,8 @@ int main(void) {
 
             } while (--t5msTimeoutCounter); // after 5 ms fastctr is 0.
 
-            asm volatile("wdr"); // perform cyclically watchdog reset, for the case it is fused on and we can not disable it.
+            asm volatile("wdr");
+            // perform cyclically watchdog reset, for the case it is fused on and we can not disable it.
 
 #if OSCCAL_SLOW_PROGRAMMING
             uint8_t osccal_tmp  = OSCCAL;
@@ -552,13 +559,21 @@ int main(void) {
         /*
          * USB transmission timeout -> cleanup and call user program
          */
-        // Set LED pin to input if LED exists
+        // Set LED pin to low (and input - see below) if LED exists
         LED_EXIT();
+
+#define STR_HELPER(x) #x
+#define STR(x) STR_HELPER(x)
 
 #ifdef USB_CFG_PULLUP_IOPORTNAME
         usbDeviceDisconnect(); // Changing USB_PULLUP_OUT to input() to avoid to drive the pullup resistor, and set level to low.
 #else
-        usbDeviceConnect(); // Changing D- to input().
+        // with STR(), the compiler is able to optimize the if :-)
+        if (STR(USBDDR) == STR(LED_DDR) && LED_MODE != ACTIVE_LOW) {
+            USBDDR = 0; // Set all pins to input, including LED and D- pin. The latter keeps device connected.
+        } else  {
+            usbDeviceConnect(); // Changing only D- to input(). This keeps device connected.
+        }
 #endif
 
         /*
@@ -583,13 +598,13 @@ void blinkLED(uint8_t aBlinkCount) {
 #  if LED_MODE==ACTIVE_HIGH
         LED_PORT |= _BV(LED_PIN);
 #  else
-        LED_DDR|=_BV(LED_PIN);
+        LED_DDR |= _BV(LED_PIN);
 #  endif
         _delay_ms(300);
 #  if LED_MODE==ACTIVE_HIGH
         LED_PORT &= ~_BV(LED_PIN);
 #  else
-        LED_DDR&=~_BV(LED_PIN);
+        LED_DDR &= ~_BV(LED_PIN);
 #  endif
         _delay_ms(300);
     }
