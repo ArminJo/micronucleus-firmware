@@ -5,14 +5,14 @@
 
 Here I forked the firmware part of [micronucleus repository](https://github.com/micronucleus/micronucleus) and try to add all improvements and bug fixes I am aware of. To make the code better understandable, I also added a lot of comment lines.
 
-![Digisparks](https://github.com/ArminJo/micronucleus-firmware/blob/master/pictures/Digisparks.jpg)
+![Digisparks](pictures/Digisparks.jpg)
 
 # How to update the bootloader to the new version
 To **update** your old flash consuming **bootloader**, open the Arduino IDE, select *Tools/Programmer: "Micronucleus"* and then run *Tools/Burn Bootloder*.<br/>
 ![Burn Bootloader](https://github.com/ArminJo/DigistumpArduino/blob/master/pictures/Micronucleus_Burn_Bootloader.jpg)<br/>
-The bootloader is the recommended configuration [`entry_on_power_on_no_pullup_fast_exit_on_no_USB`](firmware/configuration/README.md#recommended-configuration).<br/>
+The bootloader is the recommended configuration [`entry_on_power_on_no_pullup_fast_exit_on_no_USB`](firmware/configuration#recommended-configuration).<br/>
 Or run one of the window [scripts](https://github.com/ArminJo/micronucleus-firmware/tree/master/utils)
-like e.g. the [Burn_upgrade-t85_default.cmd](https://github.com/ArminJo/micronucleus-firmware/tree/master/utils/Burn_upgrade-t85_default.cmd).
+like e.g. the [Burn_upgrade-t85_default.cmd](utils/Burn_upgrade-t85_default.cmd).
 
 # Driver installation
 For Windows you must install the **Digispark driver** before you can program the board. Download it [here](https://github.com/digistump/DigistumpArduino/releases/download/1.6.7/Digistump.Drivers.zip), open it and run `InstallDrivers.exe`.
@@ -27,10 +27,10 @@ If you use the configurations:
 - t85_pullup_at_0
 you can change the lines `.upload.maximum_size=6522` to `.upload.maximum_size=6586` in %localappdata%\Arduino15\packages\digistump\hardware\avr\1.6.8\boards.txt to **enable the additonal 64 bytes** of these configurations. 
 
-# Configuration overview is [here](firmware/configuration)
+# Configuration overview is [here](firmware/configuration#configuration-overview)
 
 # Memory footprint of the new firmware
-The actual memory footprint for each configuration can be found in the file [*firmware/build.log*](https://github.com/ArminJo/micronucleus-firmware/tree/master/firmware/build.log).<br/>
+The actual memory footprint for each configuration can be found in the file [*firmware/build.log*](firmware/build.log).<br/>
 Bytes used by the mironucleus bootloader can be computed by taking the data size value in *build.log*, 
 and rounding it up to the next multiple of the page size which is e.g. 64 bytes for ATtiny85 and 128 bytes for ATtiny176.<br/>
 Subtracting this (+ 6 byte for postscript) from the total amount of memory will result in the free bytes numbers.
@@ -43,7 +43,7 @@ So the `START_WITHOUT_PULLUP` and `ENTRY_POWER_ON` configurations are reducing t
 
 For *t167_default.hex* (as well as for the other t167 configurations) with the new compiler we get 1436 as data size. The next multiple of 128 is 1536 (12 * 128) => (16384 - (1536 + 6)) = 14842 bytes are free.<br/>
 
-## Bootloader memory comparison of different releases for [*t85_default.hex*](https://github.com/ArminJo/micronucleus-firmware/tree/master/firmware/releases/t85_default.hex).
+## Bootloader memory comparison of different releases for [*t85_default.hex*](firmware/releases/t85_default.hex).
 - V1.6  6012 bytes free
 - V1.11 6330 bytes free
 - V2.3  6522 bytes free
@@ -89,7 +89,13 @@ INT1 9 (D3) PA3  4|    |17  PB3 (D11) 4 OC1BV USB-
   USB+ and USB- are each terminated on the host side with 15k to 25k pull-down resistors.
 
 ```
-![DigisparkProPinLayout](https://github.com/ArminJo/micronucleus-firmware/blob/master/pictures/DigisparkProPinLayout.png)
+![DigisparkProPinLayout](pictures/DigisparkProPinLayout.png)
+
+# Digispark clone and originals
+On the photos below you see from left-to-right: a clone, an old genuine and a new genuine board. The clone is larger. You can tell from the locations of the (zener)diodes with respect to the Attiny85 and the powerLED orientation.
+The value of the USB pullup resistor on a genuine Digispark Micro-USB is 1 kOhm (102). The series resistors are 22 Ohm.
+![DigisparkProPinLayout](pictures/Digispark+Clone.png)
+![DigisparkProPinLayout](pictures/Digispark+Clone_Back.png)
 
 # Revision History
 ### Version 2.5
