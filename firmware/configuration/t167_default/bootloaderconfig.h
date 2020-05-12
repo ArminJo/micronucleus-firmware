@@ -181,10 +181,10 @@
  *
  *  The bootloader will only time out if a user program was loaded.
  *
- *  AUTO_EXIT_NO_USB_MS        The bootloader will exit after this delay if no USB is connected after the initial 300 ms disconnect and connect.
+ *  FAST_EXIT_NO_USB_MS        The bootloader will exit after this delay if no USB is connected after the initial 300 ms disconnect and connect.
  *                             Set to < 120 to disable.
  *                             Adds 8 bytes.
- *                             (This will wait for AUTO_EXIT_NO_USB_MS milliseconds for an USB SE0 reset from the host, otherwise exit)
+ *                             (This will wait for FAST_EXIT_NO_USB_MS milliseconds for an USB SE0 reset from the host, otherwise exit)
  *
  *  AUTO_EXIT_MS               The bootloader will exit after this delay if no USB communication from the host tool was received.
  *                             Set to 0 to disable
@@ -193,7 +193,7 @@
  */
 
 // I observed 2 Resets. First is 100ms after initial connecting to USB lasting 65 ms and the second 90 ms later and also 65 ms.
-#define AUTO_EXIT_NO_USB_MS       0 // Values below 120 are ignored. Effective timeout is 300 + AUTO_EXIT_NO_USB_MS.
+#define FAST_EXIT_NO_USB_MS       0 // Values below 120 are ignored. Effective timeout is 300 + FAST_EXIT_NO_USB_MS.
 #define AUTO_EXIT_MS           6000
 
  /*

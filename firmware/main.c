@@ -75,8 +75,8 @@
 #error "Do not set AUTO_EXIT_MS to below 1s to allow Micronucleus to function properly"
 #endif
 
-#if ((AUTO_EXIT_NO_USB_MS>0) && (AUTO_EXIT_NO_USB_MS<120))
-#warning "Values below 120 ms are not possible for AUTO_EXIT_NO_USB_MS"
+#if ((FAST_EXIT_NO_USB_MS>0) && (FAST_EXIT_NO_USB_MS<120))
+#warning "Values below 120 ms are not possible for FAST_EXIT_NO_USB_MS"
 #endif
 
 // Device configuration reply
@@ -362,12 +362,12 @@ int main(void) {
 
         LED_INIT(); // Set LED pin to output, if LED exists
 
-#if (AUTO_EXIT_NO_USB_MS > 120) // At default AUTO_EXIT_NO_USB_MS is defined 0
+#if (FAST_EXIT_NO_USB_MS > 120) // At default FAST_EXIT_NO_USB_MS is defined 0
         /*
-         * Bias idle counter to wait only for AUTO_EXIT_NO_USB_MS if no reset was detected (which is first in USB protocol)
+         * Bias idle counter to wait only for FAST_EXIT_NO_USB_MS if no reset was detected (which is first in USB protocol)
          * Requires 8 bytes. We have to set both registers, since they are undetermined!
          */
-        idlePolls.w = ((AUTO_EXIT_MS - AUTO_EXIT_NO_USB_MS) / 5);
+        idlePolls.w = ((AUTO_EXIT_MS - FAST_EXIT_NO_USB_MS) / 5);
 #else
         // start with 0 to exit after AUTO_EXIT_MS milliseconds (6 seconds) of USB inactivity (not connected or Idle)
         idlePolls.b[1] = 0; // only set register 7, register 6 is almost random (determined by the usage before)
@@ -376,7 +376,7 @@ int main(void) {
         sLoopCommand = cmd_local_nop; // initialize register 3
         currentAddress.w = 0;
 
-#if ((OSCCAL_HAVE_XTAL == 0) || (AUTO_EXIT_NO_USB_MS > 0)) && defined(START_WITHOUT_PULLUP) // Adds 14 bytes
+#if ((OSCCAL_HAVE_XTAL == 0) || (FAST_EXIT_NO_USB_MS > 0)) && defined(START_WITHOUT_PULLUP) // Adds 14 bytes
         uint8_t resetDetected = 0; // Flag to call calibrateOscillatorASM() or reset idlePolls directly after host reset ends.
 #endif
 
@@ -406,7 +406,7 @@ int main(void) {
                     tResetDownCounter = 100;
 
 #if defined(START_WITHOUT_PULLUP)
-#  if (OSCCAL_HAVE_XTAL == 0) || (AUTO_EXIT_NO_USB_MS > 0)
+#  if (OSCCAL_HAVE_XTAL == 0) || (FAST_EXIT_NO_USB_MS > 0)
                     /*
                      * Call calibrateOscillatorASM() or reset idlePolls only if USB is attached and after a reset, otherwise just skip it and wait for timeout.
                      * If USB has no pullup at VCC but at USB 5 volt, we will end up here only if USB 5 volt is connected and after host reset has ended.
@@ -416,7 +416,7 @@ int main(void) {
 #    if (OSCCAL_HAVE_XTAL == 0)
                         calibrateOscillatorASM();
 #    endif
-#    if (AUTO_EXIT_NO_USB_MS > 0)
+#    if (FAST_EXIT_NO_USB_MS > 0)
                     idlePolls.b[1] = 0; // Reset counter to have 6 seconds timeout since we detected USB connection by end of a reset condition
 #    endif
                     }
@@ -435,7 +435,7 @@ int main(void) {
 
 
 #if defined(START_WITHOUT_PULLUP) // if not connected to USB we have an endless USB reset condition, so do actions after end of reset
-#  if (OSCCAL_HAVE_XTAL == 0) || (AUTO_EXIT_NO_USB_MS > 0)
+#  if (OSCCAL_HAVE_XTAL == 0) || (FAST_EXIT_NO_USB_MS > 0)
                     resetDetected = 1;  // Set flag to wait for reset to end before calling calibrateOscillatorASM() or reset idlePolls.
 #  endif  // OSCCAL_HAVE_XTAL
 #else
@@ -447,7 +447,7 @@ int main(void) {
                      */
                     calibrateOscillatorASM();
 #  endif
-#if (AUTO_EXIT_NO_USB_MS > 0)
+#if (FAST_EXIT_NO_USB_MS > 0)
                     idlePolls.b[1] = 0; // Reset counter to have 6 seconds timeout since we detected USB connection by getting a reset
 #endif
 #endif

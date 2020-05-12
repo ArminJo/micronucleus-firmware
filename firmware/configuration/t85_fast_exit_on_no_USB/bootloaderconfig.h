@@ -4,7 +4,7 @@
  * according to the hardware.
  *
  * Controller type: ATtiny 85 - 16.5 MHz
- * Configuration:   Default configuration + AUTO_EXIT_NO_USB_MS=300
+ * Configuration:   Default configuration + FAST_EXIT_NO_USB_MS=300
  *       USB D- :   PB3
  *       USB D+ :   PB4
  *       Entry  :   Always
@@ -186,10 +186,10 @@
  *
  *  The bootloader will only time out if a user program was loaded.
  *
- *  AUTO_EXIT_NO_USB_MS        The bootloader will exit after this delay if no USB is connected after the initial 300 ms disconnect and connect.
+ *  FAST_EXIT_NO_USB_MS        The bootloader will exit after this delay if no USB is connected after the initial 300 ms disconnect and connect.
  *                             Set to < 120 to disable.
  *                             Adds 8 bytes.
- *                             (This will wait for AUTO_EXIT_NO_USB_MS milliseconds for an USB SE0 reset from the host, otherwise exit)
+ *                             (This will wait for FAST_EXIT_NO_USB_MS milliseconds for an USB SE0 reset from the host, otherwise exit)
  *
  *  AUTO_EXIT_MS               The bootloader will exit after this delay if no USB communication from the host tool was received.
  *                             Set to 0 to disable
@@ -199,7 +199,7 @@
 
 // I observed 2 resets. First is 100 ms after initial connecting to USB lasting 65 ms and the second 90 ms later and also 65 ms.
 // On my old HP laptop I have different timing: First reset is 220 ms after initial connecting to USB lasting 300 ms and the second is missing.
-#define AUTO_EXIT_NO_USB_MS     300 // Values below 120 are ignored. Effective timeout is 300 + AUTO_EXIT_NO_USB_MS.
+#define FAST_EXIT_NO_USB_MS     300 // Values below 120 are ignored. Effective timeout is 300 + FAST_EXIT_NO_USB_MS.
 #define AUTO_EXIT_MS           6000
 
 /* ----------------------- Optional Timeout Config ------------------------ */
