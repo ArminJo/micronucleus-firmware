@@ -248,9 +248,9 @@
  *
  *  LED_MODE                  Define behavior of attached LED or suppress LED code.
  *
- *          NONE              Do not generate LED code (gains 20 bytes).
+ *          NONE              Do not generate LED code (gains 18 bytes).
  *          ACTIVE_HIGH       LED is on when output pin is high. This will toggle between 1 and 0.
- *          ACTIVE_LOW        LED is on when output pin is low.  This will toggle between Z and 0.
+ *          ACTIVE_LOW        LED is on when output pin is low.  This will toggle between Z and 0. + 2 bytes
  *
  *  LED_DDR,LED_PORT,LED_PIN  Where is your LED connected?
  *

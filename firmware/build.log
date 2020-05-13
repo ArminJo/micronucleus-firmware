@@ -1,5 +1,4 @@
 Building Micronucleus configuration: BitBoss 
-Building Micronucleus configuration: BitBoss 
 Size of binary hexfile. Use the "data" size to calculate the bootloader address: 
    text	   data	    bss	    dec	    hex	filename
       0	   1596	      0	   1596	    63c	main.hex

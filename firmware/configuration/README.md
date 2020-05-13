@@ -78,4 +78,5 @@ The recommended configuration is *entry_on_power_on_no_pullup_fast_exit_on_no_US
 #### Hex files for these configuration are already available in the [releases](/firmware/releases) and [upgrades](/firmware/upgrades) folders.
 
 ## Create your own configuration
-You can easily create your own configuration by adding a new *firmware/configuration* directory and adjusting *bootloaderconfig.h* and *Makefile.inc*. Before you run the *firmware/make_all.cmd* script, check the arduino directory path in the [`firmware/SetPath.cmd`](/firmware/SetPath.cmd#L1) file.
+You can easily create your own configuration by adding a new *firmware/configuration* directory and adjusting *bootloaderconfig.h* and *Makefile.inc*. Before you run the *firmware/make_all.cmd* script, check the arduino directory path in the [`firmware/SetPath.cmd`](/firmware/SetPath.cmd#L1) file.<br/>
+Feel free to supply a pull request if you added and tested a previously unsupported device.

@@ -186,7 +186,7 @@ static inline void writeFlashPage(void) {
  * Will overwrite the bootloader reset vector sent from the host with our fixed value.
  * Normally both values are the same, this is only a safety net if transfer was disturbed
  * to ensure that the device can not be bricked.
- * ??? Saving user-reset-vector ??? is done in the host tool, starting with firmware V2.
+ * Handling user-reset-vector is done in the host tool, starting with firmware V2.
  */
 static void writeWordToPageBuffer(uint16_t data) {
 
@@ -524,14 +524,13 @@ int main(void) {
 
 #if (AUTO_EXIT_MS > 0)
             // Try to execute program when bootloader times out
-            if (idlePolls.w == (AUTO_EXIT_MS / 5)) {
-                if (pgm_read_byte(BOOTLOADER_ADDRESS - TINYVECTOR_RESET_OFFSET + 1) != 0xff) {
-                    break; // Only exit to user program, if program exists
-                }
+            if (idlePolls.w == (AUTO_EXIT_MS / 5) && pgm_read_byte(BOOTLOADER_ADDRESS - TINYVECTOR_RESET_OFFSET + 1) != 0xff) {
+                break; // Only exit to user program, if program exists
             }
 #endif
 
             // Switch LED on for 4 Idle loops every 64th idle loop - implemented by masking LSByte of idle counter with 0x4C
+            // Requires 10 byte, but the compiler requires 12 byte :-(
             LED_MACRO( idlePolls.b[0] );
 
             // Test whether another interrupt occurred during the processing of USBpoll and commands.
@@ -559,7 +558,7 @@ int main(void) {
         /*
          * USB transmission timeout -> cleanup and call user program
          */
-        // Set LED pin to low (and input - see below) if LED exists
+        // Set LED pin to low (and input - see below) if LED exists - 2 (sometimes 4) bytes
         LED_EXIT();
 
 #define STR_HELPER(x) #x
@@ -571,7 +570,7 @@ int main(void) {
         // with STR(), the compiler is able to optimize the if :-)
         if (STR(USBDDR) == STR(LED_DDR) && LED_MODE != ACTIVE_LOW) {
             USBDDR = 0; // Set all pins to input, including LED and D- pin. The latter keeps device connected.
-        } else  {
+        } else {
             usbDeviceConnect(); // Changing only D- to input(). This keeps device connected.
         }
 #endif
