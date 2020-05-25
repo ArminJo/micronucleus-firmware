@@ -7,7 +7,7 @@ To allow maximum flexibility, micronucleus supports a [configuration system](/fi
 make CONFIG=<config_name>
 ```
 
-Please note that the configuration "t84_aggressive" may be instable unders certain circumstances. Please revert to "t85_default" if downloading of user programs fails.
+Please note that the configuration "t85_aggressive" may be instable unders certain circumstances. Please revert to "t85_default" if downloading of user programs fails.
 
 You can add your own configuration by adding a new folder to /firmware/configurations/. The folder has to contain a customized "Makefile.inc" and "bootloaderconfig.h". 
 
@@ -15,9 +15,11 @@ If changes to the configuration lead to an increase in bootloader size, it may b
 
 Other make options:
 
-    make CONFIG=<config_name> fuse    # Configure fuses
-    make CONFIG=<config_name> flash   # Uploade the bootloader using AVRDUDE
-    
+```
+make CONFIG=<config_name> fuse    # Configure fuses
+make CONFIG=<config_name> flash   # Uploade the bootloader using AVRDUDE
+```
+
 There is also an option to disable the reset line and use it as an I/O. While it may seem tempting to use this feature to make an additional I/O pin available on the ATtiny85, we strongly discourage from doing so, as it led to many issues in the past.
 
 Please "make clean" when switching from one configuration to another.

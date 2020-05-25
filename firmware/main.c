@@ -11,7 +11,7 @@
  *
  *  This file is part of micronucleus https://github.com/micronucleus/micronucleus.
  *
- *  ServoEasing is free software: you can redistribute it and/or modify
+ *  Micronucleus is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 2 of the License, or
  *  (at your option) any later version.
@@ -29,6 +29,7 @@
 #define MICRONUCLEUS_VERSION_MINOR 5 // 165 (0xA5) is shown in W10 Device manager in BCD but as :5 instead of A5
 
 #define RECONNECT_DELAY_MILLIS 300 // Time between disconnect and connect. Even 250 is to fast!
+#define __DELAY_BACKWARD_COMPATIBLE__ // Saves 2 bytes at _delay_ms(). Must be declared before the include util/delay.h
 
 #include <avr/io.h>
 #include <avr/pgmspace.h>
@@ -49,11 +50,11 @@
 #endif
 
 // Postscript are the few bytes at the end of programmable memory which store user program reset vector and optionally OSCCAL calibration
-//#if OSCCAL_SAVE_CALIB
+#if OSCCAL_SAVE_CALIB
 #define POSTSCRIPT_SIZE 6
-//#else
-//#define POSTSCRIPT_SIZE 4
-//#endif
+#else
+#define POSTSCRIPT_SIZE 4
+#endif
 #define PROGMEM_SIZE (BOOTLOADER_ADDRESS - POSTSCRIPT_SIZE) /* max size of user program */
 
 // verify the bootloader address aligns with page size
@@ -310,8 +311,7 @@ static void reconnectAndInitUSB(void) {
 
 /* ------------------------------------------------------------------------ */
 // reset system to a normal state and launch user program
-static void leaveBootloader(void) __attribute__((__noreturn__));
-static inline void leaveBootloader(void) {
+__attribute__((__noreturn__)) static inline void leaveBootloader(void) {
 
     // bootLoaderExit() is a Macro defined in bootloaderconfig.h and mainly empty except for ENTRY_JUMPER, where it resets the pullup.
     bootLoaderExit();
@@ -328,12 +328,9 @@ static inline void leaveBootloader(void) {
 
 #define STR_HELPER(x) #x
 #define STR(x) STR_HELPER(x)
-    asm volatile ("rjmp __vectors - " STR(TINYVECTOR_RESET_OFFSET));
     // jump to application reset vector at end of flash
-
-    for (;;) { // Make sure function does not return to help compiler optimize
-        ;
-    }
+    asm volatile ("rjmp __vectors - " STR(TINYVECTOR_RESET_OFFSET));
+    __builtin_unreachable(); // Tell the compiler function does not return, to help compiler optimize
 }
 
 void USB_handler(void); // must match name used in usbconfig.h line 25 and implemented in usbdrvasm.S
@@ -349,7 +346,7 @@ int main(void) {
 #endif
 
 #if OSCCAL_SAVE_CALIB
-    // adjust clock to previous calibration value, so bootloader starts with proper clock calibration
+    // Adjust clock to previous calibration value, so bootloader AND User program starts with proper clock calibration, even when not connected to USB
     unsigned char stored_osc_calibration = pgm_read_byte(BOOTLOADER_ADDRESS - TINYVECTOR_OSCCAL_OFFSET);
     if (stored_osc_calibration != 0xFF) {
         OSCCAL = stored_osc_calibration;
@@ -476,7 +473,7 @@ int main(void) {
             asm volatile("wdr");
             // perform cyclically watchdog reset, for the case it is fused on and we can not disable it.
 
-#if OSCCAL_SLOW_PROGRAMMING
+#if OSCCAL_SLOW_PROGRAMMING // reduce clock to enable save flash programming timing
             uint8_t osccal_tmp  = OSCCAL;
             OSCCAL      = osccal_default;
 #endif
