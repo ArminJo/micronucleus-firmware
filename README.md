@@ -19,19 +19,21 @@ Please invoke the command line tool with "micronucleus -help" for a list of avai
 For Windows you must install the **libusb driver** before you can program the board. Download it [here](https://github.com/digistump/DigistumpArduino/releases/download/1.6.7/Digistump.Drivers.zip), open it and run `InstallDrivers.exe`.
 Clean Micronucleus devices without uploaded userprogram will not time out and allow sufficient time for proper driver installation. Linux and OS X do not require custom drivers.
 
-# Installation of a better optimizing compiler configuration for Digispark boards
-**The new Digistump AVR version 1.6.8 shrinks generated code size by 5 to 15 percent**. Just replace the old Digispark board URL **http://digistump.com/package_digistump_index.json** (e.g.in Arduino *File/Preferences*) by the new  **https://raw.githubusercontent.com/ArminJo/DigistumpArduino/master/package_digistump_index.json** and install the **Digistump AVR Boards** version **1.6.8**.<br/>
+# Updated configuration for Digispark boards
+**The new [Digistump AVR version](https://github.com/ArminJo/DigistumpArduino) shrinks generated code size by 5 to 15 percent**. Just replace the old Digispark board URL **http://digistump.com/package_digistump_index.json** (e.g.in Arduino *File/Preferences*) by the new  **https://raw.githubusercontent.com/ArminJo/DigistumpArduino/master/package_digistump_index.json** and install the latest **Digistump AVR Boards** version.<br/>
 ![Boards Manager](https://github.com/ArminJo/DigistumpArduino/blob/master/pictures/Digistump1.6.8.jpg)<br/>
 
 # Update the bootloader to the new version
 To **update** your old flash consuming **bootloader**, jou have 2 choices.
-1. Install the new Digistump board manager (see above), open the Arduino IDE, select *Tools/Programmer: "Micronucleus"* and then run *Tools/Burn Bootloder*.<br/>
-![Burn Bootloader](https://github.com/ArminJo/DigistumpArduino/blob/master/pictures/Micronucleus_Burn_Bootloader.jpg)<br/>
-The bootloader is the recommended configuration [`entry_on_power_on_no_pullup_fast_exit_on_no_USB`](firmware/configuration#recommended-configuration).<br/>
+1. Using the [new Digistump board manager](https://github.com/ArminJo/DigistumpArduino#update-the-bootloader) (see above).<br/>
 2. Run one of the Windows [scripts](https://github.com/ArminJo/micronucleus-firmware/tree/master/utils)
 like e.g. the [Burn_upgrade-t85_default.cmd](utils/Burn_upgrade-t85_default.cmd).
 
+### If you want to burn the bootloader to an **ATtiny87** or **ATtiny167** with avrdude, you must use the *avrdude.config* file in `windows_exe` where ATtiny87 and ATtiny167 specifications are added.
+
 # Configuration overview is [here](firmware/configuration#overview)
+
+# Compile instructions for the bootloader are [here](firmware#compiling)
 
 # New features
 ## MCUSR content now available in sketch
@@ -47,7 +49,6 @@ For `ENTRY_EXT_RESET` configuration see [Fixed wrong ENTRY_EXT_RESET].
 - V2.04 6522 bytes free
 - V2.5  **6586** bytes free
 
-## This repository contains also an avrdude config file in `windows_exe` with **ATtiny87** and **ATtiny167** data added.
 
 # Pin layout
 ### ATtiny85 on Digispark
