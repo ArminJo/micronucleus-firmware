@@ -2,7 +2,7 @@
 If not otherwise noted, the OSCCAL value is calibrated (+/- 1%) after boot for all ATtiny85 configurations
 | Configuration | Available FLASH | Bootloader size | Non default config flags set |
 |---------------|-----------------|-----------------|------------------------------|
-| t85_aggressive<br/>It works for my Digispark boards without any problems :-) | 6780 | 1392 | [Do not provide calibrated OSCCAL, if no USB attached](t85_aggressive/bootloaderconfig.h#L220), [ENABLE_UNSAFE_OPTIMIZATIONS](#enable_unsafe_optimizations)<br/>Relying on calibrated 16MHz internal clock stability, not using the 16.5 MHz USB driver version with integrated PLL. This causes the main memory saving. |
+| t85_aggressive<br/><br/>It works for my Digispark boards without any problems :-) | 6780 | 1392 | [Do not provide calibrated OSCCAL, if no USB attached](t85_aggressive/bootloaderconfig.h#L220), [ENABLE_UNSAFE_OPTIMIZATIONS](#enable_unsafe_optimizations)<br/>Relying on calibrated 16MHz internal clock stability, not using the 16.5 MHz USB driver version with integrated PLL. This causes the main memory saving. |
 |  |  |  |  |
 | t85_default | 6586 | 1544 | - |
 | t85_entry_on_power_on | 6586 | 1580 | [ENTRY_POWER_ON](#entry_power_on-entry-condition), LED_MODE=ACTIVE_HIGH |
@@ -86,4 +86,5 @@ The recommended configuration is *entry_on_power_on_no_pullup_fast_exit_on_no_US
 
 ## Create your own configuration
 You can easily create your own configuration by adding a new *firmware/configuration* directory and adjusting *bootloaderconfig.h* and *Makefile.inc*. Before you run the *firmware/make_all.cmd* script, check the arduino directory path in the [`firmware/SetPath.cmd`](/firmware/SetPath.cmd#L1) file.<br/>
+If changes to the configuration lead to an increase in bootloader size, it may be necessary to change the bootloader start address as described [above](#computing-the-values) or in the *Makefile.inc*.
 Feel free to supply a pull request if you added and tested a previously unsupported device.

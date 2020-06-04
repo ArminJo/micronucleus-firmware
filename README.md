@@ -49,7 +49,6 @@ For `ENTRY_EXT_RESET` configuration see [Fixed wrong ENTRY_EXT_RESET].
 - V2.04 6522 bytes free
 - V2.5  **6586** bytes free
 
-
 # Pin layout
 ### ATtiny85 on Digispark
 
@@ -87,10 +86,6 @@ INT1 9 (D3) PA3  4|    |17  PB3 (D11) 4 OC1BV USB-
   USB+ and USB- are each terminated on the host side with 15k to 25k pull-down resistors.
 
 ```
-
-# Devices using Micronucleus
-Micronucleus is widely installed on thousands of open source hardware devices. Please find an incomplete list [here](https://github.com/micronucleus/micronucleus/blob/master/Devices_with_Micronucleus.md)
-
 # Revision History
 ### Version 2.5
 - Saved 2 bytes by removing for loop at leaveBootloader().
@@ -111,66 +106,3 @@ Micronucleus is widely installed on thousands of open source hardware devices. P
 - no_pullup targets for low energy applications forever loop fixed.
 - `USB_CFG_PULLUP_IOPORTNAME` disconnect bug fixed.
 - New `ENTRY_POWER_ON` configuration switch, which enables the program to start immediately after a reset.
-
-### Version v2.04 Dec 8th, 2018
-- Merged changed to support ATMega328p by @AHorneffer (#132)
-- Idlepolls is now only reset when traffic to the current endpoint is detected. This will let micronucleus timeout also when traffic from other USB devices
-  is present on the bus.
-
-### Version v2.3 February 13th, 2016
-- Added page buffer clearing if a new block transfer is initiated. 
-This fixes a critical, but extremely rare bug that could lead to bricking of the device if micronucleus is restarted after an USB error.   
-- #74 Fixed LED_INIT macro so it only modifies the DDR register bit of the LED. (Thanks @russdill)
-
-### Version v2.2 August 3rd, 2015
-- Fixes timing bug with Windows 10 USB drivers. Some Win 10 drivers reduce the delay between reset and the first data packet to 20 ms.
-This led to an issue with osccalASM.S, which did not terminate correctly.
-
-### Version v2.1 July 26th, 2015
-This pull request documents changes leading to V2.1: https://github.com/micronucleus/micronucleus/pull/66
-- Fixes "unknown USB device" issue when devices with <16MHz CPU clock were connected to a USB3.0 port.
-- Fixes one bug that could lead to a deadlock if no USB was connected while the bootloader was active and noise was injected into the floating D+ input.
-- D- line is released before the user program is started, instead of pulling it down.
-This solves various issues where Micronucleus was not recognized after a reset depending on the duration of the reset button activation.
-Att: This may lead to a "Unknown device" pop-up in Windows, if the user program does not have USB functionality itself. 
-
-### Version v2.0b  June 6th, 2015
-This pull request documents changes leading to V2.0: https://github.com/micronucleus/micronucleus/pull/43
-- Support for the entire ATtiny family instead of only ATtiny85.
-- Much smaller size. All configurations are below 2 kb.
-- Interrupt free V-USB: no patching of the user program INT-vector anymore.
-- Faster uploads due to new protocol.
-- Far jmp also allows using ATtinies with more than 8 kb flash.
-- Many robustness improvements, such as compatibility to USB hubs and less erratic time out behavior.
-
-### Version 1.11
-The last release of the V1.x can be found [here](https://github.com/micronucleus/micronucleus/tree/v1.11).
-
-# License
-This project is released under the GPLv2 license. Code uploaded via the bootloader is not subject to any license.
-In addition, we'd like you to consider these points if you intend to sell products using micronucleus:
-- Please make your hardware open source. At least the schematic needs to be published according to the license inherited from V-USB.
-- Your documentation should mention Micronucleus and include a link to the main repository (https://github.com/micronucleus/)
-- Please do not "rebrand" micronucleus by renaming the USB device.
-- Feel welcome to submit a pull request to include your product in the "Devices using Micronucleus"-list. 
-
-# Credits
-
-## Firmware:
-- Micronucleus V2.5             (c) 2020 Current maintainer: @ArminJo
-- Micronucleus V2.04            (c) 2019 Current maintainers: @cpldcpu, @AHorneffer
-- Micronucleus V2.0x            (c) 2016 Tim Bo"scke - cpldcpu@gmail.com, (c) 2014 Shay Green
-- Original Micronucleus         (c) 2012 Jenna Fox
-- Based on USBaspLoader-tiny85  (c) 2012 Louis Beaudoin
-- Based on USBaspLoader         (c) 2007 by OBJECTIVE DEVELOPMENT Software GmbH
- 
-## Commandline tool:
-- Original commandline tool     (c) 2012 by ihsan Kehribar <ihsan@kehribar.me>, Jenna Fox
-- Updates for V2.x              (c) 2014 T. Bo"scke
-
-## Special Thanks:
-- Aaron Stone/@sodabrew for building the OS X command line tool and various fixes.
-- Objective Development's great V-USB bitbanging usb driver
-- Embedded Creations' pioneering and inspiring USBaspLoader-tiny85
-- Digistump for motivation and contributing the VID/PID pair
-- Numerous supporters for smaller bug fixes and improvements.
