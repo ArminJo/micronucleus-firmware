@@ -21,8 +21,8 @@ DEVICE = attiny85
 # hexadecimal address for bootloader section to begin. To calculate the best value:
 # - make clean; make main.hex; ### output will list data: 1404
 # - for the size of your device (8kb = 1024 * 8 = 8192) subtract above value = 6788
-# - How many pages in is that? 6770 / 64 (tiny85 page size in bytes) = 106
-# - round that down to 106 - our new bootloader address is 106 * 64 = 6784, in hex = 1A40
+# - How many pages in is that? 6770 / 64 (tiny85 page size in bytes) = 106.xxx
+# - round that down to 106 - our new bootloader address is 106 * 64 = 6784, in hex = 1A80
 # - For data size up to 1408 the address is 1A80 for size from 1409 the address is 1A40
 BOOTLOADER_ADDRESS = 1A80
 

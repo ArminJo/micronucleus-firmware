@@ -82,9 +82,9 @@ The recommended configuration is *entry_on_power_on_no_pullup_fast_exit_on_no_US
 - Start even if pullup is disconnected. Otherwise the bootloader hangs forever, if you commect the Pullup to USB-VCC to save power.
 - Fast exit of bootloader (after 600 ms) if there is no host program sending us data (to upload a new userprogram/sketch).
 
-#### Hex files for these configuration are already available in the [releases](/firmware/releases) and [upgrades](/firmware/upgrades) folders.
+#### Hex files for these configuration are already available in the [releases](https://github.com/ArminJo/micronucleus-firmware/firmware/releases) and [upgrades](https://github.com/ArminJo/micronucleus-firmware/firmware/upgrades) folders.
 
 ## Create your own configuration
-You can easily create your own configuration by adding a new *firmware/configuration* directory and adjusting *bootloaderconfig.h* and *Makefile.inc*. Before you run the *firmware/make_all.cmd* script, check the arduino directory path in the [`firmware/SetPath.cmd`](/firmware/SetPath.cmd#L1) file.<br/>
+You can easily create your own configuration by adding a new *firmware/configuration* directory and adjusting *bootloaderconfig.h* and *Makefile.inc*. Before you run the *firmware/make_all.cmd* script, check the arduino directory path in the [`firmware/SetPath.cmd`](https://github.com/ArminJo/micronucleus-firmware/firmware/SetPath.cmd#L1) file.<br/>
 If changes to the configuration lead to an increase in bootloader size, it may be necessary to change the bootloader start address as described [above](#computing-the-values) or in the *Makefile.inc*.
 Feel free to supply a pull request if you added and tested a previously unsupported device.
