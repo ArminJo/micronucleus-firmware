@@ -101,5 +101,10 @@ Size of binary hexfile. Use the "data" size to calculate the bootloader address:
 Building Micronucleus configuration: t88_default 
 Size of binary hexfile. Use the "data" size to calculate the bootloader address: 
    text	   data	    bss	    dec	    hex	filename
-      0	   1452	      0	   1452	    5ac	main.hex
+      0	   1470	      0	   1470	    5be	main.hex
+- 
+Building Micronucleus configuration: t88_entry_on_power_on_no_pullup_fast_exit_on_no_USB 
+Size of binary hexfile. Use the "data" size to calculate the bootloader address: 
+   text	   data	    bss	    dec	    hex	filename
+      0	   1510	      0	   1510	    5e6	main.hex
 - 
