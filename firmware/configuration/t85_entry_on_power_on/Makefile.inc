@@ -3,7 +3,7 @@
 # License: GNU GPL v2 (see License.txt)
 
 # Controller type: ATtiny 85 - 16.5 MHz
-# Configuration:   t85_entry_on_power_on
+# Configuration:   Default configuration + ENTRY_POWER_ON + LED
 # Last Change:     4/2020
  
 # Enable safe optimizations. This will disable several unnecesary instructions in microncleus to save around 12 more bytes.

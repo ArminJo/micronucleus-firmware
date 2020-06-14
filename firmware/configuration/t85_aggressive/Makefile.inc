@@ -4,7 +4,7 @@
 
 # Controller type: ATtiny 85
 # Configuration:   Size optimized. Uses 16 MHz V-USB implementation, which may be instable with some computers
-# Last Change:     Jan 11,2015
+# Last Change:     Jun 16,2020
 
 # Enable unsafe optimizations. This will disable several safety features in microncleus to save around 40 more bytes
 #

@@ -4,14 +4,14 @@
  * according to the hardware.
  *
  * Controller type: ATtiny 167 - 16 MHz with crystal
- * Configuration:   Standard configuration - Follows Digispark Pro defaults. Needs 16Mhz XTAL.
+ * Configuration:   Standard configuration + ENTRY_EXT_RESET + START_WITHOUT_PULLUP + LED
  *       USB D- :   PB3
  *       USB D+ :   PB6
- *       Entry  :   Always
- *       LED    :   Active High on PB1
+ *       Entry  :   ENTRY_EXT_RESET
+ *       LED    :   ACTIVE_HIGH on PB1
  *       OSCCAL :   No change due to external crystal
  * Note: Uses 16 MHz V-USB implementation.
- * Last Change:     JUn 15,2015
+ * Last Change:     Jun 16,2020
  *
  * License: GNU GPL v2 (see License.txt
  */

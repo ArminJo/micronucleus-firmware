@@ -3,8 +3,8 @@
 # License: GNU GPL v2 (see License.txt)
 
 # Controller type: ATtiny 85 - 16.5 MHz
-# Configuration:   Default
-# Last Change:     Mar 16,2014
+# Configuration:   Default + ENTRY_POWER_ON + START_WITHOUT_PULLUP + LED
+# Last Change:     Jun 16,2020
  
  
 F_CPU = 16500000

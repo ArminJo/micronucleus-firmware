@@ -7,11 +7,11 @@
  * Configuration:   Default configuration + ENTRY_POWER_ON + START_WITHOUT_PULLUP + FAST_EXIT_NO_USB_MS=300
  *       USB D- :   PB3
  *       USB D+ :   PB4
- *       Entry  :   Always
+ *       Entry  :   Power on
  *       LED    :   None
  *       OSCCAL :   Stays at 16 MHz
  * Note: Uses 16.5 MHz V-USB implementation with PLL
- * Last Change:     Mar 16,2014
+ * Last Change:     Jun 16,2020
  *
  * License: GNU GPL v2 (see License.txt
  */

@@ -4,14 +4,14 @@
  * according to the hardware.
  *
  * Controller type: ATtiny 85 - 16.5 MHz
- * Configuration:   Default configuration + ENTRY_POWER_ON
+ * Configuration:   Default configuration + ENTRY_POWER_ON + LED
  *       USB D- :   PB3
  *       USB D+ :   PB4
- *       Entry  :   Always
- *       LED    :   None
+ *       Entry  :   ENTRY_POWER_ON
+ *       LED    :   ACTIVE_HIGH on B1
  *       OSCCAL :   Stays at 16 MHz
  * Note: Uses 16.5 MHz V-USB implementation with PLL
- * Last Change:     Mar 16,2014
+ * Last Change:     Jun 16,2020
  *
  * License: GNU GPL v2 (see License.txt
  */

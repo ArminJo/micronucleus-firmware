@@ -3,8 +3,8 @@
 # License: GNU GPL v2 (see License.txt)
 
 # Controller type: ATtiny 85 - 16.5 MHz
-# Configuration:   t85_fast_exit_on_no_USB
-# Last Change:     4/2020
+# Configuration:   Default + FAST_EXIT_NO_USB_MS=300 + LED
+# Last Change:     Jun 16,2020
 
 # Enable safe optimizations. This will disable several unnecesary instructions in microncleus to save around 12 more bytes.
 # These optimizations disables entering the bootloader with jmp 0000, which you should not do anyway - better use the watchdog timer reset functionality.
