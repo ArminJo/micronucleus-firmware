@@ -24,18 +24,18 @@ Clean Micronucleus devices without uploaded userprogram will not time out and al
 ![Boards Manager](https://github.com/ArminJo/DigistumpArduino/blob/master/pictures/Digistump1.6.8.jpg)<br/>
 
 # Update the bootloader to the new version
-To **update** your old flash consuming **bootloader**, jou have 2 choices.
+To **update** your old flash consuming **bootloader**, you have 2 choices.
 1. Using the [new Digistump board manager](https://github.com/ArminJo/DigistumpArduino#update-the-bootloader) (see above).<br/>
 2. Run one of the Windows [scripts](https://github.com/ArminJo/micronucleus-firmware/tree/master/utils)
-like e.g. the [Burn_upgrade-t85_default.cmd](utils/Burn_upgrade-t85_default.cmd).
+like e.g. the [Burn_upgrade-t85_default.cmd](utils/Burn_upgrade-t85_default.cmd). The internal mechanism is described [here](https://github.com/ArminJo/micronucleus-firmware/blob/master/firmware/upgrades/README.md).
 
-### If you want to burn the bootloader to an **ATtiny87** or **ATtiny167** with avrdude, you must use the *avrdude.config* file in `windows_exe` where ATtiny87 and ATtiny167 specifications are added.
+### If you want to burn the bootloader to an **ATtiny87** or **ATtiny167** with avrdude, you must use the [avrdude.config file](https://raw.githubusercontent.com/ArminJo/micronucleus-firmware/master/windows_exe/avrdude.conf) in `windows_exe` where [ATtiny87](https://github.com/ArminJo/micronucleus-firmware/blob/master/windows_exe/avrdude.conf#L15055) and [ATtiny167](https://github.com/ArminJo/micronucleus-firmware/blob/master/windows_exe/avrdude.conf#L15247) specifications are added.
 
 # Configuration overview
 If not otherwise noted, the OSCCAL value is calibrated (+/- 1%) after boot for all ATtiny85 configurations
 | Configuration | Available FLASH | Bootloader size | Non default config flags set |
 |---------------|-----------------|-----------------|------------------------------|
-| t85_aggressive<br/><br/>It works for my Digispark boards without any problems :-) | 6780 | 1392 | [Do not provide calibrated OSCCAL, if no USB attached](t85_aggressive/bootloaderconfig.h#L220), [ENABLE_UNSAFE_OPTIMIZATIONS](#enable_unsafe_optimizations)<br/>Relying on calibrated 16MHz internal clock stability, not using the 16.5 MHz USB driver version with integrated PLL. This causes the main memory saving. |
+| t85_aggressive<br/><br/>It works for my Digispark boards without any problems :-) | 6780 | 1392 | [Do not provide calibrated OSCCAL, if no USB attached](/firmware/configuration/t85_aggressive/bootloaderconfig.h#L220), [ENABLE_UNSAFE_OPTIMIZATIONS](#enable_unsafe_optimizations)<br/>Relying on calibrated 16MHz internal clock stability, not using the 16.5 MHz USB driver version with integrated PLL. This causes the main memory saving. |
 |  |  |  |  |
 | t85_default | 6586 | 1544 | - |
 | t85_entry_on_power_on | 6586 | 1580 | [ENTRY_POWER_ON](#entry_power_on-entry-condition), LED_MODE=ACTIVE_HIGH |
@@ -44,7 +44,7 @@ If not otherwise noted, the OSCCAL value is calibrated (+/- 1%) after boot for a
 | **t85_entry_on_power_on_no_pullup_fast_exit_on_no_USB**<br/>[recommended configuration](#recommended-configuration) | 6586 | 1584 | [ENTRY_POWER_ON](#entry_power_on-entry-condition), [START_WITHOUT_PULLUP](#start_without_pullup), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit) |
 | t85_entry_on_power_on_pullup_at_0 | 6586 | 1568 | [ENTRY_POWER_ON](#entry_power_on-entry-condition), USB_CFG_PULLUP_IOPORTNAME + USB_CFG_PULLUP_BIT |
 | t85_fast_exit_on_no_USB | 6586 | 1570 | [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), LED_MODE=ACTIVE_HIGH |
-| t85_entry_on_reset_no_pullup | 6582 | 1600 | [ENTRY_EXT_RESET](#entry_ext_reset-entry-condition), [START_WITHOUT_PULLUP](#start_without_pullup), LED_MODE=ACTIVE_HIGH |
+| t85_entry_on_reset_no_pullup | 6586 | 1600 | [ENTRY_EXT_RESET](#entry_ext_reset-entry-condition), [START_WITHOUT_PULLUP](#start_without_pullup), LED_MODE=ACTIVE_HIGH |
 |  |  |  |  |
 | t88_default | 6714 | 1470 | LED_MODE=ACTIVE_HIGH |
 | **t88_entry_on_power_on_no_pullup_fast_exit_on_no_USB**<br/>[recommended configuration](#recommended-configuration) | 6650 | 1510 | [ENTRY_POWER_ON](#entry_power_on-entry-condition), [START_WITHOUT_PULLUP](#start_without_pullup), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), LED_MODE=ACTIVE_HIGH |
@@ -67,7 +67,7 @@ If not otherwise noted, the OSCCAL value is calibrated (+/- 1%) after boot for a
 - [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit) - If not connected to USB (e.g. powered via VIN) the userprogram starts after 300 ms (+ initial 300 ms) -> 600 ms.
 - [START_WITHOUT_PULLUP](#start_without_pullup) - Bootloader does not hang up, if no pullup is activated/connected.
 - [ENABLE_SAFE_OPTIMIZATIONS](#enable_safe_optimizations) - jmp 0x0000 does not initialize the stackpointer.
-- [LED_MODE=ACTIVE_HIGH](https://github.com/ArminJo/micronucleus-firmware/blob/eebe73c46e7780d52c92e6f1c00c72edc26b7769/firmware/main.c#L527) - The built in LED flashes during the 5 seconds of the bootloader waiting for commands.
+- [LED_MODE=ACTIVE_HIGH](https://github.com/ArminJo/micronucleus-firmware/blob/master/firmware/main.c#L527) - The built in LED flashes during the 5 seconds of the bootloader waiting for commands.
 
 ## Computing the values
 The actual memory footprint for each configuration can be found in the file [*firmware/build.log*](firmware/build.log).<br/>
@@ -82,43 +82,43 @@ For *t167_default.hex* (as well as for the other t167 configurations) with the n
 
 # Configuration Options
 
-## [`FAST_EXIT_NO_USB_MS`](t85_fast_exit_on_no_USB/bootloaderconfig.h#L184) for fast bootloader exit
+## [`FAST_EXIT_NO_USB_MS`](/firmware/configuration/t85_fast_exit_on_no_USB/bootloaderconfig.h#L184) for fast bootloader exit
 If the bootloader is entered, it requires 300 ms to initialize USB connection (disconnect and reconnect). 
 100 ms after this 300 ms initialization, the bootloader receives a reset, if the host application wants to program the device.<br/>
 This enable us to wait for 200 ms after initialization for a reset and if no reset detected to exit the bootloader and start the user program. 
 So the user program is started with a 500 ms delay after power up (or reset) even if we do not specify a special entry condition.<br/>
 The 100 ms time to reset may depend on the type of host CPU etc., so I took 200 ms to be safe. 
 
-## [`ENTRY_POWER_ON`](t85_entry_on_power_on/bootloaderconfig.h#L108) entry condition
+## [`ENTRY_POWER_ON`](/firmware/configuration/t85_entry_on_power_on/bootloaderconfig.h#L108) entry condition
 The `ENTRY_POWER_ON` configuration adds 18 bytes to the ATtiny85 default configuration, but this behavior is **what you normally need** if you use a Digispark board, since it is programmed by attaching to the USB port resulting in power up.<br/>
 In this configuration **a reset will immediately start your userprogram** without any delay.<br/>
 Do not forget to **reset the flags in setup()** with `MCUSR = 0;` to make it work!<br/>
 
-## [`ENTRY_EXT_RESET`](t85_entry_on_reset_no_pullup/bootloaderconfig.h#L122) entry condition
+## [`ENTRY_EXT_RESET`](/firmware/configuration/t85_entry_on_reset_no_pullup/bootloaderconfig.h#L122) entry condition
 The ATtiny85 has the bug, that it sets the `External Reset Flag` also on power up. To guarantee a correct behavior for `ENTRY_EXT_RESET` condition, it is checked if only this flag is set **and** all MCUSR flags are **always reset** before start of user program. The latter is done to avoid bricking the device by fogetting to reset the `PORF` flag in the user program.<br/>
 The content of the MCUSR is copied to the OCR1C register before clearing the flags. This enables the user program to interprete it.<br/>
 For ATtiny167 it is even worse, it sets the `External Reset Flag` and the `Brown-out Reset Flag` also on power up. Here the MCUSR content is copied to the ICR1L register before clearing.<br/>
 
-## [`START_WITHOUT_PULLUP`](t85_entry_on_power_on_no_pullup_fast_exit_on_no_USB/bootloaderconfig.h#L207)
+## [`START_WITHOUT_PULLUP`](/firmware/configuration/t85_entry_on_power_on_no_pullup_fast_exit_on_no_USB/bootloaderconfig.h#L207)
 The `START_WITHOUT_PULLUP` configuration adds 16 to 18 bytes for an additional check. It is required for low energy applications, where the pullup is directly connected to the USB-5V and not to the CPU-VCC. Since this check was contained by default in all pre 2.0 versions, it is obvious that **it can also be used for boards with a pullup**.
 
-## [`ENABLE_SAFE_OPTIMIZATIONS`](https://github.com/ArminJo/micronucleus-firmware/tree/master/firmware/crt1.S#L99)
-This configuration is specified in the [Makefile.inc](t85_fast_exit_on_no_USB/Makefile.inc#L18) file and will [disable the restoring of the stack pointer](firmware/crt1.S#L102) at the start of program, whis is normally done by reset anyway. These optimization disables reliable entering the bootloader with `jmp 0x0000`, which you should not do anyway - better use the watchdog timer reset functionality.<br/>
+## [`ENABLE_SAFE_OPTIMIZATIONS`](/firmware/crt1.S#L99)
+This configuration is referenced in the [Makefile.inc](/firmware/configuration/t85_fast_exit_on_no_USB/Makefile.inc#L18) file and will [disable the restoring of the stack pointer](https://github.com/ArminJo/micronucleus-firmware/blob/master/firmware/crt1.S#L102) at the start of program, whis is normally done by reset anyway. These optimization disables reliable entering the bootloader with `jmp 0x0000`, which you should not do anyway - better use the watchdog timer reset functionality.<br/>
 - Gains 10 bytes.
 
-## [`ENABLE_UNSAFE_OPTIMIZATIONS`](https://github.com/ArminJo/micronucleus-firmware/tree/master/firmware/crt1.S#L99)
+## [`ENABLE_UNSAFE_OPTIMIZATIONS`](/firmware/crt1.S#L99)
 - Includes [`ENABLE_SAFE_OPTIMIZATIONS`](#enable_safe_optimizations).
 - The bootloader reset vector is written by the host and not by the bootloader itself. In case of an disturbed communication the reset vector may be wrong -but I have never experienced it.
 
-You have a slightly bigger chance to brick the bootloader, which reqires it to be reprogrammed by [avrdude](windows_exe) -command files can be found [here](utils)- and an ISP or an Arduino as ISP.
+You have a slightly bigger chance to brick the bootloader, which reqires it to be reprogrammed by [avrdude](windows_exe) and an ISP or an Arduino as ISP. Command files for this can be found [here](/utils).
 
-## [Recommended](t85_entry_on_power_on_no_pullup_fast_exit_on_no_USB) configuration
+## [Recommended](/firmware/configuration/t85_entry_on_power_on_no_pullup_fast_exit_on_no_USB) configuration
 The recommended configuration is *entry_on_power_on_no_pullup_fast_exit_on_no_USB*:
 - Entry on power on, no entry on reset, ie. after a reset the application starts immediately.
 - Start even if pullup is disconnected. Otherwise the bootloader hangs forever, if you commect the Pullup to USB-VCC to save power.
 - Fast exit of bootloader (after 600 ms) if there is no host program sending us data (to upload a new userprogram/sketch).
 
-#### Hex files for these configuration are already available in the [releases](https://github.com/ArminJo/micronucleus-firmware/firmware/releases) and [upgrades](https://github.com/ArminJo/micronucleus-firmware/firmware/upgrades) folders.
+#### Hex files for these configuration are already available in the [releases](/firmware/releases) and [upgrades](/firmware/upgrades) folders.
 
 ## Create your own configuration
 You can easily create your own configuration by adding a new *firmware/configuration* directory and adjusting *bootloaderconfig.h* and *Makefile.inc*. Before you run the *firmware/make_all.cmd* script, check the arduino directory path in the [`firmware/SetPath.cmd`](https://github.com/ArminJo/micronucleus-firmware/firmware/SetPath.cmd#L1) file.<br/>
@@ -126,13 +126,6 @@ If changes to the configuration lead to an increase in bootloader size, it may b
 Feel free to supply a pull request if you added and tested a previously unsupported device.
 
 # Compile instructions for the bootloader are [here](firmware#compiling)
-
-# New features
-## MCUSR content now available in sketch
-In this versions the reset flags in the MCUSR register are no longer cleared by micronucleus and can therefore read out by the sketch!<br/>
-If you use the flags in your program or use the `ENTRY_POWER_ON` boot mode, **you must clear them** with `MCUSR = 0;` **after** saving or evaluating them.
-If you do not reset the flags, and use the `ENTRY_POWER_ON` mode of the bootloader, the bootloader will be entered even after a reset, since the power on reset flag in MCUSR is still set!<br/>
-For `ENTRY_EXT_RESET` configuration see [Fixed wrong ENTRY_EXT_RESET].
 
 # Bootloader memory comparison of different releases for [*t85_default.hex*](firmware/releases/t85_default.hex).
 - V1.6  6012 bytes free
