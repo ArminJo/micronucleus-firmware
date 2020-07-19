@@ -51,9 +51,9 @@
 
 // Postscript are the few bytes at the end of programmable memory which store user program reset vector and optionally OSCCAL calibration
 #if OSCCAL_SAVE_CALIB
-#define POSTSCRIPT_SIZE 6
+#define POSTSCRIPT_SIZE TINYVECTOR_OSCCAL_OFFSET
 #else
-#define POSTSCRIPT_SIZE 4
+#define POSTSCRIPT_SIZE TINYVECTOR_RESET_OFFSET
 #endif
 #define PROGMEM_SIZE (BOOTLOADER_ADDRESS - POSTSCRIPT_SIZE) /* max size of user program */
 
