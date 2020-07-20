@@ -27,7 +27,7 @@ DEVICE = attiny85
 # - How many pages in is that? 6598 / 64 (tiny85 page size in bytes) = 103.09377
 # - round that down to 103
 # - our new bootloader address is 103 * 64 = 6592, in hex = 19C0
-# - For data size up to 1600 the address is 19C0 for size from 1601 to 1664 the address is 1980
+# - For data size from 1536 up to 1600 the address is 19C0 (6586 free) for size from 1601 to 1664 the address is 1980 (6522 free)
 BOOTLOADER_ADDRESS = 19C0
 
 FUSEOPT = -U lfuse:w:0xe1:m -U hfuse:w:0xdd:m -U efuse:w:0xfe:m

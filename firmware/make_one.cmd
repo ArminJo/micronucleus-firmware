@@ -4,7 +4,7 @@ if not exist releases MKDIR releases
 if not exist upgrades MKDIR upgrades
 
 rem Set TARGET=t85_entry_on_power_on_USB_detect_no_pullup
-Set TARGET=t88_default
+Set TARGET=t85_entry_on_power_on
 echo.
 echo **********************************************************
 echo make Configuration %TARGET%

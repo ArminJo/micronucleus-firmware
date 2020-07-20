@@ -154,12 +154,13 @@
 #elif ENTRYMODE==ENTRY_EXT_RESET
 // On my ATtiny85 I have always 0x03 EXTRF | PORF after power on.
 // After reset only EXTRF is NEWLY set.
-// So we must reset at least PORF flag ALWAYS after checking for entry condition,
+// So we must reset at least PORF flag ALWAYS after checking for this entry condition,
 // otherwise entry condition will NEVER be true if application does not reset PORF.
-// To be able to interpret MCUSR flags in user program, it is copied to the OCR1C register.
+// To be able to interpret MCUSR flags in user program, it is copied to the GPIOR0 register.
+// Use "if (MCUSR != 0) tMCUSRStored = MCUSR; else tMCUSRStored = GPIOR0;"
 // In turn we can just clear MCUSR, which saves flash.
   #define bootLoaderInit()
-  #define bootLoaderExit() {OCR1C=MCUSR; MCUSR = 0;} // Adds 6 bytes
+  #define bootLoaderExit() {GPIOR0=MCUSR; MCUSR = 0;} // Adds 6 bytes
   #define bootLoaderStartCondition() (MCUSR == _BV(EXTRF)) // Adds 18 bytes
 #elif ENTRYMODE==ENTRY_JUMPER
   // Enable pull up on jumper pin and delay to stabilize input
@@ -168,7 +169,10 @@
   #define bootLoaderStartCondition() (!(JUMPER_INP & _BV(JUMPER_PIN)))
 #elif ENTRYMODE==ENTRY_POWER_ON
   #define bootLoaderInit()
-  #define bootLoaderExit()
+// We must reset PORF flag after checking for entry condition to prepare for the next time.
+// To be able to interpret MCUSR flags in user program, it is copied to the OCR1C register.
+// Use "if (MCUSR != 0) tMCUSRStored = MCUSR; else tMCUSRStored = GPIOR0;"
+  #define bootLoaderExit() {GPIOR0 = MCUSR; MCUSR = 0;} // Adds 6 bytes
   #define bootLoaderStartCondition() (MCUSR&_BV(PORF))
 #else
    #error "No entry mode defined"
@@ -211,10 +215,10 @@
  *  Defines the setting of the RC-oscillator calibration after quitting the bootloader. (OSCCAL)
  *
  *  OSCCAL_RESTORE_DEFAULT    Set this to '1' to revert to OSCCAL factory calibration after bootloader exit.
- *                            This is 8 MHz +/-2% on most devices or 16 MHz on the ATtiny 85 with activated PLL.
+ *                            This is 8 MHz +/-2% on most devices for 16 MHz on the ATtiny 85 with activated PLL.
  *                            Adds ~14 bytes.
  *
- *  OSCCAL_SAVE_CALIB         Set this to '1' to save the OSCCAL calibration during program upload.
+ *  OSCCAL_SAVE_CALIB         Set this to '1' to save the OSCCAL calibration during program upload in FLASH.
  *                            This value will be reloaded after reset and will also be used for the user
  *                            program unless "OSCCAL_RESTORE_DEFAULT" is active. This allows calibrate the internal
  *                            RC oscillator to the F_CPU target frequency +/-1% from the USB timing. Please note
