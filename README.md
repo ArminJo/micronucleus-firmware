@@ -1,5 +1,5 @@
 # Micronucleus USB Bootloader for ATtinies / Digisparks
-### Version 2.5
+### Version 2.5.1
 [![License: GPL v2](https://img.shields.io/badge/License-GPLv2-blue.svg)](https://www.gnu.org/licenses/gpl-2.0)
 [![Hit Counter](https://hitcounter.pythonanywhere.com/count/tag.svg?url=https://github.com/ArminJo/micronucleus-firmware)](https://github.com/brentvollebregt/hit-counter)
 
@@ -173,6 +173,9 @@ INT1 9 (D3) PA3  4|    |17  PB3 (D11) 4 OC1BV USB-
 
 ```
 # Revision History
+### Version 2.5.1
+- Swapped D+ and D- for t88 to support MH-ET LIVE Tiny88 boards.
+
 ### Version 2.5
 - Saved 2 bytes by removing for loop at leaveBootloader().
 - Saved 2 bytes by defining __DELAY_BACKWARD_COMPATIBLE__ for _delay_ms().
