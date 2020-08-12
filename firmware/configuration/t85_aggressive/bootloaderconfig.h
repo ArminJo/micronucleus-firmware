@@ -33,6 +33,7 @@
 #define USB_CFG_DMINUS_BIT      3
 /* This is the bit number in USB_CFG_IOPORT where the USB D- line is connected.
  * This may be any bit in the port.
+ * USB- has a 1.5k pullup resistor to indicate a low-speed device.
  */
 #define USB_CFG_DPLUS_BIT       4
 /* This is the bit number in USB_CFG_IOPORT where the USB D+ line is connected.

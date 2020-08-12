@@ -98,6 +98,7 @@ In this configuration **a reset will immediately start your userprogram** withou
 The ATtiny85 has the bug, that it sets the `External Reset Flag` also on power up. To guarantee a correct behavior for `ENTRY_EXT_RESET` condition, it is checked if only this flag is set **and** `MCUSR` is cleared before start of user program. The latter is done to avoid bricking the device by fogetting to reset the `PORF` flag in the user program.<br/>
 For ATtiny167 it is even worse, it sets the `External Reset Flag` and the `Brown-out Reset Flag` also on power up.<br/>
 The content of the `MCUSR` is copied to the `GPIOR0` register before clearing it. This enables the user program to evaluate its original content.
+**ATTENTION! If the external reset pin is disabled, this entry mode will brick the board!**
 
 ## [`START_WITHOUT_PULLUP`](/firmware/configuration/t85_entry_on_power_on_no_pullup_fast_exit_on_no_USB/bootloaderconfig.h#L207)
 The `START_WITHOUT_PULLUP` configuration adds 16 to 18 bytes for an additional check. It is required for low energy applications, where the pullup is directly connected to the USB-5V and not to the CPU-VCC. Since this check was contained by default in all pre 2.0 versions, it is obvious that **it can also be used for boards with a pullup**.
@@ -146,7 +147,7 @@ Feel free to supply a pull request if you added and tested a previously unsuppor
                        +----+
   USB+ and USB- are each connected to a 3.3 volt Zener to GND and with a 68 Ohm series resistor to the ATtiny pin.
   On boards with a micro USB connector, the series resistor is 22 Ohm instead of 68 Ohm. 
-  USB- has a 1k pullup resistor to indicate a low-speed device (standard says 1k5).                  
+  USB- has a 1.5k pullup resistor to indicate a low-speed device.                  
   USB+ and USB- are each terminated on the host side with 15k to 25k pull-down resistors.
 ```
 
