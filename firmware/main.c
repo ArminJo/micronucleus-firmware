@@ -58,7 +58,7 @@
 #define PROGMEM_SIZE (BOOTLOADER_ADDRESS - POSTSCRIPT_SIZE) /* max size of user program */
 
 // verify the bootloader address aligns with page size
-#if (defined __AVR_ATtiny841__)||(defined __AVR_ATtiny441__)
+#if (defined __AVR_ATtiny841__)||(defined __AVR_ATtiny441__)||(defined __AVR_ATtiny1634__)
 #if BOOTLOADER_ADDRESS % ( SPM_PAGESIZE * 4 ) != 0
 #error "BOOTLOADER_ADDRESS in makefile must be a multiple of chip's pagesize"
 #endif
@@ -143,7 +143,7 @@ static inline void eraseApplication(void) {
     uint16_t ptr = BOOTLOADER_ADDRESS; // from Makefile.inc
 
     while (ptr) {
-#if (defined __AVR_ATtiny841__)||(defined __AVR_ATtiny441__)
+#if (defined __AVR_ATtiny841__)||(defined __AVR_ATtiny441__)||(defined __AVR_ATtiny1634__)
     ptr -= SPM_PAGESIZE * 4;
 #else
         ptr -= SPM_PAGESIZE;
@@ -159,7 +159,7 @@ static inline void eraseApplication(void) {
          * __SPM_REG = (__BOOT_PAGE_ERASE);
          * asm volatile("spm" : : "z" ((uint16_t)(ptr))); // the value of ptr is used and can not be optimized away
          */
-#if (defined __AVR_ATmega328P__)||(defined __AVR_ATmega168P__)||(defined __AVR_ATmega88P__)
+#if (defined __AVR_ATmega328P__)||(defined __AVR_ATmega168P__)||(defined __AVR_ATmega88P__)||(defined __AVR_ATtiny828__)
     // the ATmegaATmega328p/168p/88p don't halt the CPU when writing to RWW flash, so we need to wait here
     boot_spm_busy_wait();
 #endif
@@ -175,7 +175,7 @@ static inline void eraseApplication(void) {
 static inline void writeFlashPage(void) {
     if (currentAddress.w - 2 < BOOTLOADER_ADDRESS) {
         boot_page_write(currentAddress.w - 2);   // will halt CPU, no waiting required
-#if (defined __AVR_ATmega328P__)||(defined __AVR_ATmega168P__)||(defined __AVR_ATmega88P__)
+#if (defined __AVR_ATmega328P__)||(defined __AVR_ATmega168P__)||(defined __AVR_ATmega88P__)||(defined __AVR_ATtiny828__)
     // the ATmega328p/168p/88p don't halt the CPU when writing to RWW flash
     boot_spm_busy_wait();
 #endif
@@ -321,7 +321,7 @@ __attribute__((__noreturn__)) static inline void leaveBootloader(void) {
   asm volatile("nop"); // NOP to avoid CPU hickup during oscillator stabilization
 #endif
 
-#if (defined __AVR_ATmega328P__)||(defined __AVR_ATmega168P__)||(defined __AVR_ATmega88P__)
+#if (defined __AVR_ATmega328P__)||(defined __AVR_ATmega168P__)||(defined __AVR_ATmega88P__)||(defined __AVR_ATtiny828__)
   // Tell the system that we want to read from the RWW memory again.
   boot_rww_enable();
 #endif
