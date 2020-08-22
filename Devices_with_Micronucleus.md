@@ -17,7 +17,7 @@ Please note that Micronucleus is a completely independent project and is not afi
 
 - [Wattuino Nanite 85](http://www.watterott.com/en/Wattuino-Nanite85) by [Watterott](http://www.watterott.com) - Manufacturable redesign of the Nanite 85
 
-- [BBtech ATtiny85 board](https://www.tindie.com/products/BBTech/attiny85-usb-development-tool-board/) - Well designed ATtiny85 board in Trinket form factor. Discontinued(?)
+- [BBtech ATtiny85 board](https://www.tindie.com/products/BBTech/attiny85-usb-development-tool-board-for-arduino-v0/) - Well designed ATtiny85 board in Trinket form factor. Discontinued.
 
 - [Iteadduino Tiny](http://imall.iteadstudio.com/im130615003.html) by Itead
 
@@ -25,7 +25,7 @@ Please note that Micronucleus is a completely independent project and is not afi
 
 - [LaborTageBadge2013](http://www.das-labor.org/wiki/LaborTageBadge2013) - Badge with ATtiny85
 
-- [Franzininho](https://github.com/Franzininho/franzininho-diy-board) - Franzininho designed by Fábio Souza and Thalis Antunes for Arduino Day 2017 at São Paulo / Brazil.
+- [Franzininho](https://github.com/Franzininho/franzininho-diy-board) - Franzininho designed by FÃ¡bio Souza and Thalis Antunes for Arduino Day 2017 at SÃ£o Paulo / Brazil.
 
 - [TinyStick](https://gitlab.com/nonchip/tinystick) - A simple open source Attiny85 board in a "usb stick on PCB" form factor simply exposes ISP and PortB without any onboard LED/button pin hogging. by Kyra 'nonchip' Zimmer
 
