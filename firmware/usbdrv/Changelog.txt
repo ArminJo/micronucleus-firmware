@@ -327,3 +327,8 @@ Scroll down to the bottom to see the most recent changes.
   - Prepared repository for github.com.
 
 * Release 2012-12-06
+
+* picoNucleus 2020-08
+  - strip out everything except EP0 control endpoint
+  - supported speeds limited to 12, 16, & 16.5
+

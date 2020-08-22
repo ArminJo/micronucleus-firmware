@@ -150,16 +150,9 @@ bootloader.o: bootloader.raw
 
 bootloader.h: bootloader.o
 #	@echo generating bootloader.h
-# for internal echo command
-	@echo extern const uint8_t $* [] PROGMEM;> $@
-	@echo extern const uint8_t $*_end [] PROGMEM;>> $@
-	@echo extern const uint8_t $*_size_sym [];>> $@
-	@echo #define $*_size ( (int) $*_size_sym )>> $@
-	@echo #define $*_address 0x$(BOOTLOADER_ADDRESS)>> $@
-
 # for unix echo command
-#	@echo "extern const uint8_t" $*"[] PROGMEM;" > $@
-#	@echo "extern const uint8_t" $*_end"[] PROGMEM;" >> $@
-#	@echo "extern const uint8_t" $*_size_sym"[];" >> $@
-#	@echo "#define $*_size ( (int) $*_size_sym )" >> $@
-#	@echo "#define $*_address 0x$(BOOTLOADER_ADDRESS)" >> $@
+	@echo "extern const uint8_t" $*"[] PROGMEM;" > $@
+	@echo "extern const uint8_t" $*_end"[] PROGMEM;" >> $@
+	@echo "extern const uint8_t" $*_size_sym"[];" >> $@
+	@echo "#define $*_size ( (int) $*_size_sym )" >> $@
+	@echo "#define $*_address 0x$(BOOTLOADER_ADDRESS)" >> $@

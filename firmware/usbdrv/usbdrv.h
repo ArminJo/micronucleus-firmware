@@ -22,17 +22,13 @@ pull-down or pull-up of 1M SHOULD be connected from D+ to +3.5V to prevent
 interference when no USB master is connected. If you use Zener diodes to limit
 the voltage on D+ and D-, you MUST use a pull-down resistor, not a pull-up.
 We use D+ as interrupt source and not D- because it does not trigger on
-keep-alive and RESET states. If you want to count keep-alive events with
-USB_COUNT_SOF, you MUST use D- as an interrupt source.
+keep-alive and RESET states.
 
 As a compile time option, the 1.5k pull-up resistor on D- can be made
 switchable to allow the device to disconnect at will. See the definition of
 usbDeviceConnect() and usbDeviceDisconnect() further down in this file.
 
 Please adapt the values in usbconfig.h according to your hardware!
-
-The device MUST be clocked at exactly 12 MHz, 15 MHz, 16 MHz or 20 MHz
-or at 12.8 MHz resp. 16.5 MHz +/- 1%. See usbconfig-prototype.h for details.
 
 
 Limitations:
@@ -58,23 +54,6 @@ Number of endpoints:
 The driver supports the following endpoints:
 
 - Endpoint 0, the default control endpoint.
-- Any number of interrupt- or bulk-out endpoints. The data is sent to
-  usbFunctionWriteOut() and USB_CFG_IMPLEMENT_FN_WRITEOUT must be defined
-  to 1 to activate this feature. The endpoint number can be found in the
-  global variable 'usbRxToken'.
-- One default interrupt- or bulk-in endpoint. This endpoint is used for
-  interrupt- or bulk-in transfers which are not handled by any other endpoint.
-  You must define USB_CFG_HAVE_INTRIN_ENDPOINT in order to activate this
-  feature and call usbSetInterrupt() to send interrupt/bulk data.
-- One additional interrupt- or bulk-in endpoint. This was endpoint 3 in
-  previous versions of this driver but can now be configured to any endpoint
-  number. You must define USB_CFG_HAVE_INTRIN_ENDPOINT3 in order to activate
-  this feature and call usbSetInterrupt3() to send interrupt/bulk data. The
-  endpoint number can be set with USB_CFG_EP3_NUMBER.
-
-Please note that the USB standard forbids bulk endpoints for low speed devices!
-Most operating systems allow them anyway, but the AVR will spend 90% of the CPU
-time in the USB interrupt polling for bulk data.
 
 Maximum data payload:
 Data payload of control in and out transfers may be up to 254 bytes. In order
@@ -82,15 +61,13 @@ to accept payload data of out transfers, you need to implement
 'usbFunctionWrite()'.
 
 USB Suspend Mode supply current:
-The USB standard limits power consumption to 500uA when the bus is in suspend
+The USB standard limits power consumption to 2.5mA when the bus is in suspend
 mode. This is not a problem for self-powered devices since they don't need
 bus power anyway. Bus-powered devices can achieve this only by putting the
 CPU in sleep mode. The driver does not implement suspend handling by itself.
 However, the application may implement activity monitoring and wakeup from
 sleep. The host sends regular SE0 states on the bus to keep it active. These
-SE0 states can be detected by using D- as the interrupt source. Define
-USB_COUNT_SOF to 1 and use the global variable usbSofCount to check for bus
-activity.
+SE0 states can be detected by using D- as the interrupt source.
 
 Operation without an USB master:
 The driver behaves neutral without connection to an USB master if D- reads
@@ -164,16 +141,10 @@ extern "C" {
 #endif
 /* shortcuts for well defined 8 bit integer types */
 
-#if USB_CFG_LONG_TRANSFERS  /* if more than 254 bytes transfer size required */
-#   define usbMsgLen_t unsigned
-#else
 #   define usbMsgLen_t uchar
-#endif
 /* usbMsgLen_t is the data type used for transfer lengths. By default, it is
  * defined to uchar, allowing a maximum of 254 bytes (255 is reserved for
- * USB_NO_MSG below). If the usbconfig.h defines USB_CFG_LONG_TRANSFERS to 1,
- * a 16 bit data type is used, allowing up to 16384 bytes (the rest is used
- * for flags in the descriptor configuration).
+ * USB_NO_MSG below). 
  */
 #define USB_NO_MSG  ((usbMsgLen_t)-1)   /* constant meaning "no message" */
 
@@ -250,25 +221,7 @@ USB_PUBLIC usbMsgLen_t usbFunctionDescriptor(struct usbRequest *rq);
  * usbFunctionSetup() above, but it is called only to request USB descriptor
  * data. See the documentation of usbFunctionSetup() above for more info.
  */
-#if USB_CFG_HAVE_INTRIN_ENDPOINT
-USB_PUBLIC void usbSetInterrupt(uchar *data, uchar len);
-/* This function sets the message which will be sent during the next interrupt
- * IN transfer. The message is copied to an internal buffer and must not exceed
- * a length of 8 bytes. The message may be 0 bytes long just to indicate the
- * interrupt status to the host.
- * If you need to transfer more bytes, use a control read after the interrupt.
- */
-#define usbInterruptIsReady()   (usbTxLen1 & 0x10)
-/* This macro indicates whether the last interrupt message has already been
- * sent. If you set a new interrupt message before the old was sent, the
- * message already buffered will be lost.
- */
-#if USB_CFG_HAVE_INTRIN_ENDPOINT3
-USB_PUBLIC void usbSetInterrupt3(uchar *data, uchar len);
-#define usbInterruptIsReady3()   (usbTxLen3 & 0x10)
-/* Same as above for endpoint 3 */
-#endif
-#endif /* USB_CFG_HAVE_INTRIN_ENDPOINT */
+
 #if USB_CFG_HID_REPORT_DESCRIPTOR_LENGTH    /* simplified interface for backward compatibility */
 #define usbHidReportDescriptor  usbDescriptorHidReport
 /* should be declared as: PROGMEM char usbHidReportDescriptor[]; */
@@ -279,46 +232,8 @@ USB_PUBLIC void usbSetInterrupt3(uchar *data, uchar len);
  * Otherwise you should probably start with a working example.
  */
 #endif  /* USB_CFG_HID_REPORT_DESCRIPTOR_LENGTH */
-#if USB_CFG_IMPLEMENT_FN_WRITE
-USB_PUBLIC uchar usbFunctionWrite(uchar *data, uchar len);
-/* This function is called by the driver to provide a control transfer's
- * payload data (control-out). It is called in chunks of up to 8 bytes. The
- * total count provided in the current control transfer can be obtained from
- * the 'length' property in the setup data. If an error occurred during
- * processing, return 0xff (== -1). The driver will answer the entire transfer
- * with a STALL token in this case. If you have received the entire payload
- * successfully, return 1. If you expect more data, return 0. If you don't
- * know whether the host will send more data (you should know, the total is
- * provided in the usbFunctionSetup() call!), return 1.
- * NOTE: If you return 0xff for STALL, 'usbFunctionWrite()' may still be called
- * for the remaining data. You must continue to return 0xff for STALL in these
- * calls.
- * In order to get usbFunctionWrite() called, define USB_CFG_IMPLEMENT_FN_WRITE
- * to 1 in usbconfig.h and return 0xff in usbFunctionSetup()..
- */
-#endif /* USB_CFG_IMPLEMENT_FN_WRITE */
-#if USB_CFG_IMPLEMENT_FN_READ
-USB_PUBLIC uchar usbFunctionRead(uchar *data, uchar len);
-/* This function is called by the driver to ask the application for a control
- * transfer's payload data (control-in). It is called in chunks of up to 8
- * bytes each. You should copy the data to the location given by 'data' and
- * return the actual number of bytes copied. If you return less than requested,
- * the control-in transfer is terminated. If you return 0xff, the driver aborts
- * the transfer with a STALL token.
- * In order to get usbFunctionRead() called, define USB_CFG_IMPLEMENT_FN_READ
- * to 1 in usbconfig.h and return 0xff in usbFunctionSetup()..
- */
-#endif /* USB_CFG_IMPLEMENT_FN_READ */
 
 extern uchar usbRxToken;    /* may be used in usbFunctionWriteOut() below */
-#if USB_CFG_IMPLEMENT_FN_WRITEOUT
-USB_PUBLIC void usbFunctionWriteOut(uchar *data, uchar len);
-/* This function is called by the driver when data is received on an interrupt-
- * or bulk-out endpoint. The endpoint number can be found in the global
- * variable usbRxToken. You must define USB_CFG_IMPLEMENT_FN_WRITEOUT to 1 in
- * usbconfig.h to get this function called.
- */
-#endif /* USB_CFG_IMPLEMENT_FN_WRITEOUT */
 #ifdef USB_CFG_PULLUP_IOPORTNAME
 #define usbDeviceConnect()      ((USB_PULLUP_DDR |= (1<<USB_CFG_PULLUP_BIT)), \
                                   (USB_PULLUP_OUT |= (1<<USB_CFG_PULLUP_BIT)))
@@ -373,40 +288,11 @@ extern uchar    usbConfiguration;
  * You may want to reflect the "configured" status with a LED on the device or
  * switch on high power parts of the circuit only if the device is configured.
  */
-#if USB_COUNT_SOF
-extern volatile uchar   usbSofCount;
-/* This variable is incremented on every SOF packet. It is only available if
- * the macro USB_COUNT_SOF is defined to a value != 0.
- */
-#endif
-#if USB_CFG_CHECK_DATA_TOGGLING
-extern uchar    usbCurrentDataToken;
-/* This variable can be checked in usbFunctionWrite() and usbFunctionWriteOut()
- * to ignore duplicate packets.
- */
-#endif
 
 #define USB_STRING_DESCRIPTOR_HEADER(stringLength) ((2*(stringLength)+2) | (3<<8))
 /* This macro builds a descriptor header for a string descriptor given the
  * string's length. See usbdrv.c for an example how to use it.
  */
-#if USB_CFG_HAVE_FLOWCONTROL
-extern volatile schar   usbRxLen;
-#define usbDisableAllRequests()     usbRxLen = -1
-/* Must be called from usbFunctionWrite(). This macro disables all data input
- * from the USB interface. Requests from the host are answered with a NAK
- * while they are disabled.
- */
-#define usbEnableAllRequests()      usbRxLen = 0
-/* May only be called if requests are disabled. This macro enables input from
- * the USB interface after it has been disabled with usbDisableAllRequests().
- */
-#define usbAllRequestsAreDisabled() (usbRxLen < 0)
-/* Use this macro to find out whether requests are disabled. It may be needed
- * to ensure that usbEnableAllRequests() is never called when requests are
- * enabled.
- */
-#endif
 
 #define USB_SET_DATATOKEN1(token)   usbTxBuf1[0] = token
 #define USB_SET_DATATOKEN3(token)   usbTxBuf3[0] = token
@@ -590,14 +476,6 @@ int usbDescriptorStringSerialNumber[];
 #define USB_CFG_PULLUP_IOPORT   USB_OUTPORT(USB_CFG_PULLUP_IOPORTNAME)
 #endif
 
-#ifndef USB_CFG_EP3_NUMBER  /* if not defined in usbconfig.h */
-#define USB_CFG_EP3_NUMBER  3
-#endif
-
-#ifndef USB_CFG_HAVE_INTRIN_ENDPOINT3
-#define USB_CFG_HAVE_INTRIN_ENDPOINT3   0
-#endif
-
 #define USB_BUFSIZE     11  /* PID, 8 bytes data, 2 bytes CRC */
 
 /* ----- Try to find registers and bits responsible for ext interrupt 0 ----- */
@@ -610,14 +488,7 @@ int usbDescriptorStringSerialNumber[];
 #   endif
 #endif
 #ifndef USB_INTR_CFG_SET    /* allow user to override our default */
-#   if defined(USB_COUNT_SOF) || defined(USB_SOF_HOOK)
-#       define USB_INTR_CFG_SET (1 << ISC01)                    /* cfg for falling edge */
-        /* If any SOF logic is used, the interrupt must be wired to D- where
-         * we better trigger on falling edge
-         */
-#   else
-#       define USB_INTR_CFG_SET ((1 << ISC00) | (1 << ISC01))   /* cfg for rising edge */
-#   endif
+#   define USB_INTR_CFG_SET ((1 << ISC00) | (1 << ISC01))   /* cfg for rising edge */
 #endif
 #ifndef USB_INTR_CFG_CLR    /* allow user to override our default */
 #   define USB_INTR_CFG_CLR 0    /* no bits to clear */

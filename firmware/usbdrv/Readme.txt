@@ -80,22 +80,6 @@ all AVRs can reach 12.8 MHz, although this is outside the specified range.
 See the EasyLogger example at http://www.obdev.at/vusb/easylogger.html for
 code which calibrates the RC oscillator based on the USB frame clock.
 
-18 MHz Clock
-This module is closer to the USB specification because it performs an on the
-fly CRC check for incoming packets. Packets with invalid checksum are
-discarded as required by the spec. If you also implement checks for data
-PID toggling on application level (see option USB_CFG_CHECK_DATA_TOGGLING
-in usbconfig.h for more info), this ensures data integrity. Due to the CRC
-tables and alignment requirements, this code is bigger than modules for other
-clock rates. To activate this module, you must define USB_CFG_CHECK_CRC to 1
-and USB_CFG_CLOCK_KHZ to 18000 in usbconfig.h.
-
-20 MHz Clock
-This module is for people who won't do it with less than the maximum. Since
-20 MHz is not divisible by the USB low speed bit clock of 1.5 MHz, the code
-uses similar tricks as the 16 MHz module to insert leap cycles.
-
-
 USB IDENTIFIERS
 ===============
 Every USB device needs a vendor- and a product-identifier (VID and PID). VIDs
