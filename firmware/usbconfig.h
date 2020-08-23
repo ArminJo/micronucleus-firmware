@@ -166,8 +166,6 @@
  *   USB_CFG_DESCR_PROPS_STRING_VENDOR
  *   USB_CFG_DESCR_PROPS_STRING_PRODUCT
  *   USB_CFG_DESCR_PROPS_STRING_SERIAL_NUMBER
- *   USB_CFG_DESCR_PROPS_HID
- *   USB_CFG_DESCR_PROPS_HID_REPORT
  *   USB_CFG_DESCR_PROPS_UNKNOWN (for all descriptors not handled by the driver)
  *
  * Note about string descriptors: String descriptors are not just strings, they
@@ -185,8 +183,6 @@
 #define USB_CFG_DESCR_PROPS_STRING_VENDOR           0
 #define USB_CFG_DESCR_PROPS_STRING_PRODUCT          0
 #define USB_CFG_DESCR_PROPS_STRING_SERIAL_NUMBER    0
-#define USB_CFG_DESCR_PROPS_HID                     0
-#define USB_CFG_DESCR_PROPS_HID_REPORT              0
 #define USB_CFG_DESCR_PROPS_UNKNOWN                 0
 
 #endif /* __usbconfig_h_included__ */

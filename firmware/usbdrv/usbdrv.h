@@ -181,8 +181,8 @@ extern usbMsgPtr_t usbMsgPtr;
  */
 
 extern uchar usbMsgFlags;    /* flag values see USB_FLG_* */
-/* Can be set to `USB_FLG_MSGPTR_IS_ROM` in `usbFunctionSetup()` or
- * `usbFunctionDescriptor()` if `usbMsgPtr` has been set to a flash memory
+/* Can be set to `USB_FLG_MSGPTR_IS_ROM` in `usbFunctionSetup()` 
+ * if `usbMsgPtr` has been set to a flash memory
  * address.
  */
 
@@ -215,23 +215,6 @@ USB_PUBLIC usbMsgLen_t usbFunctionSetup(uchar data[8]);
  * Note that calls to the functions usbFunctionRead() and usbFunctionWrite()
  * are only done if enabled by the configuration in usbconfig.h.
  */
-USB_PUBLIC usbMsgLen_t usbFunctionDescriptor(struct usbRequest *rq);
-/* You need to implement this function ONLY if you provide USB descriptors at
- * runtime (which is an expert feature). It is very similar to
- * usbFunctionSetup() above, but it is called only to request USB descriptor
- * data. See the documentation of usbFunctionSetup() above for more info.
- */
-
-#if USB_CFG_HID_REPORT_DESCRIPTOR_LENGTH    /* simplified interface for backward compatibility */
-#define usbHidReportDescriptor  usbDescriptorHidReport
-/* should be declared as: PROGMEM char usbHidReportDescriptor[]; */
-/* If you implement an HID device, you need to provide a report descriptor.
- * The HID report descriptor syntax is a bit complex. If you understand how
- * report descriptors are constructed, we recommend that you use the HID
- * Descriptor Tool from usb.org, see http://www.usb.org/developers/hidpage/.
- * Otherwise you should probably start with a working example.
- */
-#endif  /* USB_CFG_HID_REPORT_DESCRIPTOR_LENGTH */
 
 extern uchar usbRxToken;    /* may be used in usbFunctionWriteOut() below */
 #ifdef USB_CFG_PULLUP_IOPORTNAME
@@ -312,17 +295,7 @@ extern uchar    usbConfiguration;
  * about the various methods to define USB descriptors. If you do nothing,
  * the default descriptors will be used.
  */
-#define USB_PROP_IS_DYNAMIC     (1u << 14)
-/* If this property is set for a descriptor, usbFunctionDescriptor() will be
- * used to obtain the particular descriptor. Data directly returned via
- * usbMsgPtr are FLASH data by default, combine (OR) with USB_PROP_IS_RAM to
- * return RAM data.
- */
-#define USB_PROP_IS_RAM         (1u << 15)
-/* If this property is set for a descriptor, the data is read from RAM
- * memory instead of Flash. The property is used for all methods to provide
- * external descriptors.
- */
+
 #define USB_PROP_LENGTH(len)    ((len) & 0x3fff)
 /* If a static external descriptor is used, this is the total length of the
  * descriptor in bytes.
@@ -350,17 +323,6 @@ extern uchar    usbConfiguration;
 #ifndef USB_CFG_DESCR_PROPS_STRING_SERIAL_NUMBER
 #define USB_CFG_DESCR_PROPS_STRING_SERIAL_NUMBER    0
 #endif
-#ifndef USB_CFG_DESCR_PROPS_HID
-#define USB_CFG_DESCR_PROPS_HID                     0
-#endif
-#if !(USB_CFG_DESCR_PROPS_HID_REPORT)
-#   undef USB_CFG_DESCR_PROPS_HID_REPORT
-#   if USB_CFG_HID_REPORT_DESCRIPTOR_LENGTH /* do some backward compatibility tricks */
-#       define USB_CFG_DESCR_PROPS_HID_REPORT       USB_CFG_HID_REPORT_DESCRIPTOR_LENGTH
-#   else
-#       define USB_CFG_DESCR_PROPS_HID_REPORT       0
-#   endif
-#endif
 #ifndef USB_CFG_DESCR_PROPS_UNKNOWN
 #define USB_CFG_DESCR_PROPS_UNKNOWN                 0
 #endif
@@ -381,12 +343,6 @@ extern
 PROGMEM const
 #endif
 char usbDescriptorConfiguration[];
-
-extern
-#if !(USB_CFG_DESCR_PROPS_HID_REPORT & USB_PROP_IS_RAM)
-PROGMEM const
-#endif
-char usbDescriptorHidReport[];
 
 extern
 #if !(USB_CFG_DESCR_PROPS_STRING_0 & USB_PROP_IS_RAM)
@@ -445,13 +401,7 @@ int usbDescriptorStringSerialNumber[];
 #endif
 
 #ifndef USB_CFG_DEVICE_ID
-#   if USB_CFG_HID_REPORT_DESCRIPTOR_LENGTH
-#       define USB_CFG_DEVICE_ID    0xdf, 0x05  /* = 0x5df = 1503, shared PID for HIDs */
-#   elif USB_CFG_INTERFACE_CLASS == 2
-#       define USB_CFG_DEVICE_ID    0xe1, 0x05  /* = 0x5e1 = 1505, shared PID for CDC Modems */
-#   else
-#       define USB_CFG_DEVICE_ID    0xdc, 0x05  /* = 0x5dc = 1500, obdev's free PID */
-#   endif
+#   define USB_CFG_DEVICE_ID    0xdc, 0x05  /* = 0x5dc = 1500, obdev's free PID */
 #endif
 
 /* Derive Output, Input and DataDirection ports from port names */
@@ -621,22 +571,11 @@ typedef struct usbRequest{
 #define USBDESCR_STRING         3
 #define USBDESCR_INTERFACE      4
 #define USBDESCR_ENDPOINT       5
-#define USBDESCR_HID            0x21
-#define USBDESCR_HID_REPORT     0x22
-#define USBDESCR_HID_PHYS       0x23
 
 //#define USBATTR_BUSPOWER        0x80  // USB 1.1 does not define this value any more
 #define USBATTR_BUSPOWER        0
 #define USBATTR_SELFPOWER       0x40
 #define USBATTR_REMOTEWAKE      0x20
-
-/* USB HID Requests */
-#define USBRQ_HID_GET_REPORT    0x01
-#define USBRQ_HID_GET_IDLE      0x02
-#define USBRQ_HID_GET_PROTOCOL  0x03
-#define USBRQ_HID_SET_REPORT    0x09
-#define USBRQ_HID_SET_IDLE      0x0a
-#define USBRQ_HID_SET_PROTOCOL  0x0b
 
 /* ------------------------------------------------------------------------- */
 

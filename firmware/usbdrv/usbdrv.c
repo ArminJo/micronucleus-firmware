@@ -16,7 +16,8 @@
  *       * remove msgflag variable and all handling involving it
  */
 
- // code cleanup and optimization by Ralph Doncaster 2020
+ // code cleanup and optimization by Ralph Doncaster 2020-08
+
 
 #define MNHACK_ONLY_FLASH_MSGPTR
 /*     b) Do not use preinitialized global variables to avoid having to initialize
@@ -57,10 +58,6 @@ usbMsgPtr_t         usbMsgPtr;      /* data to transmit next -- ROM or RAM addre
   static usbMsgLen_t  usbMsgLen; /* remaining number of bytes */
 #else
   static usbMsgLen_t  usbMsgLen = USB_NO_MSG; /* remaining number of bytes */
-#endif
-
-#ifndef MNHACK_ONLY_FLASH_MSGPTR
-uchar        usbMsgFlags;    /* flag values see USB_FLG_* */
 #endif
 
 #define USB_FLG_USE_USER_RW     (1<<7)
@@ -144,19 +141,13 @@ PROGMEM const char usbDescriptorDevice[] = {    /* USB device descriptor */
 
 /* ----------------------- Configuration Descriptor ------------------------ */
 
-#if USB_CFG_DESCR_PROPS_HID_REPORT != 0 && USB_CFG_DESCR_PROPS_HID == 0
-#undef USB_CFG_DESCR_PROPS_HID
-#define USB_CFG_DESCR_PROPS_HID     9   /* length of HID descriptor in config descriptor below */
-#endif
-
 #if USB_CFG_DESCR_PROPS_CONFIGURATION == 0
 #undef USB_CFG_DESCR_PROPS_CONFIGURATION
 #define USB_CFG_DESCR_PROPS_CONFIGURATION   sizeof(usbDescriptorConfiguration)
 PROGMEM const char usbDescriptorConfiguration[] = {    /* USB configuration descriptor */
     9,          /* sizeof(usbDescriptorConfiguration): length of descriptor in bytes */
     USBDESCR_CONFIG,    /* descriptor type */
-    18 + (USB_CFG_DESCR_PROPS_HID & 0xff), 0,
-                /* total length of data returned (including inlined descriptors) */
+    18, 0,      /* total length of data returned (including inlined descriptors) */
     1,          /* number of interfaces in this configuration */
     1,          /* index of this configuration */
     0,          /* configuration name string index */
@@ -172,16 +163,6 @@ PROGMEM const char usbDescriptorConfiguration[] = {    /* USB configuration desc
     USB_CFG_INTERFACE_SUBCLASS,
     USB_CFG_INTERFACE_PROTOCOL,
     0,          /* string index for interface */
-#if (USB_CFG_DESCR_PROPS_HID & 0xff)    /* HID descriptor */
-    9,          /* sizeof(usbDescrHID): length of descriptor in bytes */
-    USBDESCR_HID,   /* descriptor type: HID */
-    0x01, 0x01, /* BCD representation of HID version */
-    0x00,       /* target country code */
-    0x01,       /* number of HID Report (or other HID class) Descriptor infos to follow */
-    0x22,       /* descriptor type: report */
-    (USB_CFG_HID_REPORT_DESCRIPTOR_LENGTH & 0xFF), /* descriptor length (low byte) */
-    ((USB_CFG_HID_REPORT_DESCRIPTOR_LENGTH >> 8) & 0xFF), /*            (high byte) */
-#endif
 };
 #endif
 
@@ -232,39 +213,19 @@ static inline void  usbResetStall(void)
  * This may cause problems with undefined symbols if compiled without
  * optimizing!
  */
-#ifndef MNHACK_ONLY_FLASH_MSGPTR
-  #define GET_DESCRIPTOR(cfgProp, staticName)         \
-      if(cfgProp){                                    \
-          if((cfgProp) & USB_PROP_IS_RAM)             \
-              flags = 0;                              \
-          if((cfgProp) & USB_PROP_IS_DYNAMIC){        \
-              len = usbFunctionDescriptor(rq);        \
-          }else{                                      \
-              len = USB_PROP_LENGTH(cfgProp);         \
-              usbMsgPtr = (usbMsgPtr_t)(staticName);  \
-          }                                           \
-      }
-#else
 // no ram descriptor possible here
 #define GET_DESCRIPTOR(cfgProp, staticName)         \
     if(cfgProp){                                    \
-        if((cfgProp) & USB_PROP_IS_DYNAMIC){        \
-            len = usbFunctionDescriptor(rq);        \
-        }else{                                      \
-            len = USB_PROP_LENGTH(cfgProp);         \
-            usbMsgPtr = (usbMsgPtr_t)(staticName);  \
-        }                                           \
+        len = USB_PROP_LENGTH(cfgProp);             \
+        usbMsgPtr = (usbMsgPtr_t)(staticName);      \
     }
-#endif
+
 /* usbDriverDescriptor() is similar to usbFunctionDescriptor(), but used
  * internally for all types of descriptors.
  */
 static inline usbMsgLen_t usbDriverDescriptor(usbRequest_t *rq)
 {
     usbMsgLen_t len = 0;
-#ifndef MNHACK_ONLY_FLASH_MSGPTR
-    uchar       flags = USB_FLG_MSGPTR_IS_ROM;
-#endif
 
     SWITCH_START(rq->wValue.bytes[1])
     SWITCH_CASE(USBDESCR_DEVICE)    /* 1 */
@@ -272,13 +233,6 @@ static inline usbMsgLen_t usbDriverDescriptor(usbRequest_t *rq)
     SWITCH_CASE(USBDESCR_CONFIG)    /* 2 */
         GET_DESCRIPTOR(USB_CFG_DESCR_PROPS_CONFIGURATION, usbDescriptorConfiguration)
     SWITCH_CASE(USBDESCR_STRING)    /* 3 */
-#if USB_CFG_DESCR_PROPS_STRINGS & USB_PROP_IS_DYNAMIC
-        if(USB_CFG_DESCR_PROPS_STRINGS & USB_PROP_IS_RAM)
-#ifndef MNHACK_ONLY_FLASH_MSGPTR
-           flags = 0;
-#endif
-        len = usbFunctionDescriptor(rq);
-#else   /* USB_CFG_DESCR_PROPS_STRINGS & USB_PROP_IS_DYNAMIC */
         SWITCH_START(rq->wValue.bytes[0])
         SWITCH_CASE(0)
             GET_DESCRIPTOR(USB_CFG_DESCR_PROPS_STRING_0, usbDescriptorString0)
@@ -289,37 +243,10 @@ static inline usbMsgLen_t usbDriverDescriptor(usbRequest_t *rq)
         SWITCH_CASE(3)
             GET_DESCRIPTOR(USB_CFG_DESCR_PROPS_STRING_SERIAL_NUMBER, usbDescriptorStringSerialNumber)
         SWITCH_DEFAULT
-            if(USB_CFG_DESCR_PROPS_UNKNOWN & USB_PROP_IS_DYNAMIC){
-                if(USB_CFG_DESCR_PROPS_UNKNOWN & USB_PROP_IS_RAM){
-#ifndef MNHACK_ONLY_FLASH_MSGPTR
-                    flags = 0;
-#endif
-                }
-                len = usbFunctionDescriptor(rq);
-            }
         SWITCH_END
-#endif  /* USB_CFG_DESCR_PROPS_STRINGS & USB_PROP_IS_DYNAMIC */
-#if USB_CFG_DESCR_PROPS_HID_REPORT  /* only support HID descriptors if enabled */
-    SWITCH_CASE(USBDESCR_HID)       /* 0x21 */
-        GET_DESCRIPTOR(USB_CFG_DESCR_PROPS_HID, usbDescriptorConfiguration + 18)
-    SWITCH_CASE(USBDESCR_HID_REPORT)/* 0x22 */
-        GET_DESCRIPTOR(USB_CFG_DESCR_PROPS_HID_REPORT, usbDescriptorHidReport)
-#endif
     SWITCH_DEFAULT
-        if(USB_CFG_DESCR_PROPS_UNKNOWN & USB_PROP_IS_DYNAMIC){
-            if(USB_CFG_DESCR_PROPS_UNKNOWN & USB_PROP_IS_RAM){
-#ifndef MNHACK_ONLY_FLASH_MSGPTR
-                flags = 0;
-#endif
-            }
-            len = usbFunctionDescriptor(rq);
-        }
     SWITCH_END
 
-//    flags=flags;  // Make compiler shut up about unused variable -> leads to another warning :-(
-#ifndef MNHACK_ONLY_FLASH_MSGPTR
-    usbMsgFlags = flags;
-#endif
     return len;
 }
 
@@ -384,9 +311,6 @@ usbRequest_t    *rq = (void *)data;
         usbMsgLen_t replyLen;
         usbTxBuf[0] = USBPID_DATA0;         /* initialize data toggling */
         usbTxLen = USBPID_NAK;              /* abort pending transmit */
-#ifndef MNHACK_ONLY_FLASH_MSGPTR
-        usbMsgFlags = 0;
-#endif
         uchar type = rq->bmRequestType & USBRQ_TYPE_MASK;
         if(type != USBRQ_TYPE_STANDARD){    /* standard requests are handled by driver */
             replyLen = usbFunctionSetup(data); // for USBRQ_TYPE_CLASS or USBRQ_TYPE_VENDOR
@@ -413,27 +337,14 @@ usbRequest_t    *rq = (void *)data;
 static uchar usbDeviceRead(uchar *data, uchar len)
 {
     if(len > 0){    /* don't bother app with 0 sized reads */
-        {
-            uchar i = len;
-            usbMsgPtr_t r = usbMsgPtr;
-#ifndef MNHACK_ONLY_FLASH_MSGPTR
-            if(usbMsgFlags & USB_FLG_MSGPTR_IS_ROM){    /* ROM data */
-#endif
-                do{
-                    uchar c = USB_READ_FLASH(r);    /* assign to char size variable to enforce byte ops */
-                    *data++ = c;
-                    r++;
-                }while(--i);
-#ifndef MNHACK_ONLY_FLASH_MSGPTR
-             }else{  // RAM data
-                do{
-                    *data++ = *((uchar *)r);
-                    r++;
-                }while(--i);
-            }
-#endif
-            usbMsgPtr = r;
-        }
+        uchar i = len;
+        usbMsgPtr_t r = usbMsgPtr;
+        do{
+            uchar c = USB_READ_FLASH(r);    /* assign to char size variable to enforce byte ops */
+            *data++ = c;
+            r++;
+        }while(--i);
+        usbMsgPtr = r;
     }
     return len;
 }
