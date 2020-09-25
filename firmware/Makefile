@@ -70,7 +70,7 @@ disablereset:
 	$(AVRDUDE) $(FUSEOPT_DISABLERESET) -B 20
 
 read_fuses:
-	$(UISP) --rd_fuses -B 20
+	$(AVRDUDE) -B 20
 
 clean:
 	@rm -f main.hex main.bin main.c.lst main.map main.raw *.o usbdrv/*.o main.s usbdrv/oddebug.s usbdrv/usbdrv.s usbdrv/oddebug.c.lst main.lss main.lst

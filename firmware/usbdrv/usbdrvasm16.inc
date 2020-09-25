@@ -3,7 +3,7 @@
  * Author: Christian Starkjohann
  * Creation Date: 2007-06-15
  * Tabsize: 4
- * 5/2020 ArminJo Saved 28 bytes by converting USB_INTR_VECTOR in *usbdrvasm165.inc* from ISR with pushes to a plain function.
+ * 5/2020 ArminJo Saved 28 bytes by converting USB_INTR_VECTOR in *usbdrvasm16.inc* from ISR with pushes to a plain function.
  * one push is still left
  * Copyright: (c) 2007 by OBJECTIVE DEVELOPMENT Software GmbH
  * License: GNU GPL v2 (see License.txt), GNU GPL v3 or proprietary (CommercialLicense.txt)
@@ -32,7 +32,7 @@ of CPU cycles, but even an exact number of cycles!
 ; when instruction starts
 
 USB_INTR_VECTOR:
-;order of registers pushed: YL, SREG YH, [sofError], bitcnt, shift, x1, x2, x3, x4, cnt
+;order of registers pushed: YL, SREG, YH, [sofError], bitcnt, shift, x1, x2, x3, x4, cnt
 #    push    YL                  ;[-25] push only what is necessary to sync with edge ASAP
 #    in      YL, SREG            ;[-23]
 #    push    YL                  ;[-22]
