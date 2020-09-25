@@ -135,19 +135,12 @@ Feel free to supply a pull request if you added and tested a previously unsuppor
 - V2.04 6522 bytes free
 - V2.5  **6586** bytes free
 
-# Tips and Tricks
-
-## Unknown USB Device (Device Descriptor Request Failed) entry in device manager
-The bootloader finishes with an active disconnect from USB and after 300 ms setting back both D- and D+ line ports to input.
-This in turn enables the pullup resistor indicating a low-speed device, which makes the host try to reconnect to the digispark.
-If you have loaded a sketch without USB communication, the host can not find any valid USB device and reflects this in the device manager.
-**You can avoid this by actively disconnecting from the host by pulling the D- line to low.**<br/>
-A short beep at startup with e.g. tone(3, 2000, 200) will pull the D- line low and keep the module disconnected.
-The old v1 micronucleus versions do not disconnect from the host and therefore do not show this entry.
-
-## Periodically disconnect->connect if no sketch is loaded
-This is a side effect of enabling the bootloader to timeout also when traffic from other USB devices is present on the bus.
-It can be observed e.g. in the old 1.06 version too and can be used to determine if the board is programmed or still empty.
+# USB device manager entry / disconnect from USB
+To avoid periodically disconnect->connect if no sketch is loaded and an unknown USB Device (Device Descriptor Request Failed) entry in device manager when entering user program, **the bootloader finishes without an active disconnect from USB**.<br/>
+This means that you still can see a libusb-win32 decive / Digispark Bootloader in the Device manager, even when it is not alive, since your program has taken over the control of the CPU.<br/>
+This behavior is compatible to the old v1 micronucleus versions, which also do not disconnect from the host.
+**You can avoid this by actively disconnecting from the host by pulling the D- line to low for around 300 milliseconds.**<br/>
+E.g a short beep at startup with tone(3, 2000, 200) will pull the D- line low and keep the module disconnected.
 
 # Pin layout
 ### ATtiny85 on Digispark
