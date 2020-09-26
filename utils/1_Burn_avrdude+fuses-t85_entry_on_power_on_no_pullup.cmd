@@ -11,11 +11,12 @@ REM The files t85_no_pullup.hex and t85_entry_on_power_on_no_pullup.hex are iden
 @echo. Writing ATtiny85 Hfuse to 0xDF - External Reset pin enabled (Pin5 not usable as I/O) + BOD disabled + Enable Serial Program and Data Downloading
 @echo. Writing ATtiny85 EFuse to 0xFE - self programming enabled.
 @echo.
-@if exist t85_entry_on_power_on_no_pullup.hex  (
-  avrdude -pt85 -cstk500v1 -PCOM6 -b19200 -u -Uflash:w:t85_entry_on_power_on_no_pullup.hex:a -Ulfuse:w:0xE1:m -Uhfuse:w:0xDF:m -Uefuse:w:0xFE:m
+set FILENAME=t85_entry_on_power_on_no_pullup.hex
+@if exist %FILENAME% (
+  avrdude -pt85 -cstk500v1 -PCOM6 -b19200 -u -Uflash:w:%FILENAME%:a -Ulfuse:w:0xE1:m -Uhfuse:w:0xDF:m -Uefuse:w:0xFE:m
   goto end
 )
 @rem Try another path
-avrdude -pt85 -cstk500v1 -PCOM6 -b19200 -u -Uflash:w:..\firmware\releases\t85_entry_on_power_on_no_pullup.hex:a -Ulfuse:w:0xE1:m -Uhfuse:w:0xDF:m -Uefuse:w:0xFE:m
+avrdude -pt85 -cstk500v1 -PCOM6 -b19200 -u -Uflash:w:..\firmware\releases\%FILENAME%:a -Ulfuse:w:0xE1:m -Uhfuse:w:0xDF:m -Uefuse:w:0xFE:m
 :end
 pause

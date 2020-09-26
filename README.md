@@ -35,31 +35,32 @@ like e.g. the [Burn_upgrade-t85_default.cmd](utils/Burn_upgrade-t85_default.cmd)
 If not otherwise noted, the OSCCAL value is calibrated (+/- 1%) after boot for all ATtiny85 configurations
 | Configuration | Available FLASH | Bootloader size | Non default config flags set |
 |---------------|-----------------|-----------------|------------------------------|
-| t85_aggressive<br/><br/>It works for my Digispark boards without any problems :-) | 6780 | 1392 | [Do not provide calibrated OSCCAL, if no USB attached](/firmware/configuration/t85_aggressive/bootloaderconfig.h#L220), [ENABLE_UNSAFE_OPTIMIZATIONS](#enable_unsafe_optimizations)<br/>Relying on calibrated 16MHz internal clock stability, not using the 16.5 MHz USB driver version with integrated PLL. This causes the main memory saving. |
+| t85_aggressive<br/><br/>It works for my Digispark boards without any problems :-) | 6780 | 1364 | [Do not provide calibrated OSCCAL, if no USB attached](/firmware/configuration/t85_aggressive/bootloaderconfig.h#L220), [ENABLE_UNSAFE_OPTIMIZATIONS](#enable_unsafe_optimizations)<br/>Relying on calibrated 16MHz internal clock stability, not using the 16.5 MHz USB driver version with integrated PLL. This causes the main memory saving. |
 |  |  |  |  |
-| t85_default | 6586 | 1544 | - |
-| t85_entry_on_power_on | 6586 | 1586 | [ENTRY_POWER_ON](#entry_power_on-entry-condition), LED_MODE=ACTIVE_HIGH |
-| t85_entry_on_power_on_no_pullup | 6586 | 1600 | [ENTRY_POWER_ON](#entry_power_on-entry-condition), [START_WITHOUT_PULLUP](#start_without_pullup), LED_MODE=ACTIVE_HIGH |
-| t85_entry_on_power_on_<br/>fast_exit_on_no_USB | 6586 | 1594 | [ENTRY_POWER_ON](#entry_power_on-entry-condition), [START_WITHOUT_PULLUP](#start_without_pullup), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), LED_MODE=ACTIVE_HIGH |
-| **t85_entry_on_power_on_<br/>no_pullup_fast_exit_on_no_USB**<br/>[recommended configuration](#recommended-configuration) | 6586 | 1590 | [ENTRY_POWER_ON](#entry_power_on-entry-condition), [START_WITHOUT_PULLUP](#start_without_pullup), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit) |
+| t85_default | 6650 | 1528 | - |
+| t85_entry_on_power_on | 6586 | 1570 | [ENTRY_POWER_ON](#entry_power_on-entry-condition), LED_MODE=ACTIVE_HIGH |
+| t85_entry_on_power_on_no_pullup | 6586 | 1584 | [ENTRY_POWER_ON](#entry_power_on-entry-condition), [START_WITHOUT_PULLUP](#start_without_pullup), LED_MODE=ACTIVE_HIGH |
+| t85_entry_on_power_on_<br/>fast_exit_on_no_USB | 6586 | 1578 | [ENTRY_POWER_ON](#entry_power_on-entry-condition), [START_WITHOUT_PULLUP](#start_without_pullup), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), LED_MODE=ACTIVE_HIGH |
+| **t85_entry_on_power_on_<br/>no_pullup_fast_exit_on_no_USB**<br/>[recommended configuration](#recommended-configuration) | 6586 | 1592 | [ENTRY_POWER_ON](#entry_power_on-entry-condition), [START_WITHOUT_PULLUP](#start_without_pullup), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), LED_MODE=ACTIVE_HIGH |
 | t85_entry_on_power_on_pullup_at_0 | 6586 | 1574 | [ENTRY_POWER_ON](#entry_power_on-entry-condition), USB_CFG_PULLUP_IOPORTNAME + USB_CFG_PULLUP_BIT |
-| t85_fast_exit_on_no_USB | 6586 | 1570 | [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), LED_MODE=ACTIVE_HIGH |
-| t85_entry_on_reset_no_pullup | 6586 | 1600 | [ENTRY_EXT_RESET](#entry_ext_reset-entry-condition), [START_WITHOUT_PULLUP](#start_without_pullup), LED_MODE=ACTIVE_HIGH |
+| t85_fast_exit_on_no_USB | 6586 | 1554 | [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), LED_MODE=ACTIVE_HIGH |
+| t85_entry_on_reset_no_pullup | 6586 | 1584 | [ENTRY_EXT_RESET](#entry_ext_reset-entry-condition), [START_WITHOUT_PULLUP](#start_without_pullup), LED_MODE=ACTIVE_HIGH |
+| t85_entry_on_reset_<br/>no_pullup_fast_exit_on_no_USB | 6586 | 1592 | [ENTRY_EXT_RESET](#entry_ext_reset-entry-condition), [START_WITHOUT_PULLUP](#start_without_pullup), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), LED_MODE=ACTIVE_HIGH<br/>Bootloader timeout increased to 15 seconds (if connected to USB). |
 |  |  |  |  |
-| t88_default | 6714 | 1470 | LED_MODE=ACTIVE_HIGH |
-| **t88_entry_on_power_on_<br/>no_pullup_fast_exit_on_no_USB**<br/>[recommended configuration](#recommended-configuration) | 6650 | 1516 | [ENTRY_POWER_ON](#entry_power_on-entry-condition), [START_WITHOUT_PULLUP](#start_without_pullup), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), LED_MODE=ACTIVE_HIGH |
+| t88_default | 6714 | 1442 | LED_MODE=ACTIVE_HIGH |
+| **t88_entry_on_power_on_<br/>no_pullup_fast_exit_on_no_USB**<br/>[recommended configuration](#recommended-configuration) | 6650 | 1488 | [ENTRY_POWER_ON](#entry_power_on-entry-condition), [START_WITHOUT_PULLUP](#start_without_pullup), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), LED_MODE=ACTIVE_HIGH |
 |  |  |  |  |
-| t167_default | 14970 | 1350 | - |
-| t167_entry_on_power_on_no_pullup | 14842 | 1394 | [ENTRY_POWER_ON](#entry_power_on-entry-condition), [START_WITHOUT_PULLUP](#start_without_pullup), LED_MODE=ACTIVE_HIGH |
-| **t167_entry_on_power_on_<br/>no_pullup_fast_exit_on_no_USB**<br/>[recommended configuration](#recommended-configuration) | 14842 | 1402 | [ENTRY_POWER_ON](#entry_power_on-entry-condition), [START_WITHOUT_PULLUP](#start_without_pullup), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), LED_MODE=ACTIVE_HIGH |
-| t167_entry_on_reset_no_pullup | 14842 | 1394 | [ENTRY_EXT_RESET](#entry_ext_reset-entry-condition), [START_WITHOUT_PULLUP](#start_without_pullup), LED_MODE=ACTIVE_HIGH |
+| t167_default | 14970 | 1322 | - |
+| t167_entry_on_power_on_no_pullup | 14842 | 1366 | [ENTRY_POWER_ON](#entry_power_on-entry-condition), [START_WITHOUT_PULLUP](#start_without_pullup), LED_MODE=ACTIVE_HIGH |
+| **t167_entry_on_power_on_<br/>no_pullup_fast_exit_on_no_USB**<br/>[recommended configuration](#recommended-configuration) | 14842 | 1374 | [ENTRY_POWER_ON](#entry_power_on-entry-condition), [START_WITHOUT_PULLUP](#start_without_pullup), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), LED_MODE=ACTIVE_HIGH |
+| t167_entry_on_reset_no_pullup | 14842 | 1366 | [ENTRY_EXT_RESET](#entry_ext_reset-entry-condition), [START_WITHOUT_PULLUP](#start_without_pullup), LED_MODE=ACTIVE_HIGH |
 |  |  |  |  |
-| Nanite841 |  | 1594 |  |
-| BitBoss |  | 1588 |  |
-| t84_default |  | 1520 |  |
+| Nanite841 |  | 1566 |  |
+| BitBoss |  | 1560 |  |
+| t84_default |  | 1492 |  |
 |  |  |  |  |
-| m168p_extclock |  | 1510 |  |
-| m328p_extclock |  | 1510 |  |
+| m168p_extclock |  | 1482 |  |
+| m328p_extclock |  | 1482 |  |
 
 ### Legend
 - [ENTRY_POWER_ON](#entry_power_on-entry-condition) - Only enter bootloader on power on, not on reset or brownout.
@@ -181,6 +182,8 @@ INT1 9 (D3) PA3  4|    |17  PB3 (D11) 4 OC1BV USB-
 ```
 # Revision History
 ### Version 2.5.1
+- Saved 28 bytes by `#define USB_CFG_DESCR_PROPS_STRINGS 1`. See #10, thanks to [nerdralph](https://github.com/nerdralph).
+- Use 12 byted by re enabling push and pop of Y register in *usbdrvasm165.inc*. See #11.
 - Swapped D+ and D- for t88 to support MH-ET LIVE Tiny88 boards.
 
 ### Version 2.5

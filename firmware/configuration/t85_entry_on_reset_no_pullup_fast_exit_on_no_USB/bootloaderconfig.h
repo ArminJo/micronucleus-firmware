@@ -4,11 +4,11 @@
  * according to the hardware.
  *
  * Controller type: ATtiny 85 - 16.5 MHz
- * Configuration:   Default configuration + ENTRY_POWER_ON + START_WITHOUT_PULLUP + FAST_EXIT_NO_USB_MS=300
+ * Configuration:   Default configuration + ENTRY_EXT_RESET + START_WITHOUT_PULLUP + LED
  *       USB D- :   PB3
  *       USB D+ :   PB4
- *       Entry  :   Power on
- *       LED    :   None
+ *       Entry  :   ENTRY_EXT_RESET
+ *       LED    :   ACTIVE_HIGH on B1
  *       OSCCAL :   Stays at 16 MHz
  * Note: Uses 16.5 MHz V-USB implementation with PLL
  * Last Change:     Jun 16,2020
@@ -144,7 +144,7 @@
 #define ENTRY_JUMPER    4
 #define ENTRY_POWER_ON  5
 
-#define ENTRYMODE ENTRY_POWER_ON
+#define ENTRYMODE ENTRY_EXT_RESET
 
 #define JUMPER_PIN    PB0
 #define JUMPER_PORT   PORTB
@@ -204,8 +204,8 @@
 
 // I observed 2 resets. First is 100 ms after initial connecting to USB lasting 65 ms and the second 90 ms later and also 65 ms.
 // On my old HP laptop I have different timing: First reset is 220 ms after initial connecting to USB lasting 300 ms and the second is missing.
-#define FAST_EXIT_NO_USB_MS     300 // Values below 120 are ignored. Effective timeout is 300 + FAST_EXIT_NO_USB_MS.
-#define AUTO_EXIT_MS           6000
+#define FAST_EXIT_NO_USB_MS      300 // Values below 120 are ignored. Effective timeout is 300 + FAST_EXIT_NO_USB_MS.
+#define AUTO_EXIT_MS           15000
 
 /* ----------------------- Optional Timeout Config ------------------------ */
 
@@ -223,10 +223,10 @@
  *  Defines the setting of the RC-oscillator calibration after quitting the bootloader. (OSCCAL)
  *
  *  OSCCAL_RESTORE_DEFAULT    Set this to '1' to revert to OSCCAL factory calibration after bootloader exit.
- *                            This is 8 MHz +/-2% on most devices for 16 MHz on the ATtiny 85 with activated PLL.
+ *                            This is 8 MHz +/-2% on most devices or 16 MHz on the ATtiny 85 with activated PLL.
  *                            Adds ~14 bytes.
  *
- *  OSCCAL_SAVE_CALIB         Set this to '1' to save the OSCCAL calibration during program upload in FLASH.
+ *  OSCCAL_SAVE_CALIB         Set this to '1' to save the OSCCAL calibration during program upload.
  *                            This value will be reloaded after reset and will also be used for the user
  *                            program unless "OSCCAL_RESTORE_DEFAULT" is active. This allows calibrate the internal
  *                            RC oscillator to the F_CPU target frequency +/-1% from the USB timing. Please note
