@@ -1,6 +1,7 @@
 # Micronucleus USB Bootloader for ATtinies / Digisparks
 ### Version 2.5.1
 [![License: GPL v2](https://img.shields.io/badge/License-GPLv2-blue.svg)](https://www.gnu.org/licenses/gpl-2.0)
+[![Commits since latest](https://img.shields.io/github/commits-since/ArminJo/micronucleus-firmware/latest)](https://github.com/ArminJo/ServoEasmicronucleus-firmwareing/commits/master)
 [![Hit Counter](https://hitcounter.pythonanywhere.com/count/tag.svg?url=https://github.com/ArminJo/micronucleus-firmware)](https://github.com/brentvollebregt/hit-counter)
 
 Micronucleus is a bootloader designed for AVR ATtiny microcontrollers with a minimal usb interface, cross platform libusb-based program upload tool, and a strong emphasis on bootloader compactness. To the authors knowledge this is, by far, the smallest USB bootloader for AVR ATtiny.<br/>
