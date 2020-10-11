@@ -14,9 +14,9 @@ CONFIG ?= t85_default
 ###############################################################################
 # Configure the following variables according to your AVR.
 # Program the device with
-#     make fuse    		# to set the clock generator, boot section size etc.
-#     make flash   		# to load the boot loader into flash
-#     make disablereset		# use external reset line for IO (CAUTION: this is not easy to enable again, see README)
+#     make fuse    			# to set the clock generator, boot section size etc.
+#     make flash   			# to load the boot loader into flash
+#     make disablereset		# use external reset line for IO (CAUTION: this is not easy to enable again, see README) 
 
 CFLAGS =
 CONFIGBASEPATH	  = configuration
@@ -27,17 +27,17 @@ PROGRAMMER ?= -c USBasp
 # PROGRAMMER contains AVRDUDE options to address your programmer
 
 # Tools:
-AVRDUDE = avrdude $(PROGRAMMER) -p $(DEVICE)
+AVRDUDE = avrdude $(PROGRAMMER) -p $(DEVICE) 
 CC = avr-gcc
 
 # Options:
 CFLAGS += -I. -g2 -Os -Wall -Wextra
-CFLAGS += -I$(CONFIGPATH) -mmcu=$(DEVICE) -DF_CPU=$(F_CPU) -DBOOTLOADER_ADDRESS=0x$(BOOTLOADER_ADDRESS)
+CFLAGS += -I$(CONFIGPATH) -mmcu=$(DEVICE) -DF_CPU=$(F_CPU) -DBOOTLOADER_ADDRESS=0x$(BOOTLOADER_ADDRESS) 
 CFLAGS += -nostartfiles -ffunction-sections -fdata-sections -fpack-struct -fno-inline-small-functions -fno-move-loop-invariants -fno-tree-scev-cprop
 
 LDFLAGS = -Wl,--relax,--section-start=.text=$(BOOTLOADER_ADDRESS),--gc-sections,-Map=main.map
 
-OBJECTS =  crt1.o usbdrv/usbdrvasm.o usbdrv/oddebug.o main.o
+OBJECTS =  crt1.o usbdrv/usbdrvasm.o usbdrv/oddebug.o main.o 
 OBJECTS += osccalASM.o
 
 
@@ -65,7 +65,7 @@ readflash:
 
 fuse:
 	$(AVRDUDE) $(FUSEOPT) -B 20
-
+	
 disablereset:
 	$(AVRDUDE) $(FUSEOPT_DISABLERESET) -B 20
 
@@ -92,12 +92,12 @@ main.hex:	main.bin
 	@avr-objcopy -j .text -j .data -O ihex main.bin main.hex
 	@echo Size of binary hexfile. Use the "data" size to calculate the bootloader address:
 	@avr-size main.hex
-	@echo
 # Output to logfile
 	@echo Building Micronucleus configuration: $(CONFIG) >> build.log
 	@echo Size of binary hexfile. Use the "data" size to calculate the bootloader address: >> build.log
 	@avr-size main.hex >> build.log
-	@echo >> build.log
+	@echo - >> build.log
+
 
 
 disasm:	main.bin upgrade.bin
@@ -113,7 +113,7 @@ CFLAGS_U = -Wall -g2 -Os -fno-move-loop-invariants -fno-tree-scev-cprop -fno-inl
 LDFLAGS_U = -Wl,--relax,--gc-sections -Wl,--section-start=.text=$(APP_ADDRESS),-Map=upgrade.map
 
 
-upgrade.o:	upgrade.c bootloader.h
+upgrade.o: upgrade.c bootloader.h
 	@$(CC) $(CFLAGS_U) -c $< -o $@ $(LDFLAGS_U) -Wa,-ahls=$<.lst
 
 
@@ -125,30 +125,30 @@ upgrade.bin:	upgrade.o bootloader.o
 upgrade.hex:	upgrade.bin
 	@rm -f upgrade.hex upgrade.eep.hex
 	@avr-objcopy -j .text -j .data -O ihex upgrade.bin upgrade-app.hex
-	@echo ":1000000003C003C003C003C003C003C003C003C0D8" > upgrade.hex
+	@echo :1000000003C003C003C003C003C003C003C003C0D8> upgrade.hex
 	@cat upgrade-app.hex >> upgrade.hex
 	@rm upgrade-app.hex
-	@#avr-size upgrade.hex
+	@avr-size upgrade.hex
 
 
-bootloader.raw:	main.hex
-	@avr-objcopy -I ihex -O binary main.hex bootloader.raw
+bootloader.raw: main.hex
+	@avr-objcopy -I ihex -O binary $< $@
 
 
-bootloader.o:	bootloader.raw
+bootloader.o: bootloader.raw
 	@avr-objcopy -I binary -O elf32-avr \
 	--rename-section .data=.text \
-	--redefine-sym _binary_bootloader_raw_start=bootloader \
-	--redefine-sym _binary_bootloader_raw_end=bootloader_end \
-	--redefine-sym _binary_bootloader_raw_size=bootloader_size_sym \
+	--redefine-sym _binary_$*_raw_start=$* \
+	--redefine-sym _binary_$*_raw_end=$*_end \
+	--redefine-sym _binary_$*_raw_size=$*_size_sym \
 	$(AVR_ARCHITECTURE_PARAMETER) \
-	bootloader.raw bootloader.o
+	$< $@
 
 
-bootloader.h:	bootloader.o
-	@#echo generating bootloader.h
-	@echo "extern const uint8_t bootloader[] PROGMEM;" > bootloader.h
-	@echo "extern const uint8_t bootloader_end[] PROGMEM;" >> bootloader.h
-	@echo "extern const uint8_t bootloader_size_sym[];" >> bootloader.h
-	@echo "#define bootloader_size ( (int) bootloader_size_sym )" >> bootloader.h
-	@echo "#define bootloader_address 0x$(BOOTLOADER_ADDRESS)" >> bootloader.h
+bootloader.h: bootloader.o
+#	@echo generating bootloader.h
+#	@echo extern const uint8_t $* [] PROGMEM;> $@
+#	@echo extern const uint8_t $*_end [] PROGMEM;>> $@
+#	@echo extern const uint8_t $*_size_sym [];>> $@
+#	@echo #define $*_size ( (int) $*_size_sym )>> $@
+#	@echo #define $*_address 0x$(BOOTLOADER_ADDRESS)>> $@

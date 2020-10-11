@@ -9,7 +9,7 @@ echo **********************************************************
 echo make Configuration %%C
 echo **********************************************************
 make clean
-make CONFIG=%%C
+make -f Makefile.windows CONFIG=%%C
 mv main.hex releases\%%C.hex
 mv upgrade.hex upgrades\upgrade-%%C.hex
 )

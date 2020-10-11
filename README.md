@@ -25,15 +25,16 @@ Clean Micronucleus devices without uploaded userprogram will not time out and al
 ![Boards Manager](https://github.com/ArminJo/DigistumpArduino/blob/master/pictures/Digistump1.6.8.jpg)<br/>
 
 # Update the bootloader to the new version
-To **update** your old flash consuming **bootloader**, you have 2 choices.
+To **update** your old flash consuming **bootloader**, you have 3 choices.
 1. Using the [new Digistump board manager](https://github.com/ArminJo/DigistumpArduino#update-the-bootloader) (see above).<br/>
 2. Run one of the Windows [scripts](https://github.com/ArminJo/micronucleus-firmware/tree/master/utils)
 like e.g. the [Burn_upgrade-t85_default.cmd](utils/Burn_upgrade-t85_default.cmd). The internal mechanism is described [here](https://github.com/ArminJo/micronucleus-firmware/blob/master/firmware/upgrades/README.md).
-
+3. Or the easiest way - use the command line tool directly: `micronucleus --run upgrade.hex`
 ### If you want to burn the bootloader to an **ATtiny87** or **ATtiny167** with avrdude, you must use the [avrdude.config file](https://raw.githubusercontent.com/ArminJo/micronucleus-firmware/master/windows_exe/avrdude.conf) in `windows_exe` where [ATtiny87](https://github.com/ArminJo/micronucleus-firmware/blob/master/windows_exe/avrdude.conf#L15055) and [ATtiny167](https://github.com/ArminJo/micronucleus-firmware/blob/master/windows_exe/avrdude.conf#L15247) specifications are added.
 
 # Configuration overview
 If not otherwise noted, the OSCCAL value is calibrated (+/- 1%) after boot for all ATtiny85 configurations
+
 | Configuration | Available FLASH | Bootloader size | Non default config flags set |
 |---------------|-----------------|-----------------|------------------------------|
 | t85_aggressive<br/><br/>It works for my Digispark boards without any problems :-) | 6780 | 1364 | [Do not provide calibrated OSCCAL, if no USB attached](/firmware/configuration/t85_aggressive/bootloaderconfig.h#L220), [ENABLE_UNSAFE_OPTIMIZATIONS](#enable_unsafe_optimizations)<br/>Relying on calibrated 16MHz internal clock stability, not using the 16.5 MHz USB driver version with integrated PLL. This causes the main memory saving. |
@@ -45,6 +46,7 @@ If not otherwise noted, the OSCCAL value is calibrated (+/- 1%) after boot for a
 | **t85_entry_on_power_on_<br/>no_pullup_fast_exit_on_no_USB**<br/>[recommended configuration](#recommended-configuration) | 6586 | 1592 | [ENTRY_POWER_ON](#entry_power_on-entry-condition), [START_WITHOUT_PULLUP](#start_without_pullup), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), LED_MODE=ACTIVE_HIGH |
 | t85_entry_on_power_on_pullup_at_0 | 6586 | 1574 | [ENTRY_POWER_ON](#entry_power_on-entry-condition), USB_CFG_PULLUP_IOPORTNAME + USB_CFG_PULLUP_BIT |
 | t85_fast_exit_on_no_USB | 6586 | 1554 | [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), LED_MODE=ACTIVE_HIGH |
+| t85_1s_exit_on_no_USB | 6650 | 1526 | [FAST_EXIT_NO_USB_MS=700](#fast_exit_no_usb_ms-for-fast-bootloader-exit)|
 | t85_entry_on_reset_no_pullup | 6586 | 1584 | [ENTRY_EXT_RESET](#entry_ext_reset-entry-condition), [START_WITHOUT_PULLUP](#start_without_pullup), LED_MODE=ACTIVE_HIGH |
 | t85_entry_on_reset_<br/>no_pullup_fast_exit_on_no_USB | 6586 | 1592 | [ENTRY_EXT_RESET](#entry_ext_reset-entry-condition), [START_WITHOUT_PULLUP](#start_without_pullup), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), LED_MODE=ACTIVE_HIGH<br/>Bootloader timeout increased to 15 seconds (if connected to USB). |
 |  |  |  |  |
@@ -73,7 +75,7 @@ If not otherwise noted, the OSCCAL value is calibrated (+/- 1%) after boot for a
 
 ## Computing the values
 The actual memory footprint for each configuration can be found in the file [*firmware/build.log*](firmware/build.log).<br/>
-Bytes used by the mironucleus bootloader can be computed by taking the data size value in *build.log*, 
+Bytes used by the mironucleus bootloader can be computed by taking the data size value in *build.log*,
 rounding it up to the next multiple of the page size which is e.g. 64 bytes for ATtiny85 and 128 bytes for ATtiny176.<br/>
 Subtracting this (+ 6 byte for postscript) from the total amount of memory will result in the free bytes numbers.
 - Postscript are the few bytes at the end of programmable memory which store tinyVectors.
@@ -85,7 +87,7 @@ For *t167_default.hex* (as well as for the other t167 configurations) with the n
 # Configuration Options
 
 ## [`FAST_EXIT_NO_USB_MS`](/firmware/configuration/t85_fast_exit_on_no_USB/bootloaderconfig.h#L184) for fast bootloader exit
-If the bootloader is entered, it requires minimum 300 ms to initialize USB connection (disconnect and reconnect). 
+If the bootloader is entered, it requires minimum 300 ms to initialize USB connection (disconnect and reconnect).
 100 ms after this 300 ms initialization, the bootloader receives a reset, if the host application wants to program the device.<br/>
 The 100 ms time to reset may depend on the type of host CPU etc., so I took 200 ms to be safe.<br/>
 This configuration waits for 200 ms after initialization for a reset and if no reset detected it exits the bootloader and starts the user program.<br/>
@@ -128,7 +130,7 @@ You can easily create your own configuration by adding a new *firmware/configura
 If changes to the configuration lead to an increase in bootloader size, it may be necessary to change the bootloader start address as described [above](#computing-the-values) or in the *Makefile.inc*.
 Feel free to supply a pull request if you added and tested a previously unsupported device.
 
-# Compile instructions for the bootloader are [here](firmware#compiling)
+# Compile instructions for the bootloader are [here](firmware/upgrades/README.md#prerequisits)
 
 # Bootloader memory comparison of different releases for [*t85_default.hex*](firmware/releases/t85_default.hex).
 - V1.6  6012 bytes free
@@ -155,8 +157,8 @@ E.g a short beep at startup with tone(3, 2000, 200) will pull the D- line low an
                  GND  4|    |5  PB0 (D0) OC0A/AIN0
                        +----+
   USB+ and USB- are each connected to a 3.3 volt Zener to GND and with a 68 Ohm series resistor to the ATtiny pin.
-  On boards with a micro USB connector, the series resistor is 22 Ohm instead of 68 Ohm. 
-  USB- has a 1.5k pullup resistor to indicate a low-speed device.                  
+  On boards with a micro USB connector, the series resistor is 22 Ohm instead of 68 Ohm.
+  USB- has a 1.5k pullup resistor to indicate a low-speed device.
   USB+ and USB- are each terminated on the host side with 15k to 25k pull-down resistors.
 ```
 

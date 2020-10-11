@@ -3,6 +3,8 @@
 mkdir -p releases
 mkdir -p upgrades
 
+rm -f build.log
+
 for config in $(ls configuration) ; do 
 	make clean
 	CONFIG=$config make

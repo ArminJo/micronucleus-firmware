@@ -1,0 +1,24 @@
+#!/bin/bash
+
+# set -u
+
+# T85 sizes
+FLASH_SIZE=8192
+BLOCK_SIZE=64
+
+# get the total program size of the bootloader
+BOOT_SIZE=$(avr-size -A main.hex | grep Total | cut -c6-)
+
+# how many blocks are free for user program?
+USER_BLOCKS=$(( (FLASH_SIZE - BOOT_SIZE) / BLOCK_SIZE ))
+
+# the bootloader starts at the next 64 byte boundary
+BOOTLOADER_ADDRESS=$((BLOCK_SIZE * USER_BLOCKS))
+
+# 6 bytes at the end of user space store tinyVectors
+USER_SPACE=$((BOOTLOADER_ADDRESS - 6 ))
+
+# show the info
+echo User blocks: $USER_BLOCKS
+echo User space:  $USER_SPACE
+printf "0x%X\n" $BOOTLOADER_ADDRESS

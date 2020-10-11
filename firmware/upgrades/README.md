@@ -6,12 +6,13 @@ The program then emits a beep if a piezo speaker is connected between PB1 and GN
 Upgrade has only been tested with micronucleus - use it to upload other bootloaders at your own risk!
 
 ## Prerequisits
-You'll need avr-gcc. For OS X, it can be obtained from http://www.obdev.at/products/crosspack/download.html
+You'll need avr-gcc. For OS X, it can be obtained as [crosspack](http://www.obdev.at/products/crosspack/download.html).
+For Linux install the compiler, library and tools with your package system, e.g. for debian use `apt install gcc-avr avr-libc, binutils-avr`.
 
 ## Creating an Upgrade
-Executing 'make' will build 'main.hex' (the bootloader itself) and 'upgrade.hex' (the upgrade program with new bootloader included). Next upload the 'upgrade.hex' file generated in this folder, via whichever bootloader you're using, or an ISP or whatever - everything should work. If you're using micronucleus and have the command line tool installed: micronucleus --run upgrade.hex.<br/>
+Executing `make` will build `main.hex` (the bootloader itself) and `upgrade.hex` (the upgrade program with new bootloader included). Next upload the `upgrade.hex` file generated in this folder, via whichever bootloader you're using, or an ISP or whatever - everything should work. If you're using micronucleus and have the command line tool installed: `micronucleus --run upgrade.hex`
 
-Pre-built upgrades (based on ./releases/*.hex) are available in directory ./upgrades. Shell script MK_ALL.sh was tested under linux / debian stable.
+Pre-built upgrades (based on `./releases/*.hex`) are available in directory `./upgrades`. Shell script `MK_ALL.sh` was tested under linux / debian stable. Similar `*.cmd` scripts exist for Windows.
 
 ## License
 Released under BSD license. Have fun!
@@ -20,20 +21,20 @@ Released under BSD license. Have fun!
 ## Technical Details
 A summary of how 'upgrade' works
 
-
 -- build process:
 
 1) Generate the hex files 'main.hex' and 'upgrade.hex' using make:
-     make clean; make
+
+    make clean; make
 
    The upgrader hex file is built in the usual way, then combined with a fake interrupt vector
    table in the start of the upgrader. This is necessary because bootloaders like micronucleus
    and Fast Tiny & Mega Bootloader only work with firmwares which begin with an interrupt vector
    table, because of the way they mangle the table to forward some interrupts to themselves.
 
-2) Upload the resulting *upgrade.hex* file to a chip you have some means of recovering. If all
-   works correctly, consider now uploading it to other chips which maybe more difficult to recover
-   but are otherwise identical.
+2) Upload the resulting `upgrade.hex` file to a chip you have some means of recovering, e.g. on a
+   board with ISP connector. If all works correctly, consider now uploading it to other chips
+   which maybe more difficult to recover but are otherwise identical.
 
 
 -- how it works:
