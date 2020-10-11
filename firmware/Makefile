@@ -92,11 +92,12 @@ main.hex:	main.bin
 	@avr-objcopy -j .text -j .data -O ihex main.bin main.hex
 	@echo Size of binary hexfile. Use the "data" size to calculate the bootloader address:
 	@avr-size main.hex
+	@./CALCULATE_BOOTLOADER_ADDRESS $(FLASHSIZE) $(BLOCKSIZE)
 	@echo
-# Output to logfile
 	@echo Building Micronucleus configuration: $(CONFIG) >> build.log
 	@echo Size of binary hexfile. Use the "data" size to calculate the bootloader address: >> build.log
 	@avr-size main.hex >> build.log
+	@./CALCULATE_BOOTLOADER_ADDRESS $(FLASHSIZE) $(BLOCKSIZE) >> build.log
 	@echo >> build.log
 
 

@@ -18,6 +18,8 @@
 # Change the following to 12000000 if you want to use the 12 MHz V-USB implementation
 F_CPU = 16000000
 DEVICE = atmega168p
+FLASHSIZE = 16384
+BLOCKSIZE = 128
 
 # hexadecimal address for bootloader section to begin. To calculate the best value:
 # - make clean; make main.hex; ### output will list data: 2124 (or something like that)

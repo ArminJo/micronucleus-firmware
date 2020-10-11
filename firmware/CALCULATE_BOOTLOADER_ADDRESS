@@ -3,8 +3,8 @@
 # set -u
 
 # T85 sizes
-FLASH_SIZE=8192
-BLOCK_SIZE=64
+FLASH_SIZE=${1:-8192}
+BLOCK_SIZE=${2:-64}
 
 # get the total program size of the bootloader
 BOOT_SIZE=$(avr-size -A main.hex | grep Total | cut -c6-)
@@ -21,4 +21,4 @@ USER_SPACE=$((BOOTLOADER_ADDRESS - 6 ))
 # show the info
 echo User blocks: $USER_BLOCKS
 echo User space:  $USER_SPACE
-printf "0x%X\n" $BOOTLOADER_ADDRESS
+printf "Bootloader address: 0x%X\n" $BOOTLOADER_ADDRESS

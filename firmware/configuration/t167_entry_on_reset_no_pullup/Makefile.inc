@@ -9,6 +9,8 @@
 
 F_CPU = 16000000
 DEVICE = attiny167
+FLASHSIZE = 16384
+BLOCKSIZE = 128
 AVR_ARCHITECTURE_PARAMETER = --binary-architecture avr:35
 
 # hexadecimal address for bootloader section to begin. To calculate the best value:

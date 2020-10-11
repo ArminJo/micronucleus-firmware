@@ -9,6 +9,8 @@
 
 F_CPU = 12000000
 DEVICE = attiny841
+FLASHSIZE = 8192
+BLOCKSIZE = 64
 
 # hexadecimal address for bootloader section to begin. To calculate the best value:
 # - make clean; make main.hex; ### output will list data: 2124 (or something like that)
