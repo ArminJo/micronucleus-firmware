@@ -6,11 +6,12 @@ The program then emits a beep if a piezo speaker is connected between PB1 and GN
 Upgrade has only been tested with micronucleus - use it to upload other bootloaders at your own risk!
 
 ## Prerequisits
-You'll need avr-gcc. For OS X, it can be obtained from http://www.obdev.at/products/crosspack/download.html
+You'll need avr-gcc. For OS X, it can be obtained from http://www.obdev.at/products/crosspack/download.html.
+For Linux install the compiler, library and tools with your package system, e.g. for debian use `apt install gcc-avr avr-libc, binutils-avr`.
 
 ## Creating an Upgrade
 Executing 'make' will build 'main.hex' (the bootloader itself) and 'upgrade.hex' (the upgrade program with new bootloader included).<br/>
-If you see the error `'bootloader_size' undeclared` during make, try to switch at 2 places the internal echo commands to the unix echo commands.<br/>
+If you see the error `'bootloader_size' undeclared` during make, try to switch at 2 places the echo commands to the other (operating system) flavor.<br/>
 Next upload the 'upgrade.hex' file generated in this folder, via whichever bootloader you're using, or an ISP or whatever - everything should work. If you're using micronucleus and have the command line tool installed: micronucleus --run upgrade.hex.<br/>
 
 Pre-built upgrades (based on ./releases/*.hex) are available in directory ./upgrades. Shell script MK_ALL.sh was tested under linux / debian stable.

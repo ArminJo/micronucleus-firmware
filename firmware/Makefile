@@ -125,10 +125,13 @@ upgrade.bin:	upgrade.o bootloader.o
 upgrade.hex:	upgrade.bin
 	@rm -f upgrade.hex upgrade.eep.hex
 	@avr-objcopy -j .text -j .data -O ihex upgrade.bin upgrade-app.hex
-# for internal echo command
+# for internal echo command, mainly on windows
+ifeq ($(OS),Windows_NT)
 	@echo :1000000003C003C003C003C003C003C003C003C0D8> upgrade.hex
+else
 # for unix echo command
-#	@echo ":1000000003C003C003C003C003C003C003C003C0D8" > upgrade.hex
+	@echo ":1000000003C003C003C003C003C003C003C003C0D8" > upgrade.hex
+endif
 	@cat upgrade-app.hex >> upgrade.hex
 	@rm upgrade-app.hex
 	@avr-size upgrade.hex
@@ -150,16 +153,18 @@ bootloader.o: bootloader.raw
 
 bootloader.h: bootloader.o
 #	@echo generating bootloader.h
-# for internal echo command
+# for internal echo command, mainly on windows
+ifeq ($(OS),Windows_NT)
 	@echo extern const uint8_t $* [] PROGMEM;> $@
 	@echo extern const uint8_t $*_end [] PROGMEM;>> $@
 	@echo extern const uint8_t $*_size_sym [];>> $@
 	@echo #define $*_size ( (int) $*_size_sym )>> $@
 	@echo #define $*_address 0x$(BOOTLOADER_ADDRESS)>> $@
-
+else
 # for unix echo command
-#	@echo "extern const uint8_t" $*"[] PROGMEM;" > $@
-#	@echo "extern const uint8_t" $*_end"[] PROGMEM;" >> $@
-#	@echo "extern const uint8_t" $*_size_sym"[];" >> $@
-#	@echo "#define $*_size ( (int) $*_size_sym )" >> $@
-#	@echo "#define $*_address 0x$(BOOTLOADER_ADDRESS)" >> $@
+	@echo "extern const uint8_t" $*"[] PROGMEM;" > $@
+	@echo "extern const uint8_t" $*_end"[] PROGMEM;" >> $@
+	@echo "extern const uint8_t" $*_size_sym"[];" >> $@
+	@echo "#define $*_size ( (int) $*_size_sym )" >> $@
+	@echo "#define $*_address 0x$(BOOTLOADER_ADDRESS)" >> $@
+endif
