@@ -9,7 +9,9 @@ Upgrade has only been tested with micronucleus - use it to upload other bootload
 You'll need avr-gcc. For OS X, it can be obtained from http://www.obdev.at/products/crosspack/download.html
 
 ## Creating an Upgrade
-Executing 'make' will build 'main.hex' (the bootloader itself) and 'upgrade.hex' (the upgrade program with new bootloader included). Next upload the 'upgrade.hex' file generated in this folder, via whichever bootloader you're using, or an ISP or whatever - everything should work. If you're using micronucleus and have the command line tool installed: micronucleus --run upgrade.hex.<br/>
+Executing 'make' will build 'main.hex' (the bootloader itself) and 'upgrade.hex' (the upgrade program with new bootloader included).<br/>
+If you see the error `'bootloader_size' undeclared` during make, try to switch at 2 places the internal echo commands to the unix echo commands.<br/>
+Next upload the 'upgrade.hex' file generated in this folder, via whichever bootloader you're using, or an ISP or whatever - everything should work. If you're using micronucleus and have the command line tool installed: micronucleus --run upgrade.hex.<br/>
 
 Pre-built upgrades (based on ./releases/*.hex) are available in directory ./upgrades. Shell script MK_ALL.sh was tested under linux / debian stable.
 
