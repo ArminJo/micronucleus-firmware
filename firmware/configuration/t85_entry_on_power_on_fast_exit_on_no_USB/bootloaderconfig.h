@@ -4,7 +4,7 @@
  * according to the hardware.
  *
  * Controller type: ATtiny 85 - 16.5 MHz
- * Configuration:   Default configuration + ENTRY_POWER_ON + START_WITHOUT_PULLUP + FAST_EXIT_NO_USB_MS=300 + LED
+ * Configuration:   Default configuration + ENTRY_POWER_ON + FAST_EXIT_NO_USB_MS=300 + LED
  *       USB D- :   PB3
  *       USB D+ :   PB4
  *       Entry  :   Always
