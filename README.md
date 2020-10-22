@@ -163,6 +163,7 @@ E.g a short beep at startup with tone(3, 2000, 200) will pull the D- line low an
 | 16 mA   | 5 V |    8 MHz | " |
 | 11 mA   | 5 V |    1 MHz | " |
 | 6 mA    | 3.8 V |  1 MHz | " |
+| 4.5 mA  | 3 V |  1 MHz | " |
 | **7.7 mA** | 5 V | 1 MHz | SLEEP_MODE_PWR_DOWN + ADC disabled |
 | 17 mA   | 5 V | 16.5 MHz | Voltage regulator removed |
 | 14 mA   | 5 V | 16.5 MHz | Power LED and voltage regulator removed |
@@ -176,8 +177,9 @@ E.g a short beep at startup with tone(3, 2000, 200) will pull the D- line low an
 | 2.6 mA    | **3.8 V** | 1 MHz | " |
 | 2.9 mA    | 5 V |  1 MHz | All Hardware changes + empty loop |
 | 2.4 mA    | 5 V |  1 MHz | All Hardware changes + empty loop + Timer and ADC disabled |
-| 232 µA    | 5 V |  1 MHz | All Hardware changes + SLEEP_MODE_PWR_DOWN |
-| **27 µA** | 5 V |  1 MHz | All Hardware changes + SLEEP_MODE_PWR_DOWN + ADC disabled + Watchdog enabled|
+| 230 µA    | 5 V |  1 MHz | All Hardware changes + SLEEP_MODE_PWR_DOWN |
+| **27 µA** | 5 V |  1 MHz | All Hardware changes + SLEEP_MODE_PWR_DOWN + ADC disabled + Watchdog enabled |
+| 25 µA     | 3 V |  1 MHz | " |
 |  **7 µA** | 5 V |  1 MHz | All Hardware changes + **SLEEP_MODE_PWR_DOWN + ADC disabled + BOD disabled** + Watchdog enabled |
 | 5.5 µA   | 3.8 V | 1 MHz | " |
 
