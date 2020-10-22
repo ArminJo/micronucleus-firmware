@@ -18,7 +18,7 @@ Please invoke the command line tool with "micronucleus -help" for a list of avai
 
 # Driver installation
 For Windows you must install the **libusb driver** before you can program the board. Download it [here](https://github.com/digistump/DigistumpArduino/releases/download/1.6.7/Digistump.Drivers.zip), open it and run `InstallDrivers.exe`.
-Clean Micronucleus devices without uploaded userprogram will not time out and allow sufficient time for proper driver installation. Linux and OS X do not require custom drivers.
+Clean Micronucleus devices without uploaded user program will not time out and allow sufficient time for proper driver installation. Linux and OS X do not require custom drivers.
 
 # Updated configuration for Digispark boards
 **The new [Digistump AVR version](https://github.com/ArminJo/DigistumpArduino) shrinks generated code size by 5 to 15 percent**. Just replace the old Digispark board URL **http://digistump.com/package_digistump_index.json** (e.g.in Arduino *File/Preferences*) by the new  **https://raw.githubusercontent.com/ArminJo/DigistumpArduino/master/package_digistump_index.json** and install the latest **Digistump AVR Boards** version.<br/>
@@ -42,7 +42,8 @@ If not otherwise noted, the OSCCAL value is calibrated (+/- 1%) after boot for a
 | t85_entry_on_power_on | 6586 | 1570 | [ENTRY_POWER_ON](#entry_power_on-entry-condition), LED_MODE=ACTIVE_HIGH |
 | t85_entry_on_power_on_no_pullup | 6586 | 1584 | [ENTRY_POWER_ON](#entry_power_on-entry-condition), [START_WITHOUT_PULLUP](#start_without_pullup), LED_MODE=ACTIVE_HIGH |
 | t85_entry_on_power_on_<br/>fast_exit_on_no_USB | 6586 | 1578 | [ENTRY_POWER_ON](#entry_power_on-entry-condition), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), LED_MODE=ACTIVE_HIGH |
-| **t85_entry_on_power_on_<br/>no_pullup_fast_exit_on_no_USB**<br/>[recommended configuration](#recommended-configuration) | 6586 | 1592 | [ENTRY_POWER_ON](#entry_power_on-entry-condition), [START_WITHOUT_PULLUP](#start_without_pullup), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), LED_MODE=ACTIVE_HIGH |
+| t85_entry_on_power_on_<br/>no_pullup_fast_exit_on_no_USB | 6586 | 1592 | [ENTRY_POWER_ON](#entry_power_on-entry-condition), [START_WITHOUT_PULLUP](#start_without_pullup), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), LED_MODE=ACTIVE_HIGH |
+| **t85_entry_on_power_on_AND<br/>_USB_pullup_activated_fast_exit_on_no_USB**<br/>[recommended configuration](#recommended-configuration) | 6586 | 1582 | [ENTRY_D_MINUS_PULLUP_ACTIVATED](https://github.com/ArminJo/micronucleus-firmware#entry_d_minus_pullup_activated-entry-condition) including [ENTRY_POWER_ON](#entry_power_on-entry-condition), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), LED_MODE=ACTIVE_HIGH |
 | t85_entry_on_power_on_<br/>no_pullup_fast_exit_on_no_USB_no_LED| 6586 | 1574 | [ENTRY_POWER_ON](#entry_power_on-entry-condition), [START_WITHOUT_PULLUP](#start_without_pullup), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit) |
 | t85_entry_on_power_on_pullup_at_0 | 6586 | 1574 | [ENTRY_POWER_ON](#entry_power_on-entry-condition), USB_CFG_PULLUP_IOPORTNAME + USB_CFG_PULLUP_BIT |
 | t85_fast_exit_on_no_USB | 6586 | 1554 | [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), LED_MODE=ACTIVE_HIGH |
@@ -67,7 +68,7 @@ If not otherwise noted, the OSCCAL value is calibrated (+/- 1%) after boot for a
 ### Legend
 - [ENTRY_POWER_ON](#entry_power_on-entry-condition) - Only enter bootloader on power on, not on reset or brownout.
 - [ENTRY_EXT_RESET](#entry_ext_reset-entry-condition) - Only enter bootloader on reset, not on power up.
-- [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit) - If not connected to USB (e.g. powered via VIN) the userprogram starts after 300 ms (+ initial 300 ms) -> 600 ms.
+- [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit) - If not connected to USB (e.g. powered via VIN) the user program starts after 300 ms (+ initial 300 ms) -> 600 ms.
 - [START_WITHOUT_PULLUP](#start_without_pullup) - Bootloader does not hang up, if no pullup is activated/connected.
 - [ENABLE_SAFE_OPTIMIZATIONS](#enable_safe_optimizations) - jmp 0x0000 does not initialize the stackpointer.
 - [LED_MODE=ACTIVE_HIGH](https://github.com/ArminJo/micronucleus-firmware/blob/master/firmware/main.c#L527) - The built in LED flashes during the 5 seconds of the bootloader waiting for commands.
@@ -93,19 +94,27 @@ This configuration waits for 200 ms after initialization for a reset and if no r
 With this configuration the **user program is started with a 500 ms delay after power up or reset** even if we do not specify a special entry condition.
 
 ## [`ENTRY_POWER_ON`](/firmware/configuration/t85_entry_on_power_on/bootloaderconfig.h#L108) entry condition
-The `ENTRY_POWER_ON` configuration adds 18 bytes to the ATtiny85 default configuration.
-The content of the `MCUSR` is copied to the `GPIOR0` register to enable the user program to evaluate it and then cleared to prepare for next boot.
-In this configuration **a reset will immediately start your userprogram** without any delay.
+The `ENTRY_POWER_ON` configuration adds 18 bytes to the ATtiny85 default configuration.<br/>
+The content of the `MCUSR` is copied to the `GPIOR0` register to enable the user program to evaluate it and then cleared to prepare for next boot.<br/>
+In this configuration **a reset will immediately start your user program** without any delay.
 
 ## [`ENTRY_EXT_RESET`](/firmware/configuration/t85_entry_on_reset_no_pullup/bootloaderconfig.h#L122) entry condition
 The ATtiny85 has the bug, that it sets the `External Reset Flag` also on power up. To guarantee a correct behavior for `ENTRY_EXT_RESET` condition, it is checked if only this flag is set **and** `MCUSR` is cleared before start of user program. The latter is done to avoid bricking the device by fogetting to reset the `PORF` flag in the user program.<br/>
 For ATtiny167 it is even worse, it sets the `External Reset Flag` and the `Brown-out Reset Flag` also on power up.<br/>
-The content of the `MCUSR` is copied to the `GPIOR0` register before clearing it. This enables the user program to evaluate its original content.
+The content of the `MCUSR` is copied to the `GPIOR0` register before clearing it. This enables the user program to evaluate its original content.<br/>
 **ATTENTION! If the external reset pin is disabled, this entry mode will brick the board!**
+
+## [`ENTRY_D_MINUS_PULLUP_ACTIVATED`](/firmware/configuration/t85_entry_on_power_on_AND_USB_pullup_activated_fast_exit_on_no_USB/bootloaderconfig.h#L138) entry condition
+Activate the bootloader only if we have an `ENTRY_POWER_ON` condition **and** the D- pin is high, i.e. a pullup resistor is attached and powered.<br/>
+Useful if the pullup is powered by USB V+ and NOT ATtiny VCC to save power.
+In this case often a schottky diode is connected between V* and VCC.<br/>
+The `ENTRY_D_MINUS_PULLUP_ACTIVATED` configuration adds 54 bytes to the ATtiny85 default configuration.<br/>
+The content of the `MCUSR` is copied to the `GPIOR0` register to enable the user program to evaluate it and then cleared to prepare for next boot.<br/>
+In this configuration **a power up with USB disconnected or a reset will immediately start your user program** without any delay.
 
 ## [`START_WITHOUT_PULLUP`](/firmware/configuration/t85_entry_on_power_on_no_pullup_fast_exit_on_no_USB/bootloaderconfig.h#L207)
 ### To support low energy applications
-The `START_WITHOUT_PULLUP` configuration adds 16 to 18 bytes for an additional check. It is required for low energy applications, where the pullup is directly connected to the USB-5V and not to the CPU-VCC. Since this check was contained by default in all pre 2.0 versions, it is obvious that **it can also be used for boards with a pullup**.
+The `START_WITHOUT_PULLUP` configuration adds 16 to 18 bytes for an additional check. It is only required if the bootloader can be entered without a pullup attached activated at the D- pin. Since this check was contained by default in all pre 2.0 versions, it is obvious that **it can also be used for boards with a pullup**.
 
 ## [`ENABLE_SAFE_OPTIMIZATIONS`](/firmware/crt1.S#L99)
 This configuration is referenced in the [Makefile.inc](/firmware/configuration/t85_fast_exit_on_no_USB/Makefile.inc#L18) file and will [disable the restoring of the stack pointer](https://github.com/ArminJo/micronucleus-firmware/blob/master/firmware/crt1.S#L102) at the start of program, whis is normally done by reset anyway. These optimization disables reliable entering the bootloader with `jmp 0x0000`, which you should not do anyway - better use the watchdog timer reset functionality.<br/>
@@ -117,11 +126,11 @@ This configuration is referenced in the [Makefile.inc](/firmware/configuration/t
 
 You have a slightly bigger chance to brick the bootloader, which reqires it to be reprogrammed by [avrdude](windows_exe) and an ISP or an Arduino as ISP. Command files for this can be found [here](/utils).
 
-## [Recommended](/firmware/configuration/t85_entry_on_power_on_no_pullup_fast_exit_on_no_USB) configuration
-The recommended configuration is *entry_on_power_on_no_pullup_fast_exit_on_no_USB*:
-- Entry on power on, no entry on reset, ie. after a reset the application starts immediately.
-- Start even if pullup is disconnected. Otherwise the bootloader hangs forever, if you commect the Pullup to USB-VCC to save power.
-- Fast exit of bootloader (after 600 ms) if there is no host program sending us data (to upload a new userprogram/sketch).
+## [Recommended](/firmware/configuration/t85_entry_on_power_on_AND_USB_pullup_activated_fast_exit_on_no_USB) configuration
+The recommended configuration is *t85_entry_on_power_on_AND_USB_pullup_activated_fast_exit_on_no_USB*:
+- Entry on power on **and** D- pullup active, no entry on reset, ie. after a reset if the user program starts immediately.
+- If pullup is connected to USB V+ and **not** VCC, the user program also starts immediately on power up.
+- Fast exit of bootloader (after 600 ms) if there is no host program sending us data (to upload a new user program/sketch).
 
 #### Hex files for these configuration are already available in the [releases](/firmware/releases) and [upgrades](/firmware/upgrades) folders.
 
@@ -162,14 +171,14 @@ E.g a short beep at startup with tone(3, 2000, 200) will pull the D- line low an
 | **14.3 mA** | 5 V | 16.5 MHz | **Power LED, voltage regulator removed + USB D- pullup reconnected and powered directly at VCC** (loop with delay)|
 | 9.5 mA  | **3.8 V** | 16.5 MHz | " |
 | 8.3 mA  | 5 V |    8 MHz | " |
-| 7.5 mA  | 5 V |    8 MHz | All Harware changes + empty loop + Timer and ADC disabled |
-| **3.0 mA** | 5 V | 1 MHz | **All Harware changes (loop with delay)** |
+| 7.5 mA  | 5 V |    8 MHz | All Hardware changes + empty loop + Timer and ADC disabled |
+| **3.0 mA** | 5 V | 1 MHz | **All Hardware changes (loop with delay)** |
 | 2.6 mA    | **3.8 V** | 1 MHz | " |
-| 2.9 mA    | 5 V |  1 MHz | All Harware changes + empty loop |
-| 2.4 mA    | 5 V |  1 MHz | All Harware changes + empty loop + Timer and ADC disabled |
-| 232 µA    | 5 V |  1 MHz | All Harware changes + SLEEP_MODE_PWR_DOWN |
-| **27 µA** | 5 V |  1 MHz | All Harware changes + SLEEP_MODE_PWR_DOWN + ADC disabled |
-|  **7 µA** | 5 V |  1 MHz | All Harware changes + **SLEEP_MODE_PWR_DOWN + ADC disabled + BOD disabled** |
+| 2.9 mA    | 5 V |  1 MHz | All Hardware changes + empty loop |
+| 2.4 mA    | 5 V |  1 MHz | All Hardware changes + empty loop + Timer and ADC disabled |
+| 232 µA    | 5 V |  1 MHz | All Hardware changes + SLEEP_MODE_PWR_DOWN |
+| **27 µA** | 5 V |  1 MHz | All Hardware changes + SLEEP_MODE_PWR_DOWN + ADC disabled + Watchdog enabled|
+|  **7 µA** | 5 V |  1 MHz | All Hardware changes + **SLEEP_MODE_PWR_DOWN + ADC disabled + BOD disabled** + Watchdog enabled |
 | 5.5 µA   | 3.8 V | 1 MHz | " |
 
 BOD can only be disabled by setting fuses via ISP programmer](https://www.google.de/search?q=arduino+as+isp) and a connecting adapter.
@@ -190,15 +199,17 @@ For reprogramming the fuses, you can use [this script](https://github.com/ArminJ
 
 With fast PLL Clock and standard fuses, the **start-up time from sleep is around 64ms and requires 2/3 of regular CPU power**!<br/>
 If we use the longest sleep time of 8 seconds and an empty loop, this result in an **average current consumption of 23 µA** (1 year with a 200 mAh button cell 2032).<br/>
-This long startup time can be avoided by [changing fuses to use the internal 8Mhz clock](https://github.com/ArminJo/micronucleus-firmware/blob/master/utils/Write%2085%20Fuses%20E2%20DF%20FF%20-%20ISP%20Mode%20%3D%208MHz%20without%20BOD%20and%20Pin5.cmd), but this **disables the possibility to program the Digispark board via USB** and enables availability of whole memory for your program.
+The start-up time from sleep can be reduced (at own risk of unstable clock) to 5 ms using [this fuse settings](https://github.com/ArminJo/micronucleus-firmware/blob/master/utils/Write%2085%20Fuses%20C1%20DF%20FE%20-%20Digispark%20default%20without%20BOD%20and%20Pin5%20and%20fast%20startup.cmd).
+This results in an average current consumption of **9 µA** (2.5 years with a 200 mAh button cell 2032).<br/>
+This long startup time can be dramatically reduced to 6 clock cycles by [changing fuses to use the internal 8Mhz clock](https://github.com/ArminJo/micronucleus-firmware/blob/master/utils/Write%2085%20Fuses%20E2%20DF%20FF%20-%20ISP%20Mode%20%3D%208MHz%20without%20BOD%20and%20Pin5.cmd), but this **disables the possibility to program the Digispark board via USB** and enables availability of whole memory for your program.
 
 ### Disabling the power LED
 Break the copper wire that connects the power LED to the diode with a knife or remove / disable the 102 resistor.
 ### Removing the VIN voltage regulator
-First lift the outer pins with the help of a solder iron and a pin. Then solder the big connector and remove the regulator. For small regulators, use much solder and heat up all 3 pins together, then remove.
+First lift the outer pins with the help of a solder iron and a pin. Then solder the big connector and remove the regulator. For small regulators, use much solder and heat up all 3 pins together, then remove it.
 ### Disconnecting the USB D- Pullup resistor (marked 152) from 5 volt (VCC)
 Break the copper wire on the side of the resistor that points to the ATtiny.<br/>
-**This disables the USB interface** and in turn the possibility to program the Digispark board via USB. To **enable it again**, but still save power, **connect the resistor (marked 152) directly to the USB V+** that is easily available at the outer side of the shottky diode.<br/>
+**This disables the USB interface** and in turn the possibility to program the Digispark board via USB. To **enable it again**, but still save power, **connect the resistor (marked 152) directly to the USB V+** that is easily available at the outer side of the schottky diode.<br/>
 The diode and its correct sides can be found by using a continuity tester. One side of this diode is connected to pin 8 of the ATtiny (VCC) and Digispark 5V. The other side is connected to the USB V+.<br/>
 Now the USB pullup resistor is only activated if the Digispark board is connected to USB e.g. during programming.
 

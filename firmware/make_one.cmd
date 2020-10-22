@@ -6,7 +6,8 @@ if not exist upgrades MKDIR upgrades
 rem Set TARGET=t85_entry_on_power_on_USB_detect_no_pullup
 rem Set TARGET=t85_entry_on_power_on
 rem Set TARGET=t85_entry_on_power_on_no_pullup_fast_exit_on_no_USB
-Set TARGET=t85_entry_on_reset_no_pullup
+rem Set TARGET=t85_entry_on_reset_no_pullup
+Set TARGET=t85_entry_on_power_on_AND_USB_pullup_activated_fast_exit_on_no_USB
 
 echo.
 echo **********************************************************
