@@ -2,7 +2,7 @@
 @Call ../firmware/SetPath
 color f0
 title AvrDude GUI Command Window
-@echo Writing ATtiny85 fuses to digispark default except leaving pin5 as reset to enable further low voltage SPI programming
+@echo Writing ATtiny85 fuses to digispark default except disabling BrownOutDetection and leaving pin5 as reset to enable further low voltage SPI programming
 @echo.
 @echo Writing ATtiny85 Lfuse to 0xE1 - (digispark default) PLL Clock + Startup 64 ms
 @echo Writing ATtiny85 Hfuse to 0xDF - External Reset pin enabled (Pin5 not usable as I/O) + BOD disabled + Enable Serial Program and Data Downloading

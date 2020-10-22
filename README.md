@@ -25,7 +25,7 @@ Clean Micronucleus devices without uploaded userprogram will not time out and al
 ![Boards Manager](https://github.com/ArminJo/DigistumpArduino/blob/master/pictures/Digistump1.6.8.jpg)<br/>
 
 # Update the bootloader to the new version
-To **update** your old flash consuming **bootloader**, you have 2 choices.
+To **update** your old, flash consuming **bootloader**, you have 2 choices.
 1. Using the [new Digistump board manager](https://github.com/ArminJo/DigistumpArduino#update-the-bootloader) (see above).<br/>
 2. Run one of the Windows [scripts](https://github.com/ArminJo/micronucleus-firmware/tree/master/utils)
 like e.g. the [Burn_upgrade-t85_default.cmd](utils/Burn_upgrade-t85_default.cmd). The internal mechanism is described [here](https://github.com/ArminJo/micronucleus-firmware/blob/master/firmware/upgrades/README.md).
@@ -43,6 +43,7 @@ If not otherwise noted, the OSCCAL value is calibrated (+/- 1%) after boot for a
 | t85_entry_on_power_on_no_pullup | 6586 | 1584 | [ENTRY_POWER_ON](#entry_power_on-entry-condition), [START_WITHOUT_PULLUP](#start_without_pullup), LED_MODE=ACTIVE_HIGH |
 | t85_entry_on_power_on_<br/>fast_exit_on_no_USB | 6586 | 1578 | [ENTRY_POWER_ON](#entry_power_on-entry-condition), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), LED_MODE=ACTIVE_HIGH |
 | **t85_entry_on_power_on_<br/>no_pullup_fast_exit_on_no_USB**<br/>[recommended configuration](#recommended-configuration) | 6586 | 1592 | [ENTRY_POWER_ON](#entry_power_on-entry-condition), [START_WITHOUT_PULLUP](#start_without_pullup), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), LED_MODE=ACTIVE_HIGH |
+| t85_entry_on_power_on_<br/>no_pullup_fast_exit_on_no_USB_no_LED| 6586 | 1574 | [ENTRY_POWER_ON](#entry_power_on-entry-condition), [START_WITHOUT_PULLUP](#start_without_pullup), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit) |
 | t85_entry_on_power_on_pullup_at_0 | 6586 | 1574 | [ENTRY_POWER_ON](#entry_power_on-entry-condition), USB_CFG_PULLUP_IOPORTNAME + USB_CFG_PULLUP_BIT |
 | t85_fast_exit_on_no_USB | 6586 | 1554 | [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), LED_MODE=ACTIVE_HIGH |
 | t85_entry_on_reset_no_pullup | 6586 | 1584 | [ENTRY_EXT_RESET](#entry_ext_reset-entry-condition), [START_WITHOUT_PULLUP](#start_without_pullup), LED_MODE=ACTIVE_HIGH |
@@ -103,6 +104,7 @@ The content of the `MCUSR` is copied to the `GPIOR0` register before clearing it
 **ATTENTION! If the external reset pin is disabled, this entry mode will brick the board!**
 
 ## [`START_WITHOUT_PULLUP`](/firmware/configuration/t85_entry_on_power_on_no_pullup_fast_exit_on_no_USB/bootloaderconfig.h#L207)
+### To support low energy applications
 The `START_WITHOUT_PULLUP` configuration adds 16 to 18 bytes for an additional check. It is required for low energy applications, where the pullup is directly connected to the USB-5V and not to the CPU-VCC. Since this check was contained by default in all pre 2.0 versions, it is obvious that **it can also be used for boards with a pullup**.
 
 ## [`ENABLE_SAFE_OPTIMIZATIONS`](/firmware/crt1.S#L99)
@@ -144,6 +146,64 @@ This behavior is compatible to the old v1 micronucleus versions, which also do n
 **You can avoid this by actively disconnecting from the host by pulling the D- line to low for around 300 milliseconds.**<br/>
 E.g a short beep at startup with tone(3, 2000, 200) will pull the D- line low and keep the module disconnected.
 
+# Measured Digispark (fast 64 MHz PLL clock) supply current
+| Current | Voltage | Clock | Configuration | 
+|-:|-:|-:|:-:|
+| **20 mA** | 5 V | 16.5 MHz | Standard Hardware |
+| 13 mA   | **3.8 V** | 16.5 MHz | " |
+| 16 mA   | 5 V |    8 MHz | " |
+| 11 mA   | 5 V |    1 MHz | " |
+| 6 mA    | 3.8 V |  1 MHz | " |
+| **7.7 mA** | 5 V | 1 MHz | SLEEP_MODE_PWR_DOWN + ADC disabled |
+| 17 mA   | 5 V | 16.5 MHz | Voltage regulator removed |
+| 14 mA   | 5 V | 16.5 MHz | Power LED and voltage regulator removed |
+| 9.3 mA  | 5 V |    8 MHz | " |
+| 4.3 mA  | 5 V |    1 MHz | " |
+| **14.3 mA** | 5 V | 16.5 MHz | **Power LED, voltage regulator removed + USB D- pullup reconnected and powered directly at VCC** (loop with delay)|
+| 9.5 mA  | **3.8 V** | 16.5 MHz | " |
+| 8.3 mA  | 5 V |    8 MHz | " |
+| 7.5 mA  | 5 V |    8 MHz | All Harware changes + empty loop + Timer and ADC disabled |
+| **3.0 mA** | 5 V | 1 MHz | **All Harware changes (loop with delay)** |
+| 2.6 mA    | **3.8 V** | 1 MHz | " |
+| 2.9 mA    | 5 V |  1 MHz | All Harware changes + empty loop |
+| 2.4 mA    | 5 V |  1 MHz | All Harware changes + empty loop + Timer and ADC disabled |
+| 232 µA    | 5 V |  1 MHz | All Harware changes + SLEEP_MODE_PWR_DOWN |
+| **27 µA** | 5 V |  1 MHz | All Harware changes + SLEEP_MODE_PWR_DOWN + ADC disabled |
+|  **7 µA** | 5 V |  1 MHz | All Harware changes + **SLEEP_MODE_PWR_DOWN + ADC disabled + BOD disabled** |
+| 5.5 µA   | 3.8 V | 1 MHz | " |
+
+BOD can only be disabled by setting fuses via ISP programmer](https://www.google.de/search?q=arduino+as+isp) and a connecting adapter.
+For reprogramming the fuses, you can use [this script](https://github.com/ArminJo/micronucleus-firmware/blob/master/utils/Write%2085%20Fuses%20E1%20DF%20FE%20-%20Digispark%20default%20without%20BOD%20and%20Pin5.cmd).<br/>
+
+# Current per device @ 5 volt
+| Current | Device |
+| -:|:-:|
+|   3 mA | Voltage regulator (1.5 mA at 3.8 V)|
+|   2 mA | Power LED |
+|   1 mA | USB D- pullup |
+| 14.3 mA | CPU + timer @16.5 MHz |
+|  14 mA | CPU + timer @16 MHz |
+|   8 mA | CPU + timer @8 MHz |
+|   3 mA | CPU + timer @1 MHz |
+|  20 µA | BOD |
+| 212 µA | ADC |
+
+With fast PLL Clock and standard fuses, the **start-up time from sleep is around 64ms and requires 2/3 of regular CPU power**!<br/>
+If we use the longest sleep time of 8 seconds and an empty loop, this result in an **average current consumption of 23 µA** (1 year with a 200 mAh button cell 2032).<br/>
+This long startup time can be avoided by [changing fuses to use the internal 8Mhz clock](https://github.com/ArminJo/micronucleus-firmware/blob/master/utils/Write%2085%20Fuses%20E2%20DF%20FF%20-%20ISP%20Mode%20%3D%208MHz%20without%20BOD%20and%20Pin5.cmd), but this **disables the possibility to program the Digispark board via USB** and enables availability of whole memory for your program.
+
+### Disabling the power LED
+Break the copper wire that connects the power LED to the diode with a knife or remove / disable the 102 resistor.
+### Removing the VIN voltage regulator
+First lift the outer pins with the help of a solder iron and a pin. Then solder the big connector and remove the regulator. For small regulators, use much solder and heat up all 3 pins together, then remove.
+### Disconnecting the USB D- Pullup resistor (marked 152) from 5 volt (VCC)
+Break the copper wire on the side of the resistor that points to the ATtiny.<br/>
+**This disables the USB interface** and in turn the possibility to program the Digispark board via USB. To **enable it again**, but still save power, **connect the resistor (marked 152) directly to the USB V+** that is easily available at the outer side of the shottky diode.<br/>
+The diode and its correct sides can be found by using a continuity tester. One side of this diode is connected to pin 8 of the ATtiny (VCC) and Digispark 5V. The other side is connected to the USB V+.<br/>
+Now the USB pullup resistor is only activated if the Digispark board is connected to USB e.g. during programming.
+
+![Final power reduction](https://github.com/ArminJo/Arduino-OpenWindowAlarm/blob/master/pictures/Final-Version-Detail_annotated.jpg)
+
 # Pin layout
 ### ATtiny85 on Digispark
 
@@ -155,8 +215,8 @@ E.g a short beep at startup with tone(3, 2000, 200) will pull the D- line low an
                  GND  4|    |5  PB0 (D0) OC0A/AIN0
                        +----+
   USB+ and USB- are each connected to a 3.3 volt Zener to GND and with a 68 Ohm series resistor to the ATtiny pin.
-  On boards with a micro USB connector, the series resistor is 22 Ohm instead of 68 Ohm. 
-  USB- has a 1.5k pullup resistor to indicate a low-speed device.                  
+  On boards with a micro USB connector, the series resistor is 22 Ohm instead of 68 Ohm.
+  USB- has a 1.5k pullup resistor to indicate a low-speed device.  
   USB+ and USB- are each terminated on the host side with 15k to 25k pull-down resistors.
 ```
 

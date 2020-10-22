@@ -1,5 +1,5 @@
 @echo Upgrade Digispark Bootloader with micronucleus upload
-set FILENAME=upgrade-t85_entry_on_reset_no_pullup_fast_exit_on_no_USB.hex
+set FILENAME=upgrade-t85_entry_on_reset_no_pullup_fast_exit_on_no_USB_no_LED.hex
 @if exist %FILENAME% (
   %UserProfile%\AppData\Local\Arduino15\packages\digistump\tools\micronucleus\2.0a4\launcher -cdigispark -Uflash:w:%FILENAME%:i
   goto end

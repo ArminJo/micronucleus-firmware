@@ -11,7 +11,7 @@ REM The files t85_no_pullup.hex and t85_entry_on_power_on_no_pullup.hex are iden
 @echo. Writing ATtiny85 Hfuse to 0xDF - External Reset pin enabled (Pin5 not usable as I/O) + BOD disabled + Enable Serial Program and Data Downloading
 @echo. Writing ATtiny85 EFuse to 0xFE - self programming enabled.
 @echo.
-set FILENAME=t85_entry_on_power_on_no_pullup.hex
+set FILENAME=t85_entry_on_power_on_no_pullup_fast_exit_on_no_USB.hex
 @if exist %FILENAME% (
   avrdude -pt85 -cstk500v1 -PCOM6 -b19200 -u -Uflash:w:%FILENAME%:a -Ulfuse:w:0xE1:m -Uhfuse:w:0xDF:m -Uefuse:w:0xFE:m
   goto end

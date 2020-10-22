@@ -10,7 +10,7 @@ SET /P AREYOUSURE=Are you sure you want to overwrite the fuses disabling USB pro
 IF /I "%AREYOUSURE%" NEQ "Y" GOTO END
 
 @echo.Writing ATtiny85 Lfuse to 0xE2 - 8MHz clock, 6 Clocks from Power Down sleep + 64 ms after reset.
-@echo Writing ATtiny85 Hfuse to 0xDF - External Reset pin enabled (Pin5 not usable as I/O) + BOD disabled + (digispark default) Enable Serial Program and Data Downloading.
+@echo Writing ATtiny85 Hfuse to 0xDF - External Reset pin enabled (Pin5 not usable as I/O) + BOD disabled + Enable Serial Program and Data Downloading.
 @echo Writing ATtiny85 EFuse to 0xFF - self programming disabled - no bootloader function possible.
 @echo.
 @echo trying to connect to device...
