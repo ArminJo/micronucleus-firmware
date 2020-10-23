@@ -34,29 +34,27 @@ like e.g. the [Burn_upgrade-t85_default.cmd](utils/Burn_upgrade-t85_default.cmd)
 
 # Configuration overview
 If not otherwise noted, the OSCCAL value is calibrated (+/- 1%) after boot for all ATtiny85 configurations
-| Configuration | Available FLASH | Bootloader size | Non default config flags set |
+| Configuration | Free FLASH | Boot-<br/>loader size | Non default config flags set |
 |---------------|-----------------|-----------------|------------------------------|
 | t85_aggressive<br/><br/>It works for my Digispark boards without any problems :-) | 6780 | 1364 | [Do not provide calibrated OSCCAL, if no USB attached](/firmware/configuration/t85_aggressive/bootloaderconfig.h#L220), [ENABLE_UNSAFE_OPTIMIZATIONS](#enable_unsafe_optimizations)<br/>Relying on calibrated 16MHz internal clock stability, not using the 16.5 MHz USB driver version with integrated PLL. This causes the main memory saving. |
 |  |  |  |  |
 | t85_default | 6650 | 1528 | - |
-| t85_entry_on_power_on | 6586 | 1570 | [ENTRY_POWER_ON](#entry_power_on-entry-condition), LED_MODE=ACTIVE_HIGH |
-| t85_entry_on_power_on_no_pullup | 6586 | 1584 | [ENTRY_POWER_ON](#entry_power_on-entry-condition), [START_WITHOUT_PULLUP](#start_without_pullup), LED_MODE=ACTIVE_HIGH |
-| t85_entry_on_power_on_<br/>fast_exit_on_no_USB | 6586 | 1578 | [ENTRY_POWER_ON](#entry_power_on-entry-condition), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), LED_MODE=ACTIVE_HIGH |
-| t85_entry_on_power_on_<br/>no_pullup_fast_exit_on_no_USB | 6586 | 1592 | [ENTRY_POWER_ON](#entry_power_on-entry-condition), [START_WITHOUT_PULLUP](#start_without_pullup), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), LED_MODE=ACTIVE_HIGH |
-| **t85_entry_on_power_on_AND<br/>_USB_pullup_activated_fast_exit_on_no_USB**<br/>[recommended configuration](#recommended-configuration) | 6586 | 1582 | [ENTRY_D_MINUS_PULLUP_ACTIVATED](https://github.com/ArminJo/micronucleus-firmware#entry_d_minus_pullup_activated-entry-condition) including [ENTRY_POWER_ON](#entry_power_on-entry-condition), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), LED_MODE=ACTIVE_HIGH |
-| t85_entry_on_power_on_<br/>no_pullup_fast_exit_on_no_USB_no_LED| 6586 | 1574 | [ENTRY_POWER_ON](#entry_power_on-entry-condition), [START_WITHOUT_PULLUP](#start_without_pullup), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit) |
-| t85_entry_on_power_on_pullup_at_0 | 6586 | 1574 | [ENTRY_POWER_ON](#entry_power_on-entry-condition), USB_CFG_PULLUP_IOPORTNAME + USB_CFG_PULLUP_BIT |
-| t85_fast_exit_on_no_USB | 6586 | 1554 | [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), LED_MODE=ACTIVE_HIGH |
-| t85_entry_on_reset_no_pullup | 6586 | 1584 | [ENTRY_EXT_RESET](#entry_ext_reset-entry-condition), [START_WITHOUT_PULLUP](#start_without_pullup), LED_MODE=ACTIVE_HIGH |
-| t85_entry_on_reset_<br/>no_pullup_fast_exit_on_no_USB | 6586 | 1592 | [ENTRY_EXT_RESET](#entry_ext_reset-entry-condition), [START_WITHOUT_PULLUP](#start_without_pullup), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), LED_MODE=ACTIVE_HIGH<br/>Bootloader timeout increased to 15 seconds (if connected to USB). |
+| t85_entry_on_powerOn | 6586 | 1570 | [ENTRY_POWER_ON](#entry_power_on-entry-condition), LED_MODE=ACTIVE_HIGH |
+| t85_entry_on_powerOn_<br/>fastExit | 6586 | 1578 | [ENTRY_POWER_ON](#entry_power_on-entry-condition), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), LED_MODE=ACTIVE_HIGH |
+| **t85_entry_on_powerOn<br/>_activePullup_fastExit**<br/>[recommended configuration](#recommended-configuration) | 6586 | 1582 | [ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_POWER_ON](#entry_d_minus_pullup_activated_and_entry_power_on-entry-condition), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), LED_MODE=ACTIVE_HIGH |
+| t85_entry_on_powerOn_<br/>activePullup_fastExit_noLED| 6586 | 1564 | [ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_POWER_ON](#entry_d_minus_pullup_activated_and_entry_power_on-entry-condition), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit) |
+| t85_entry_on_powerOn<br/>_pullupAt0 | 6586 | 1558 | [ENTRY_POWER_ON](#entry_power_on-entry-condition), USB_CFG_PULLUP_IOPORTNAME + USB_CFG_PULLUP_BIT |
+| t85_fastExit | 6586 | 1554 | [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), LED_MODE=ACTIVE_HIGH |
+| t85_entry_on_reset<br/>_activePullup | 6586 | 1582 | [ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_EXT_RESET](#entry_d_minus_pullup_activated_and_entry_ext_reset-entry-condition), LED_MODE=ACTIVE_HIGH |
+| t85_entry_on_reset_<br/>activePullup_fastExit | 6586 | 1582 | [ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_EXT_RESET](#entry_d_minus_pullup_activated_and_entry_ext_reset-entry-condition), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit),<br/>AUTO_EXIT_MS=15000 Bootloader timeout increased to 15 seconds (if connected to USB),<br/>LED_MODE=ACTIVE_HIGH. |
 |  |  |  |  |
 | t88_default | 6714 | 1442 | LED_MODE=ACTIVE_HIGH |
-| **t88_entry_on_power_on_<br/>no_pullup_fast_exit_on_no_USB**<br/>[recommended configuration](#recommended-configuration) | 6650 | 1488 | [ENTRY_POWER_ON](#entry_power_on-entry-condition), [START_WITHOUT_PULLUP](#start_without_pullup), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), LED_MODE=ACTIVE_HIGH |
+| **t88_entry_on_powerOn<br/>_activePullup_fastExit**<br/>[recommended configuration](#recommended-configuration) | 6650 | 1478 |  [ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_POWER_ON](#entry_d_minus_pullup_activated_and_entry_power_on-entry-condition), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), LED_MODE=ACTIVE_HIGH |
 |  |  |  |  |
 | t167_default | 14970 | 1322 | - |
-| t167_entry_on_power_on_no_pullup | 14842 | 1366 | [ENTRY_POWER_ON](#entry_power_on-entry-condition), [START_WITHOUT_PULLUP](#start_without_pullup), LED_MODE=ACTIVE_HIGH |
-| **t167_entry_on_power_on_<br/>no_pullup_fast_exit_on_no_USB**<br/>[recommended configuration](#recommended-configuration) | 14842 | 1374 | [ENTRY_POWER_ON](#entry_power_on-entry-condition), [START_WITHOUT_PULLUP](#start_without_pullup), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), LED_MODE=ACTIVE_HIGH |
-| t167_entry_on_reset_no_pullup | 14842 | 1366 | [ENTRY_EXT_RESET](#entry_ext_reset-entry-condition), [START_WITHOUT_PULLUP](#start_without_pullup), LED_MODE=ACTIVE_HIGH |
+| t167_entry_on_powerOn<br/>_no_pullup | 14842 | 1366 | [ENTRY_POWER_ON](#entry_power_on-entry-condition), [ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_POWER_ON](#entry_d_minus_pullup_activated_and_entry_power_on-entry-condition), LED_MODE=ACTIVE_HIGH |
+| **t167_entry_on_powerOn<br/>_activePullup_fastExit**<br/>[recommended configuration](#recommended-configuration) | 14842 | 1378 | [ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_POWER_ON](#entry_d_minus_pullup_activated_and_entry_power_on-entry-condition), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), LED_MODE=ACTIVE_HIGH |
+| t167_entry_on_reset<br/>_activePullup_fastExit | 14842 | 1378 | [ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_EXT_RESET](#entry_d_minus_pullup_activated_and_entry_ext_reset-entry-condition), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), <br/>AUTO_EXIT_MS=15000 Bootloader timeout increased to 15 seconds (if connected to USB),<br/>LED_MODE=ACTIVE_HIGH. |
 |  |  |  |  |
 | Nanite841 |  | 1566 |  |
 | BitBoss |  | 1560 |  |
@@ -68,56 +66,53 @@ If not otherwise noted, the OSCCAL value is calibrated (+/- 1%) after boot for a
 ### Legend
 - [ENTRY_POWER_ON](#entry_power_on-entry-condition) - Only enter bootloader on power on, not on reset or brownout.
 - [ENTRY_EXT_RESET](#entry_ext_reset-entry-condition) - Only enter bootloader on reset, not on power up.
+- [ENTRY_D_MINUS_PULLUP_ACTIVATED](#entry_d_minus_pullup_activated_and_entry_power_on-entry-condition) - Only enter if pullup connected and powered.
 - [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit) - If not connected to USB (e.g. powered via VIN) the user program starts after 300 ms (+ initial 300 ms) -> 600 ms.
-- [START_WITHOUT_PULLUP](#start_without_pullup) - Bootloader does not hang up, if no pullup is activated/connected.
 - [ENABLE_SAFE_OPTIMIZATIONS](#enable_safe_optimizations) - jmp 0x0000 does not initialize the stackpointer.
 - [LED_MODE=ACTIVE_HIGH](https://github.com/ArminJo/micronucleus-firmware/blob/master/firmware/main.c#L527) - The built in LED flashes during the 5 seconds of the bootloader waiting for commands.
 
-## Computing the values
-The actual memory footprint for each configuration can be found in the file [*firmware/build.log*](firmware/build.log).<br/>
-Bytes used by the mironucleus bootloader can be computed by taking the data size value in *build.log*, 
-rounding it up to the next multiple of the page size which is e.g. 64 bytes for ATtiny85 and 128 bytes for ATtiny176.<br/>
-Subtracting this (+ 6 byte for postscript) from the total amount of memory will result in the free bytes numbers.
-- Postscript are the few bytes at the end of programmable memory which store tinyVectors.
-
-E.g. for *t85_default.hex* with the new compiler we get 1548 as data size. The next multiple of 64 is 1600 (25 * 64) => (8192 - (1600 + 6)) = **6586 bytes are free**.<br/>
-In this case we have 52 bytes left for configuration extensions before using another 64 byte page.<br/>
-For *t167_default.hex* (as well as for the other t167 configurations) with the new compiler we get 1436 as data size. The next multiple of 128 is 1536 (12 * 128) => (16384 - (1536 + 6)) = 14842 bytes are free.
-
 # Configuration Options
 
-## [`FAST_EXIT_NO_USB_MS`](/firmware/configuration/t85_fast_exit_on_no_USB/bootloaderconfig.h#L184) for fast bootloader exit
+## [`FAST_EXIT_NO_USB_MS`](/firmware/configuration/t85_fastExit/bootloaderconfig.h#L195) for fast bootloader exit
 If the bootloader is entered, it requires minimum 300 ms to initialize USB connection (disconnect and reconnect). 
 100 ms after this 300 ms initialization, the bootloader receives a reset, if the host application wants to program the device.<br/>
 The 100 ms time to reset may depend on the type of host CPU etc., so I took 200 ms to be safe.<br/>
 This configuration waits for 200 ms after initialization for a reset and if no reset detected it exits the bootloader and starts the user program.<br/>
 With this configuration the **user program is started with a 500 ms delay after power up or reset** even if we do not specify a special entry condition.
 
-## [`ENTRY_POWER_ON`](/firmware/configuration/t85_entry_on_power_on/bootloaderconfig.h#L108) entry condition
+## [`ENTRY_POWER_ON`](/firmware/configuration/t85_entry_on_powerOn/bootloaderconfig.h#L108) entry condition
 The `ENTRY_POWER_ON` configuration adds 18 bytes to the ATtiny85 default configuration.<br/>
 The content of the `MCUSR` is copied to the `GPIOR0` register to enable the user program to evaluate it and then cleared to prepare for next boot.<br/>
 In this configuration **a reset will immediately start your user program** without any delay.
 
-## [`ENTRY_EXT_RESET`](/firmware/configuration/t85_entry_on_reset_no_pullup/bootloaderconfig.h#L122) entry condition
+## [`ENTRY_EXT_RESET`](/firmware/configuration/t85_entry_on_reset_activePullup/bootloaderconfig.h#L122) entry condition
 The ATtiny85 has the bug, that it sets the `External Reset Flag` also on power up. To guarantee a correct behavior for `ENTRY_EXT_RESET` condition, it is checked if only this flag is set **and** `MCUSR` is cleared before start of user program. The latter is done to avoid bricking the device by fogetting to reset the `PORF` flag in the user program.<br/>
 For ATtiny167 it is even worse, it sets the `External Reset Flag` and the `Brown-out Reset Flag` also on power up.<br/>
 The content of the `MCUSR` is copied to the `GPIOR0` register before clearing it. This enables the user program to evaluate its original content.<br/>
 **ATTENTION! If the external reset pin is disabled, this entry mode will brick the board!**
 
-## [`ENTRY_D_MINUS_PULLUP_ACTIVATED`](/firmware/configuration/t85_entry_on_power_on_AND_USB_pullup_activated_fast_exit_on_no_USB/bootloaderconfig.h#L138) entry condition
-Activate the bootloader only if we have an `ENTRY_POWER_ON` condition **and** the D- pin is high, i.e. a pullup resistor is attached and powered.<br/>
+## [`ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_POWER_ON`](/firmware/configuration/t85_entry_on_powerOn_activePullup_fastExit/bootloaderconfig.h#L138) entry condition
+Activate the bootloader only if the D- pin is high, i.e. a pullup resistor is attached and powered **and** we have an `ENTRY_POWER_ON` condition.<br/>
 Useful if the pullup is powered by USB V+ and NOT ATtiny VCC to save power.
 In this case often a schottky diode is connected between V* and VCC.<br/>
-The `ENTRY_D_MINUS_PULLUP_ACTIVATED` configuration adds 54 bytes to the ATtiny85 default configuration.<br/>
+The `ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_POWER_ON` configuration adds 54 bytes to the ATtiny85 default configuration.<br/>
 The content of the `MCUSR` is copied to the `GPIOR0` register to enable the user program to evaluate it and then cleared to prepare for next boot.<br/>
 In this configuration **a power up with USB disconnected or a reset will immediately start your user program** without any delay.
 
-## [`START_WITHOUT_PULLUP`](/firmware/configuration/t85_entry_on_power_on_no_pullup_fast_exit_on_no_USB/bootloaderconfig.h#L207)
+## [`ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_EXT_RESET`](/firmware/configuration/t85_entry_on_reset_activePullup/bootloaderconfig.h#L138) entry condition
+Activate the bootloader only if the D- pin is high, i.e. a pullup resistor is attached and powered **and** we have an `ENTRY_EXT_RESET` condition.<br/>
+Useful if the pullup is powered by USB V+ and NOT ATtiny VCC to save power.
+In this case often a schottky diode is connected between V* and VCC.<br/>
+The `ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_EXT_RESET` configuration adds 54 bytes to the ATtiny85 default configuration.<br/>
+The content of the `MCUSR` is copied to the `GPIOR0` register to enable the user program to evaluate it and then cleared to prepare for next boot.<br/>
+In this configuration **a power up with USB disconnected or a reset will immediately start your user program** without any delay.
+
+## [`START_WITHOUT_PULLUP`](/firmware/configuration/t85_default/bootloaderconfig.h#L220)
 ### To support low energy applications
 The `START_WITHOUT_PULLUP` configuration adds 16 to 18 bytes for an additional check. It is only required if the bootloader can be entered without a pullup attached activated at the D- pin. Since this check was contained by default in all pre 2.0 versions, it is obvious that **it can also be used for boards with a pullup**.
 
 ## [`ENABLE_SAFE_OPTIMIZATIONS`](/firmware/crt1.S#L99)
-This configuration is referenced in the [Makefile.inc](/firmware/configuration/t85_fast_exit_on_no_USB/Makefile.inc#L18) file and will [disable the restoring of the stack pointer](https://github.com/ArminJo/micronucleus-firmware/blob/master/firmware/crt1.S#L102) at the start of program, whis is normally done by reset anyway. These optimization disables reliable entering the bootloader with `jmp 0x0000`, which you should not do anyway - better use the watchdog timer reset functionality.<br/>
+This configuration is referenced in the [Makefile.inc](/firmware/configuration/t85_fastExit/Makefile.inc#L18) file and will [disable the restoring of the stack pointer](https://github.com/ArminJo/micronucleus-firmware/blob/master/firmware/crt1.S#L102) at the start of program, whis is normally done by reset anyway. These optimization disables reliable entering the bootloader with `jmp 0x0000`, which you should not do anyway - better use the watchdog timer reset functionality.<br/>
 - Gains 10 bytes.
 
 ## [`ENABLE_UNSAFE_OPTIMIZATIONS`](/firmware/crt1.S#L99)
@@ -126,8 +121,8 @@ This configuration is referenced in the [Makefile.inc](/firmware/configuration/t
 
 You have a slightly bigger chance to brick the bootloader, which reqires it to be reprogrammed by [avrdude](windows_exe) and an ISP or an Arduino as ISP. Command files for this can be found [here](/utils).
 
-## [Recommended](/firmware/configuration/t85_entry_on_power_on_AND_USB_pullup_activated_fast_exit_on_no_USB) configuration
-The recommended configuration is *t85_entry_on_power_on_AND_USB_pullup_activated_fast_exit_on_no_USB*:
+## [Recommended](/firmware/configuration/t85_entry_on_powerOn_activePullup_fastExit) configuration
+The recommended configuration is *t85_entry_on_powerOn_activePullup_fastExit*:
 - Entry on power on **and** D- pullup active, no entry on reset, ie. after a reset if the user program starts immediately.
 - If pullup is connected to USB V+ and **not** VCC, the user program also starts immediately on power up.
 - Fast exit of bootloader (after 600 ms) if there is no host program sending us data (to upload a new user program/sketch).
@@ -140,6 +135,17 @@ If changes to the configuration lead to an increase in bootloader size, it may b
 Feel free to supply a pull request if you added and tested a previously unsupported device.
 
 # Compile instructions for the bootloader are [here](firmware#compiling)
+
+## Computing the values
+The actual memory footprint for each configuration can be found in the file [*firmware/build.log*](firmware/build.log).<br/>
+Bytes used by the mironucleus bootloader can be computed by taking the data size value in *build.log*, 
+rounding it up to the next multiple of the page size which is e.g. 64 bytes for ATtiny85 and 128 bytes for ATtiny176.<br/>
+Subtracting this (+ 6 byte for postscript) from the total amount of memory will result in the free bytes numbers.
+- Postscript are the few bytes at the end of programmable memory which store tinyVectors.
+
+E.g. for *t85_default.hex* with the new compiler we get 1548 as data size. The next multiple of 64 is 1600 (25 * 64) => (8192 - (1600 + 6)) = **6586 bytes are free**.<br/>
+In this case we have 52 bytes left for configuration extensions before using another 64 byte page.<br/>
+For *t167_default.hex* (as well as for the other t167 configurations) with the new compiler we get 1436 as data size. The next multiple of 128 is 1536 (12 * 128) => (16384 - (1536 + 6)) = 14842 bytes are free.
 
 # Bootloader memory comparison of different releases for [*t85_default.hex*](firmware/releases/t85_default.hex).
 - V1.6  6012 bytes free

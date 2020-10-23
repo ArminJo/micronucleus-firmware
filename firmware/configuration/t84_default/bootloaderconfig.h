@@ -124,23 +124,28 @@
  *       JUMPER_DDR     Port data direction register for the jumper (e.g. DDRB)
  *       JUMPER_INP     Port inout register for the jumper (e.g. PINB)
  *
+ *  ENTRY_D_MINUS_PULLUP_ACTIVATED
+ *                      Activate the bootloader if the D- pin is high, i.e. a pullup resistor
+ *                      is attached and powered. Useful if the pullup is powered by USB V+
+ *                      and NOT ATtiny VCC to save power.
+ *
  */
-
-#define ENTRYMODE ENTRY_ALWAYS
 
 #define JUMPER_PIN    PB0
 #define JUMPER_PORT   PORTB
 #define JUMPER_DDR    DDRB
 #define JUMPER_INP    PINB
 
-/*
-  Internal implementation, don't change this unless you want to add an entrymode.
-*/
-
+// These definitions are only required for the #if #elif's below.
 #define ENTRY_ALWAYS    1
 #define ENTRY_WATCHDOG  2
 #define ENTRY_EXT_RESET 3
 #define ENTRY_JUMPER    4
+#define ENTRY_POWER_ON  5
+#define ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_POWER_ON  6
+#define ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_EXT_RESET 7
+
+#define ENTRYMODE ENTRY_ALWAYS
 
 #if ENTRYMODE==ENTRY_ALWAYS
   #define bootLoaderInit()

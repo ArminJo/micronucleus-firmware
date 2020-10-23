@@ -1,17 +1,16 @@
-/* Name: bootloaderconfig.h
+ /* Name: bootloaderconfig.h
  * Micronucleus configuration file.
  * This file (together with some settings in Makefile.inc) configures the boot loader
  * according to the hardware.
  *
- * Controller type: ATtiny 85 - 16 MHz
- * Configuration:   Aggresively size optimized configuration
+ * Controller type: ATtiny 167 - 16 MHz with crystal
+ * Configuration:   Standard configuration +  ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_EXT_RESET + AUTO_EXIT_MS=15000 + LED_MODE=ACTIVE_HIGH
  *       USB D- :   PB3
- *       USB D+ :   PB4
- *       Entry  :   Always
- *       LED    :   None
- *       OSCCAL :   Stays at 16 MHz
+ *       USB D+ :   PB6
+ *       Entry  :   ENTRY_EXT_RESET
+ *       LED    :   ACTIVE_HIGH on PB1
+ *       OSCCAL :   No change due to external crystal
  * Note: Uses 16 MHz V-USB implementation.
- *       Worked reliably in all tests, but is possibly less stable than 16.5M Hz Implementation with PLL
  * Last Change:     Jun 16,2020
  *
  * License: GNU GPL v2 (see License.txt
@@ -35,7 +34,7 @@
  * This may be any bit in the port.
  * USB- has a 1.5k pullup resistor to indicate a low-speed device.
  */
-#define USB_CFG_DPLUS_BIT       4
+#define USB_CFG_DPLUS_BIT       6
 /* This is the bit number in USB_CFG_IOPORT where the USB D+ line is connected.
  * This may be any bit in the port, but must be configured as a pin change interrupt.
  */
@@ -70,21 +69,34 @@
 
 
 // setup interrupt for Pin Change for D+
-#define USB_INTR_CFG            PCMSK // Pin interrupt enable register
-#define USB_INTR_CFG_SET        (1 << USB_CFG_DPLUS_BIT) // mask for pin in pin interrupt enable register
+
+// This is configured for PORTB.
+
+#define USB_INTR_CFG            PCMSK1
+#define USB_INTR_CFG_SET        (1 << USB_CFG_DPLUS_BIT)
 #define USB_INTR_CFG_CLR        0
-#define USB_INTR_ENABLE         GIMSK // Global interrupt enable register
-#define USB_INTR_ENABLE_BIT     PCIE  // Bit position in global interrupt enable register
-#define USB_INTR_PENDING        GIFR  // Register to read interrupt flag
-#define USB_INTR_PENDING_BIT    PCIF  // Bit position in register to read interrupt flag
+#define USB_INTR_ENABLE         PCICR
+#define USB_INTR_ENABLE_BIT     PCIE1
+#define USB_INTR_PENDING        PCIFR
+#define USB_INTR_PENDING_BIT    PCIF1
+
+/* Configuration for PORTA */
+/*
+#define USB_INTR_CFG            PCMSK0
+#define USB_INTR_CFG_SET        (1 << USB_CFG_DPLUS_BIT)
+#define USB_INTR_CFG_CLR        0
+#define USB_INTR_ENABLE         PCICR
+#define USB_INTR_ENABLE_BIT     PCIE0
+#define USB_INTR_PENDING        PCIFR
+#define USB_INTR_PENDING_BIT    PCIF0
+*/
 
 /* ------------------------------------------------------------------------- */
 /*       Configuration relevant to the CPU the bootloader is running on      */
 /* ------------------------------------------------------------------------- */
 
 // how many milliseconds should host wait till it sends another erase or write?
-// needs to be above 4.5 (and a whole integer) as avr freezes maximum for 4.5ms
-// while writing a FLASH page (even for 128 byte page size:-))
+// needs to be above 4.5 (and a whole integer) as avr freezes for 4.5ms
 #define MICRONUCLEUS_WRITE_SLEEP 5
 
 
@@ -109,7 +121,7 @@
  *                      you must clear them with "MCUSR = 0;" in your setup() routine
  *                      after saving or evaluating them to make this mode work.
  *                      If you do not reset the flags, the bootloader will be entered even
- *                      after reset, since the "power on reset flag" PORF in MCUSR is still set.
+ *                      after reset, since the power on reset flag in MCUSR is still set.
  *                      Adds 18 bytes.
  *
  *  ENTRY_WATCHDOG      Activate the bootloader after a watchdog reset. This can be used
@@ -129,7 +141,7 @@
  *       JUMPER_PIN     Pin the jumper is connected to. (e.g. PB0)
  *       JUMPER_PORT    Port out register for the jumper (e.g. PORTB)
  *       JUMPER_DDR     Port data direction register for the jumper (e.g. DDRB)
- *       JUMPER_INP     Port input register for the jumper (e.g. PINB)
+ *       JUMPER_INP     Port inout register for the jumper (e.g. PINB)
  *
  *  ENTRY_D_MINUS_PULLUP_ACTIVATED
  *                      Activate the bootloader if the D- pin is high, i.e. a pullup resistor
@@ -152,7 +164,7 @@
 #define ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_POWER_ON  6
 #define ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_EXT_RESET 7
 
-#define ENTRYMODE ENTRY_ALWAYS
+#define ENTRYMODE ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_EXT_RESET
 
 #if ENTRYMODE==ENTRY_ALWAYS
   #define bootLoaderInit()
@@ -163,19 +175,19 @@
   #define bootLoaderExit()
   #define bootLoaderStartCondition() (MCUSR & _BV(WDRF))
 #elif ENTRYMODE==ENTRY_EXT_RESET
-// On my ATtiny85 I have always 0x03 EXTRF | PORF after power on.
+// On my ATtiny167 I have always 0x07 BORF | EXTRF | PORF after power on.
 // After reset only EXTRF is NEWLY set.
-// So we must reset at least PORF flag ALWAYS after checking for this entry condition,
-// otherwise entry condition will NEVER be true if application does not reset PORF.
+// So we must reset at least BORF and PORF flag ALWAYS after checking for entry condition,
+// otherwise this entry condition will NEVER be true if application does not reset PORF.
 // To be able to interpret MCUSR flags in user program, it is copied to the GPIOR0 register.
 // Use "if (MCUSR != 0) tMCUSRStored = MCUSR; else tMCUSRStored = GPIOR0;"
 // In turn we can just clear MCUSR, which saves flash.
   #define bootLoaderInit()
-  #define bootLoaderExit() {GPIOR0=MCUSR; MCUSR = 0;} // Adds 6 bytes
+  #define bootLoaderExit() {GPIOR0 = MCUSR; MCUSR = 0;} // Adds 6 bytes
   #define bootLoaderStartCondition() (MCUSR == _BV(EXTRF)) // Adds 18 bytes
 #elif ENTRYMODE==ENTRY_JUMPER
   // Enable pull up on jumper pin and delay to stabilize input
-  #define bootLoaderInit()   {JUMPER_DDR &= ~_BV(JUMPER_PIN); JUMPER_PORT |= _BV(JUMPER_PIN); _delay_ms(1);}
+  #define bootLoaderInit()   {JUMPER_DDR &= ~_BV(JUMPER_PIN);JUMPER_PORT |= _BV(JUMPER_PIN);_delay_ms(1);}
   #define bootLoaderExit()   {JUMPER_PORT &= ~_BV(JUMPER_PIN);}
   #define bootLoaderStartCondition() (!(JUMPER_INP & _BV(JUMPER_PIN)))
 #elif ENTRYMODE==ENTRY_POWER_ON
@@ -184,15 +196,15 @@
 // To be able to interpret MCUSR flags in user program, it is copied to the OCR1C register.
 // Use "if (MCUSR != 0) tMCUSRStored = MCUSR; else tMCUSRStored = GPIOR0;"
   #define bootLoaderExit() {GPIOR0 = MCUSR; MCUSR = 0;} // Adds 6 bytes
-  #define bootLoaderStartCondition() (MCUSR & _BV(PORF))
+  #define bootLoaderStartCondition() (MCUSR&_BV(PORF))
 #elif ENTRYMODE==ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_POWER_ON
   #define bootLoaderInit()
   #define bootLoaderExit() {GPIOR0 = MCUSR; MCUSR = 0;} // Adds 6 bytes
-  #define bootLoaderStartCondition()  ((USBIN & USBIDLE) && (MCUSR & _BV(PORF))) // Adds 22 bytes
+  #define bootLoaderStartCondition()  ((USBIN & USBIDLE) && (MCUSR & _BV(PORF)))
 #elif ENTRYMODE==ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_EXT_RESET
   #define bootLoaderInit()
-  #define bootLoaderExit() {GPIOR0=MCUSR; MCUSR = 0;} // Adds 6 bytes
-  #define bootLoaderStartCondition() ((USBIN & USBIDLE) && (MCUSR == _BV(EXTRF))) // Adds 22 bytes
+  #define bootLoaderExit() {GPIOR0 = MCUSR; MCUSR = 0;} // Adds 6 bytes
+  #define bootLoaderStartCondition() ((USBIN & USBIDLE) && (MCUSR == _BV(EXTRF)))
 #else
    #error "No entry mode defined"
 #endif
@@ -215,23 +227,14 @@
 
 // I observed 2 resets. First is 100 ms after initial connecting to USB lasting 65 ms and the second 90 ms later and also 65 ms.
 // On my old HP laptop I have different timing: First reset is 220 ms after initial connecting to USB lasting 300 ms and the second is missing.
-#define FAST_EXIT_NO_USB_MS       0 // Values below 120 are ignored. Effective timeout is 300 + FAST_EXIT_NO_USB_MS.
-#define AUTO_EXIT_MS           6000
+#define FAST_EXIT_NO_USB_MS      300 // Values below 120 are ignored. Effective timeout is 300 + FAST_EXIT_NO_USB_MS.
+#define AUTO_EXIT_MS           15000
 
-/* ----------------------- Optional Timeout Config ------------------------ */
 
-//#define START_WITHOUT_PULLUP
-/* It is only required if the bootloader can be entered without a pullup attached activated at the D- pin.
- * If not connected to USB we then have an endless USB reset condition,
- * which must be handled separately by commenting out the define.
- * This handling adds 14 to 16 bytes to the code size.
- * This handling also works well with standard / unmodified pullup connection :-).
- */
-
-/*
+ /*
  *  Defines the setting of the RC-oscillator calibration after quitting the bootloader. (OSCCAL)
  *
- *  OSCCAL_RESTORE_DEFAULT    Set this to '1' to revert to OSCCAL factory calibration after bootloader exit.
+ *  OSCCAL_RESTORE_DEFAULT    Set this to '1' to revert to OSCCAL factore calibration after bootloader exit.
  *                            This is 8 MHz +/-2% on most devices or 16 MHz on the ATtiny 85 with activated PLL.
  *                            Adds ~14 bytes.
  *
@@ -259,7 +262,18 @@
 
 #define OSCCAL_RESTORE_DEFAULT 0
 #define OSCCAL_SAVE_CALIB 0
-#define OSCCAL_HAVE_XTAL 0
+#define OSCCAL_HAVE_XTAL 1
+
+#if OSCCAL_HAVE_XTAL == 0
+// only needed for ATtinies without external crystal oscillator.
+//#define START_WITHOUT_PULLUP
+/* It is only required if the bootloader can be entered without a pullup attached activated at the D- pin.
+ * If not connected to USB we then have an endless USB reset condition,
+ * which must be handled separately by commenting out the define.
+ * This handling adds 14 to 16 bytes to the code size.
+ * This handling also works well with standard / unmodified pullup connection :-).
+ */
+#endif
 
 /*
  *  Defines handling of an indicator LED while the bootloader is active.
@@ -274,11 +288,7 @@
  *
  */
 
-#define NONE        0
-#define ACTIVE_HIGH 1
-#define ACTIVE_LOW  2
-
-#define LED_MODE    NONE
+#define LED_MODE    ACTIVE_HIGH
 
 #define LED_DDR     DDRB
 #define LED_PORT    PORTB
@@ -292,11 +302,15 @@
  *  LED_EXIT                  Called once during bootloader exit
  *  LED_MACRO                 Called in the main loop with the idle counter as parameter.
  *                            Use to define pattern.
- */
+*/
+
+#define NONE        0
+#define ACTIVE_HIGH 1
+#define ACTIVE_LOW  2
 
 #if LED_MODE==ACTIVE_HIGH
   #define LED_INIT(x)   LED_DDR |= _BV(LED_PIN);
-  #define LED_EXIT(x)   LED_PORT &= ~_BV(LED_PIN);
+  #define LED_EXIT(x)   {LED_DDR &= ~_BV(LED_PIN);LED_PORT &= ~_BV(LED_PIN);}
   #define LED_MACRO(x)  if ( x & 0x4c ) {LED_PORT &= ~_BV(LED_PIN);} else {LED_PORT |= _BV(LED_PIN);}
 #elif LED_MODE==ACTIVE_LOW
   #define LED_INIT(x)   LED_PORT &= ~_BV(LED_PIN);

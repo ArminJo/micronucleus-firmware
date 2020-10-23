@@ -3,20 +3,18 @@
  * This file (together with some settings in Makefile.inc) configures the boot loader
  * according to the hardware.
  *
- * Controller type: ATtiny 85 - 16 MHz
- * Configuration:   Aggresively size optimized configuration
- *       USB D- :   PB3
- *       USB D+ :   PB4
- *       Entry  :   Always
- *       LED    :   None
+ * Controller type: ATtiny 88 - 16 MHz - China MHETtiny88 board
+ * Configuration:   Default configuration + ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_POWER_ON + FAST_EXIT_NO_USB_MS=300 + LED_MODE=ACTIVE_HIGH
+ *       USB D- :   PD2
+ *       USB D+ :   PD1
+ *       Entry  :   POWER_ON
+ *       LED    :   ACTIVE_HIGH on D0
  *       OSCCAL :   Stays at 16 MHz
- * Note: Uses 16 MHz V-USB implementation.
- *       Worked reliably in all tests, but is possibly less stable than 16.5M Hz Implementation with PLL
+ * Note: Uses 16.0 MHz V-USB implementation
  * Last Change:     Jun 16,2020
  *
  * License: GNU GPL v2 (see License.txt
  */
-
 #ifndef __bootloaderconfig_h_included__
 #define __bootloaderconfig_h_included__
 
@@ -25,17 +23,17 @@
 /*      Change this according to your CPU and USB configuration              */
 /* ------------------------------------------------------------------------- */
 
-#define USB_CFG_IOPORTNAME      B
+#define USB_CFG_IOPORTNAME      D
   /* This is the port where the USB bus is connected. When you configure it to
    * "B", the registers PORTB, PINB and DDRB will be used.
    */
 
-#define USB_CFG_DMINUS_BIT      3
+#define USB_CFG_DMINUS_BIT      2
 /* This is the bit number in USB_CFG_IOPORT where the USB D- line is connected.
  * This may be any bit in the port.
  * USB- has a 1.5k pullup resistor to indicate a low-speed device.
  */
-#define USB_CFG_DPLUS_BIT       4
+#define USB_CFG_DPLUS_BIT       1
 /* This is the bit number in USB_CFG_IOPORT where the USB D+ line is connected.
  * This may be any bit in the port, but must be configured as a pin change interrupt.
  */
@@ -68,15 +66,14 @@
 /* to the manual. Note that the interrupt flag system is still used even though */
 /* interrupts are disabled. So this has to be configured correctly.             */
 
-
 // setup interrupt for Pin Change for D+
-#define USB_INTR_CFG            PCMSK // Pin interrupt enable register
+#define USB_INTR_CFG            PCMSK2 // Pin interrupt enable register
 #define USB_INTR_CFG_SET        (1 << USB_CFG_DPLUS_BIT) // mask for pin in pin interrupt enable register
 #define USB_INTR_CFG_CLR        0
-#define USB_INTR_ENABLE         GIMSK // Global interrupt enable register
-#define USB_INTR_ENABLE_BIT     PCIE  // Bit position in global interrupt enable register
-#define USB_INTR_PENDING        GIFR  // Register to read interrupt flag
-#define USB_INTR_PENDING_BIT    PCIF  // Bit position in register to read interrupt flag
+#define USB_INTR_ENABLE         PCICR // Global interrupt enable register
+#define USB_INTR_ENABLE_BIT     PCIE2 // Bit position in global interrupt enable register
+#define USB_INTR_PENDING        PCIFR // Register to read interrupt flag
+#define USB_INTR_PENDING_BIT    PCIF2 // Bit position in register to read interrupt flag
 
 /* ------------------------------------------------------------------------- */
 /*       Configuration relevant to the CPU the bootloader is running on      */
@@ -152,7 +149,7 @@
 #define ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_POWER_ON  6
 #define ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_EXT_RESET 7
 
-#define ENTRYMODE ENTRY_ALWAYS
+#define ENTRYMODE ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_POWER_ON
 
 #if ENTRYMODE==ENTRY_ALWAYS
   #define bootLoaderInit()
@@ -184,15 +181,11 @@
 // To be able to interpret MCUSR flags in user program, it is copied to the OCR1C register.
 // Use "if (MCUSR != 0) tMCUSRStored = MCUSR; else tMCUSRStored = GPIOR0;"
   #define bootLoaderExit() {GPIOR0 = MCUSR; MCUSR = 0;} // Adds 6 bytes
-  #define bootLoaderStartCondition() (MCUSR & _BV(PORF))
+  #define bootLoaderStartCondition() (MCUSR&_BV(PORF))
 #elif ENTRYMODE==ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_POWER_ON
   #define bootLoaderInit()
   #define bootLoaderExit() {GPIOR0 = MCUSR; MCUSR = 0;} // Adds 6 bytes
   #define bootLoaderStartCondition()  ((USBIN & USBIDLE) && (MCUSR & _BV(PORF))) // Adds 22 bytes
-#elif ENTRYMODE==ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_EXT_RESET
-  #define bootLoaderInit()
-  #define bootLoaderExit() {GPIOR0=MCUSR; MCUSR = 0;} // Adds 6 bytes
-  #define bootLoaderStartCondition() ((USBIN & USBIDLE) && (MCUSR == _BV(EXTRF))) // Adds 22 bytes
 #else
    #error "No entry mode defined"
 #endif
@@ -215,7 +208,7 @@
 
 // I observed 2 resets. First is 100 ms after initial connecting to USB lasting 65 ms and the second 90 ms later and also 65 ms.
 // On my old HP laptop I have different timing: First reset is 220 ms after initial connecting to USB lasting 300 ms and the second is missing.
-#define FAST_EXIT_NO_USB_MS       0 // Values below 120 are ignored. Effective timeout is 300 + FAST_EXIT_NO_USB_MS.
+#define FAST_EXIT_NO_USB_MS     300 // Values below 120 are ignored. Effective timeout is 300 + FAST_EXIT_NO_USB_MS.
 #define AUTO_EXIT_MS           6000
 
 /* ----------------------- Optional Timeout Config ------------------------ */
@@ -258,7 +251,7 @@
  */
 
 #define OSCCAL_RESTORE_DEFAULT 0
-#define OSCCAL_SAVE_CALIB 0
+#define OSCCAL_SAVE_CALIB 1
 #define OSCCAL_HAVE_XTAL 0
 
 /*
@@ -278,11 +271,11 @@
 #define ACTIVE_HIGH 1
 #define ACTIVE_LOW  2
 
-#define LED_MODE    NONE
+#define LED_MODE    ACTIVE_HIGH
 
-#define LED_DDR     DDRB
-#define LED_PORT    PORTB
-#define LED_PIN     PB1
+#define LED_DDR     DDRD
+#define LED_PORT    PORTD
+#define LED_PIN     PD0
 
 /*
  *  This is the implementation of the LED code. Change the configuration above unless you want to

@@ -2,7 +2,7 @@
 color f0
 title AvrDude GUI Command Window
 @Call SetPath
-REM The files t85_no_pullup.hex and t85_entry_on_power_on_no_pullup.hex are identical!
+REM The files t85_no_pullup.hex and t85_entry_on_powerOn_no_pullup.hex are identical!
 @echo Upgrade Digispark Bootloader with spi programming by avrdude
 @echo.
 @echo. Writing ATtiny85 fuses to digispark default except leaving pin5 as reset to enable further low voltage SPI programming
@@ -11,7 +11,7 @@ REM The files t85_no_pullup.hex and t85_entry_on_power_on_no_pullup.hex are iden
 @echo. Writing ATtiny85 Hfuse to 0xDF - External Reset pin enabled (Pin5 not usable as I/O) + BOD disabled + Enable Serial Program and Data Downloading
 @echo. Writing ATtiny85 EFuse to 0xFE - self programming enabled.
 @echo.
-set FILENAME=t85_entry_on_power_on_no_pullup_fast_exit_on_no_USB.hex
+set FILENAME=t85_entry_on_powerOn_activePullup_fastExit.hex
 @if exist %FILENAME% (
   avrdude -pt85 -cstk500v1 -PCOM6 -b19200 -u -Uflash:w:%FILENAME%:a -Ulfuse:w:0xE1:m -Uhfuse:w:0xDF:m -Uefuse:w:0xFE:m
   goto end

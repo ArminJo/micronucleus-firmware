@@ -3,20 +3,18 @@
  * This file (together with some settings in Makefile.inc) configures the boot loader
  * according to the hardware.
  *
- * Controller type: ATtiny 85 - 16 MHz
- * Configuration:   Aggresively size optimized configuration
+ * Controller type: ATtiny 85 - 16.5 MHz
+ * Configuration:   Default configuration + FAST_EXIT_NO_USB_MS=300 + LED_MODE=ACTIVE_HIGH
  *       USB D- :   PB3
  *       USB D+ :   PB4
  *       Entry  :   Always
- *       LED    :   None
+ *       LED    :   ACTIVE_HIGH on B1
  *       OSCCAL :   Stays at 16 MHz
- * Note: Uses 16 MHz V-USB implementation.
- *       Worked reliably in all tests, but is possibly less stable than 16.5M Hz Implementation with PLL
+ * Note: Uses 16.5 MHz V-USB implementation with PLL
  * Last Change:     Jun 16,2020
  *
  * License: GNU GPL v2 (see License.txt
  */
-
 #ifndef __bootloaderconfig_h_included__
 #define __bootloaderconfig_h_included__
 
@@ -51,6 +49,7 @@
  */
 
 /* ----------------------- Optional Hardware Config ------------------------ */
+
 //#define USB_CFG_PULLUP_IOPORTNAME   B
 /* If you connect the 1.5k pullup resistor from D- to a port pin instead of
  * V+, you can connect and disconnect the device from firmware by calling
@@ -62,6 +61,11 @@
  * above) where the 1.5k pullup resistor is connected. See description
  * above for details.
  */
+
+/* ------------- Set up interrupt configuration (CPU specific) --------------   */
+/* The register names change quite a bit in the ATtiny family. Pay attention    */
+/* to the manual. Note that the interrupt flag system is still used even though */
+/* interrupts are disabled. So this has to be configured correctly.             */
 
 /* ------------- Set up interrupt configuration (CPU specific) --------------   */
 /* The register names change quite a bit in the ATtiny family. Pay attention    */
@@ -135,24 +139,23 @@
  *                      Activate the bootloader if the D- pin is high, i.e. a pullup resistor
  *                      is attached and powered. Useful if the pullup is powered by USB V+
  *                      and NOT ATtiny VCC to save power.
+ *                      The ENTRY_POWER_ON condition is ANDed to enable this as the default configuration.
  *
  */
 
-#define JUMPER_PIN    PB0
-#define JUMPER_PORT   PORTB
-#define JUMPER_DDR    DDRB
-#define JUMPER_INP    PINB
-
-// These definitions are only required for the #if #elif's below.
+// Internal implementation, don't change this unless you want to add an entry mode.
 #define ENTRY_ALWAYS    1
 #define ENTRY_WATCHDOG  2
 #define ENTRY_EXT_RESET 3
 #define ENTRY_JUMPER    4
 #define ENTRY_POWER_ON  5
-#define ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_POWER_ON  6
-#define ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_EXT_RESET 7
 
 #define ENTRYMODE ENTRY_ALWAYS
+
+#define JUMPER_PIN    PB0
+#define JUMPER_PORT   PORTB
+#define JUMPER_DDR    DDRB
+#define JUMPER_INP    PINB
 
 #if ENTRYMODE==ENTRY_ALWAYS
   #define bootLoaderInit()
@@ -184,15 +187,7 @@
 // To be able to interpret MCUSR flags in user program, it is copied to the OCR1C register.
 // Use "if (MCUSR != 0) tMCUSRStored = MCUSR; else tMCUSRStored = GPIOR0;"
   #define bootLoaderExit() {GPIOR0 = MCUSR; MCUSR = 0;} // Adds 6 bytes
-  #define bootLoaderStartCondition() (MCUSR & _BV(PORF))
-#elif ENTRYMODE==ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_POWER_ON
-  #define bootLoaderInit()
-  #define bootLoaderExit() {GPIOR0 = MCUSR; MCUSR = 0;} // Adds 6 bytes
-  #define bootLoaderStartCondition()  ((USBIN & USBIDLE) && (MCUSR & _BV(PORF))) // Adds 22 bytes
-#elif ENTRYMODE==ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_EXT_RESET
-  #define bootLoaderInit()
-  #define bootLoaderExit() {GPIOR0=MCUSR; MCUSR = 0;} // Adds 6 bytes
-  #define bootLoaderStartCondition() ((USBIN & USBIDLE) && (MCUSR == _BV(EXTRF))) // Adds 22 bytes
+  #define bootLoaderStartCondition() (MCUSR&_BV(PORF))
 #else
    #error "No entry mode defined"
 #endif
@@ -215,7 +210,7 @@
 
 // I observed 2 resets. First is 100 ms after initial connecting to USB lasting 65 ms and the second 90 ms later and also 65 ms.
 // On my old HP laptop I have different timing: First reset is 220 ms after initial connecting to USB lasting 300 ms and the second is missing.
-#define FAST_EXIT_NO_USB_MS       0 // Values below 120 are ignored. Effective timeout is 300 + FAST_EXIT_NO_USB_MS.
+#define FAST_EXIT_NO_USB_MS     300 // Values below 120 are ignored. Effective timeout is 300 + FAST_EXIT_NO_USB_MS.
 #define AUTO_EXIT_MS           6000
 
 /* ----------------------- Optional Timeout Config ------------------------ */
@@ -246,10 +241,6 @@
  *                            will be made to calibrate the oscillator. You should deactivate both options above
  *                            if you use this to avoid redundant code.
  *
- *  OSCCAL_SLOW_PROGRAMMING   Setting this to '1' will set OSCCAL back to the factory calibration during programming to make
- *                            sure correct timing is used for the flash writes. This is needed if the micronucleus clock
- *                            speed significantly deviated from the default clock. E.g. 12 Mhz on ATtiny841 vs. 8Mhz default.
- *
  *  If both options are selected, OSCCAL_RESTORE_DEFAULT takes precedence.
  *
  *  If no option is selected, OSCCAL will be left untouched and stays at either factory calibration or F_CPU depending
@@ -258,7 +249,7 @@
  */
 
 #define OSCCAL_RESTORE_DEFAULT 0
-#define OSCCAL_SAVE_CALIB 0
+#define OSCCAL_SAVE_CALIB 1
 #define OSCCAL_HAVE_XTAL 0
 
 /*
@@ -278,7 +269,7 @@
 #define ACTIVE_HIGH 1
 #define ACTIVE_LOW  2
 
-#define LED_MODE    NONE
+#define LED_MODE    ACTIVE_HIGH
 
 #define LED_DDR     DDRB
 #define LED_PORT    PORTB

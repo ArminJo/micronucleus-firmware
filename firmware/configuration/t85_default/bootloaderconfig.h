@@ -128,21 +128,28 @@
  *       JUMPER_DDR     Port data direction register for the jumper (e.g. DDRB)
  *       JUMPER_INP     Port input register for the jumper (e.g. PINB)
  *
+ *  ENTRY_D_MINUS_PULLUP_ACTIVATED
+ *                      Activate the bootloader if the D- pin is high, i.e. a pullup resistor
+ *                      is attached and powered. Useful if the pullup is powered by USB V+
+ *                      and NOT ATtiny VCC to save power.
+ *
  */
-
-// Internal implementation, don't change this unless you want to add an entry mode.
-#define ENTRY_ALWAYS    1
-#define ENTRY_WATCHDOG  2
-#define ENTRY_EXT_RESET 3
-#define ENTRY_JUMPER    4
-#define ENTRY_POWER_ON  5
-
-#define ENTRYMODE ENTRY_ALWAYS
 
 #define JUMPER_PIN    PB0
 #define JUMPER_PORT   PORTB
 #define JUMPER_DDR    DDRB
 #define JUMPER_INP    PINB
+
+// These definitions are only required for the #if #elif's below.
+#define ENTRY_ALWAYS    1
+#define ENTRY_WATCHDOG  2
+#define ENTRY_EXT_RESET 3
+#define ENTRY_JUMPER    4
+#define ENTRY_POWER_ON  5
+#define ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_POWER_ON  6
+#define ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_EXT_RESET 7
+
+#define ENTRYMODE ENTRY_ALWAYS
 
 #if ENTRYMODE==ENTRY_ALWAYS
   #define bootLoaderInit()
@@ -174,7 +181,15 @@
 // To be able to interpret MCUSR flags in user program, it is copied to the OCR1C register.
 // Use "if (MCUSR != 0) tMCUSRStored = MCUSR; else tMCUSRStored = GPIOR0;"
   #define bootLoaderExit() {GPIOR0 = MCUSR; MCUSR = 0;} // Adds 6 bytes
-  #define bootLoaderStartCondition() (MCUSR&_BV(PORF))
+  #define bootLoaderStartCondition() (MCUSR & _BV(PORF))
+#elif ENTRYMODE==ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_POWER_ON
+  #define bootLoaderInit()
+  #define bootLoaderExit() {GPIOR0 = MCUSR; MCUSR = 0;} // Adds 6 bytes
+  #define bootLoaderStartCondition()  ((USBIN & USBIDLE) && (MCUSR & _BV(PORF))) // Adds 22 bytes
+#elif ENTRYMODE==ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_EXT_RESET
+  #define bootLoaderInit()
+  #define bootLoaderExit() {GPIOR0=MCUSR; MCUSR = 0;} // Adds 6 bytes
+  #define bootLoaderStartCondition() ((USBIN & USBIDLE) && (MCUSR == _BV(EXTRF))) // Adds 22 bytes
 #else
    #error "No entry mode defined"
 #endif
@@ -203,16 +218,14 @@
 /* ----------------------- Optional Timeout Config ------------------------ */
 
 //#define START_WITHOUT_PULLUP
-/* If you do not have the 1.5k pullup resistor connected directly from D- to ATtiny VCC
- * to save power for battery operated applications, you must insert a diode
- * between USB V+ and ATiny VCC and connect the resistor directly to USB V+.
+/* It is only required if the bootloader can be entered without a pullup attached activated at the D- pin.
  * If not connected to USB we then have an endless USB reset condition,
  * which must be handled separately by commenting out the define.
  * This handling adds 14 to 16 bytes to the code size.
  * This handling also works well with standard / unmodified pullup connection :-).
  */
 
- /*
+/*
  *  Defines the setting of the RC-oscillator calibration after quitting the bootloader. (OSCCAL)
  *
  *  OSCCAL_RESTORE_DEFAULT    Set this to '1' to revert to OSCCAL factory calibration after bootloader exit.

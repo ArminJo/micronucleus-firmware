@@ -143,21 +143,28 @@
  *       JUMPER_DDR     Port data direction register for the jumper (e.g. DDRB)
  *       JUMPER_INP     Port inout register for the jumper (e.g. PINB)
  *
+ *  ENTRY_D_MINUS_PULLUP_ACTIVATED
+ *                      Activate the bootloader if the D- pin is high, i.e. a pullup resistor
+ *                      is attached and powered. Useful if the pullup is powered by USB V+
+ *                      and NOT ATtiny VCC to save power.
+ *
  */
-
-#define ENTRYMODE ENTRY_ALWAYS
 
 #define JUMPER_PIN    PB0
 #define JUMPER_PORT   PORTB
 #define JUMPER_DDR    DDRB
 #define JUMPER_INP    PINB
 
-//Internal implementation, don't change this unless you want to add an entrymode.
+// These definitions are only required for the #if #elif's below.
 #define ENTRY_ALWAYS    1
 #define ENTRY_WATCHDOG  2
 #define ENTRY_EXT_RESET 3
 #define ENTRY_JUMPER    4
 #define ENTRY_POWER_ON  5
+#define ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_POWER_ON  6
+#define ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_EXT_RESET 7
+
+#define ENTRYMODE ENTRY_ALWAYS
 
 #if ENTRYMODE==ENTRY_ALWAYS
   #define bootLoaderInit()
@@ -190,6 +197,14 @@
 // Use "if (MCUSR != 0) tMCUSRStored = MCUSR; else tMCUSRStored = GPIOR0;"
   #define bootLoaderExit() {GPIOR0 = MCUSR; MCUSR = 0;} // Adds 6 bytes
   #define bootLoaderStartCondition() (MCUSR&_BV(PORF))
+#elif ENTRYMODE==ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_POWER_ON
+  #define bootLoaderInit()
+  #define bootLoaderExit() {GPIOR0 = MCUSR; MCUSR = 0;} // Adds 6 bytes
+  #define bootLoaderStartCondition()  ((USBIN & USBIDLE) && (MCUSR & _BV(PORF)))
+#elif ENTRYMODE==ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_EXT_RESET
+  #define bootLoaderInit()
+  #define bootLoaderExit() {GPIOR0 = MCUSR; MCUSR = 0;} // Adds 6 bytes
+  #define bootLoaderStartCondition() ((USBIN & USBIDLE) && (MCUSR == _BV(EXTRF)))
 #else
    #error "No entry mode defined"
 #endif
@@ -210,7 +225,8 @@
  *  All values are approx. in milliseconds
  */
 
-// I observed 2 Resets. First is 100ms after initial connecting to USB lasting 65 ms and the second 90 ms later and also 65 ms.
+// I observed 2 resets. First is 100 ms after initial connecting to USB lasting 65 ms and the second 90 ms later and also 65 ms.
+// On my old HP laptop I have different timing: First reset is 220 ms after initial connecting to USB lasting 300 ms and the second is missing.
 #define FAST_EXIT_NO_USB_MS       0 // Values below 120 are ignored. Effective timeout is 300 + FAST_EXIT_NO_USB_MS.
 #define AUTO_EXIT_MS           6000
 
@@ -245,13 +261,12 @@
 
 #if OSCCAL_HAVE_XTAL == 0
 // only needed for ATtinies without external crystal oscillator.
-#define START_WITHOUT_PULLUP
-/* If you do not have the 1.5k pullup resistor connected directly from D- to ATtiny VCC
- * to save power for battery operated applications, you must insert a diode
- * between USB V+ and ATiny VCC and connect the resistor directly to USB V+.
- * Because of code space savings this results in an endless loop in the calibrateOscillatorASM() function if no USB V+ is attached.
- * To avoid this, uncomment the define.
- * Defining this adds 14 bytes to the code size. This code also works well with standard pullup connection :-).
+//#define START_WITHOUT_PULLUP
+/* It is only required if the bootloader can be entered without a pullup attached activated at the D- pin.
+ * If not connected to USB we then have an endless USB reset condition,
+ * which must be handled separately by commenting out the define.
+ * This handling adds 14 to 16 bytes to the code size.
+ * This handling also works well with standard / unmodified pullup connection :-).
  */
 #endif
 
