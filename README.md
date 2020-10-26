@@ -92,12 +92,13 @@ The content of the `MCUSR` is copied to the `GPIOR0` register before clearing it
 **ATTENTION! If the external reset pin is disabled, this entry mode will brick the board!**
 
 ## [`ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_POWER_ON`](/firmware/configuration/t85_entry_on_powerOn_activePullup_fastExit/bootloaderconfig.h#L138) entry condition
-Activate the bootloader only if the D- pin is high, i.e. a pullup resistor is attached and powered **and** we have an `ENTRY_POWER_ON` condition.<br/>
+Activate the bootloader only if the D- pin is high, i.e. a pullup resistor is attached and powered **and** we have an `ENTRY_POWER_ON` condition (ref. described above).<br/>
 Useful if the pullup is powered by USB V+ and NOT ATtiny VCC to save power.
-In this case often a schottky diode is connected between V* and VCC.<br/>
+In this case often a schottky diode is connected between USB V+ and VCC (5V).<br/>
 The `ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_POWER_ON` configuration adds 54 bytes to the ATtiny85 default configuration.<br/>
 The content of the `MCUSR` is copied to the `GPIOR0` register to enable the user program to evaluate it and then cleared to prepare for next boot.<br/>
-In this configuration **a power up with USB disconnected or a reset will immediately start your user program** without any delay.
+In this configuration **a power up with USB disconnected or a reset will immediately start your user program** without any delay.<br/>
+This configuration flag overrides `START_WITHOUT_PULLUP` (using both flags is useless and wastes bytes).
 
 ## [`ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_EXT_RESET`](/firmware/configuration/t85_entry_on_reset_activePullup/bootloaderconfig.h#L138) entry condition
 Activate the bootloader only if the D- pin is high, i.e. a pullup resistor is attached and powered **and** we have an `ENTRY_EXT_RESET` condition.<br/>
@@ -105,7 +106,8 @@ Useful if the pullup is powered by USB V+ and NOT ATtiny VCC to save power.
 In this case often a schottky diode is connected between V* and VCC.<br/>
 The `ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_EXT_RESET` configuration adds 54 bytes to the ATtiny85 default configuration.<br/>
 The content of the `MCUSR` is copied to the `GPIOR0` register to enable the user program to evaluate it and then cleared to prepare for next boot.<br/>
-In this configuration **a power up with USB disconnected or a reset will immediately start your user program** without any delay.
+In this configuration **a power up with USB disconnected or a reset will immediately start your user program** without any delay.<br/>
+This configuration flag overrides `START_WITHOUT_PULLUP` (using both flags is useless and wastes bytes).
 
 ## [`START_WITHOUT_PULLUP`](/firmware/configuration/t85_default/bootloaderconfig.h#L220)
 ### To support low energy applications
@@ -122,10 +124,25 @@ This configuration is referenced in the [Makefile.inc](/firmware/configuration/t
 You have a slightly bigger chance to brick the bootloader, which reqires it to be reprogrammed by [avrdude](windows_exe) and an ISP or an Arduino as ISP. Command files for this can be found [here](/utils).
 
 ## [Recommended](/firmware/configuration/t85_entry_on_powerOn_activePullup_fastExit) configuration
-The recommended configuration is *t85_entry_on_powerOn_activePullup_fastExit*:
-- Entry on power on **and** D- pullup active, no entry on reset, ie. after a reset if the user program starts immediately.
-- If pullup is connected to USB V+ and **not** VCC, the user program also starts immediately on power up.
-- Fast exit of bootloader (after 600 ms) if there is no host program sending us data (to upload a new user program/sketch).
+For ATtiny85, ATtiny88 and ATtiny167 the recommended configuration is *t85_entry_on_powerOn_activePullup_fastExit*, *t88_entry_on_powerOn_activePullup_fastExit.hex* and *t167_entry_on_powerOn_activePullup_fastExit.hex* respectively.
+
+This configuration has the following features:
+
+- When USB D- positive pull-up is configured in the hardware, at power-on the bootloader attempts to load the sketch (*entry_on_powerOn* / `ENTRY_POWER_ON`) and starts the user program after timeout or after upload completion. The built-in LED flashes while the bootloader is waiting for sketch upload and during the schetch upload phase (`LED_MODE=ACTIVE_HIGH`).<br/>The USB positive pull-up is the standard configuration of the Digispark device, where the hardware includes a resistor between USB D- (in turn connected to Digispark P3 though another resistor) and USB V+ (+5V), with related voltage limited by a Zener diode to comply with USB standard (about 3.6V).
+- While attempting to load a sketch at power-on, the timeout varies according to the availability of the USB host to send data. If the USB host is active, the start of the sketch upload shall occur within about 6 seconds; on timeout, the installed user program starts. If there is no USB host program sending data (to upload a new user program/sketch), the bootloader starts the already installed user program after 600 milliseconds (`FAST_EXIT_NO_USB_MS=300` means *Fast exit of bootloader after 300+300 ms*).
+- If USB D- positive pullup is not configured in the hw (e.g., pullup resistor disconnected to save energy), the bootloader prevents the loading of sketches via USB (which in any case should not be feasible without pullup resistor between +5V and D-) and immediately starts the installed user program (without startup delay, without hang-up and without affecting the internal LED at boot). This is referred to the `ENTRY_D_MINUS_PULLUP_ACTIVATED` part of the configuration flags. The builtin LED remains off in this case (`LED_MODE=ACTIVE_HIGH` has no effect here).
+
+An hardware reset (e.g., Digispark P5 shorted to ground) will not restart the bootloader and immediately runs the user program (*no entry on reset* means that the `ENTRY_POWER_ON` flag will not enter the bootloader schetch upload process on hardware reset or brownout).
+
+Detailed description of the use cases at power-on with this configuration:
+
+|Use case at power-on|Action|
+|---|---|
+|No user program installed (this condition occurs after installing or upgrading the bootloader), hardware pull-up configured on USB D-, USB connected or disconnected|The LED quickly flashes indefinitely (until a program is loaded). A user program can be loaded at any time. After the program is loaded, it immediately starts.|
+|No user program installed and no pull-up on USB D- (USB disconnected)|LED off indefinitely. The user program cannot be loaded.|
+|User program installed with USB D- pulled up and USB connected|The LED flashes for about six seconds to wait for a new sketch to be loaded. After the timeout (or after loading a sketch), the user program starts.|
+|User program installed with USB D- pulled up and USB disconnected|The LED quickly flashes for about 600 milliseconds, then the user program starts.|
+|User program installed with no USB D- pull-up (USB disconnected)|The user program immediately starts (without startup delay, without hang-up and without affecting the internal LED at boot).|
 
 #### Hex files for these configuration are already available in the [releases](/firmware/releases) and [upgrades](/firmware/upgrades) folders.
 
@@ -222,6 +239,27 @@ The diode and its correct sides can be found by using a continuity tester. One s
 Now the USB pullup resistor is only activated if the Digispark board is connected to USB e.g. during programming.
 
 ![Final power reduction](https://github.com/ArminJo/Arduino-OpenWindowAlarm/blob/master/pictures/Final-Version-Detail_annotated.jpg)
+
+Other example:
+
+<img src="pictures/modding_front.png" width="300" title="Modding front"/>
+<img src="pictures/modding_back.png" width="300" title="Modding back"/>
+
+Moddings:
+
+- Connect A to C (A is the right terminal of the 1kohm resistor; C is USB V+)
+- Cut B with a cutter (power supply rail interconnecting the 1kohm resistor with 5V)
+- Connect C with D (C is USB V+, D is the left terminal of the green LED resistor)
+- Remove the 78M05 linear regulator G
+- Connect E with F (short the two input/output terminals of the removed linear regulator)
+- Cut H with a cutter (power supply rail connecting 5V with the output of the linear regulator)
+
+Resulting connections:
+
+- Disconnect 5V and VIN; use the USB to upload a sketch (the green LED is lighted)
+- Disconnect USB and VIN; Use 5V - GND to test the device with D- pull-up (the green LED is lighted)
+- Disconnect USB and 5V; Use VIN - GND for standard operation in low current consumption; the power supply can be 3V to 5V (the green LED can be used as debug output of PB3).
+
 
 # Pin layout
 ### ATtiny85 on Digispark
