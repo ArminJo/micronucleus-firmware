@@ -129,11 +129,6 @@ static uint8_t usbFunctionSetup(uint8_t data[8]);
 static inline void leaveBootloader(void);
 void blinkLED(uint8_t aBlinkCount);
 
-// This function is never called and optimized out, it is just here to suppress a compiler warning.
-USB_PUBLIC usbMsgLen_t usbFunctionDescriptor(struct usbRequest *rq __attribute__((unused))) {
-    return 0;
-}
-
 /*
  * erase all pages until bootloader, in reverse order (so our vectors stay in place for as long as possible)
  * to minimise the chance of leaving the device in a state where the bootloader wont run, if there's power failure

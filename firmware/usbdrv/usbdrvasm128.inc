@@ -126,14 +126,6 @@ waitForK:
     rjmp    foundK
     sbis    USBIN, USBMINUS ;[0]
     rjmp    foundK          ;[1]
-#if USB_COUNT_SOF
-    lds     YL, usbSofCount
-    inc     YL
-    sts     usbSofCount, YL
-#endif  /* USB_COUNT_SOF */
-#ifdef USB_SOF_HOOK
-    USB_SOF_HOOK
-#endif
     rjmp    sofError
 
 foundK:

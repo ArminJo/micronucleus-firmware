@@ -36,12 +36,6 @@ the file appropriate for the given clock rate.
     extern  usbRxBuf, usbDeviceAddr, usbNewDeviceAddr, usbInputBufOffset
     extern  usbCurrentTok, usbRxLen, usbRxToken, usbTxLen
     extern  usbTxBuf, usbTxStatus1, usbTxStatus3
-#   if USB_COUNT_SOF
-        extern usbSofCount
-#   endif
-#if defined(USB_CRC_16_REQUIRED)
-    public  usbCrc16
-#endif
     public  usbCrc16Append
 
     COMMON  INTVEC
@@ -67,9 +61,6 @@ the file appropriate for the given clock rate.
     .text
     .global USB_INTR_VECTOR
     .type   USB_INTR_VECTOR, @function
-#if  defined(USB_CRC_16_REQUIRED)
-    .global usbCrc16
-#endif
     .global usbCrc16Append
 #endif /* __IAR_SYSTEMS_ASM__ */
 
@@ -183,11 +174,7 @@ RTMODEL "__rt_version", "3"
 ;   resCrc  r24+r25 / r16+r17
 ;   ptr     X / Z
 
-#if defined(USB_CRC_16_REQUIRED)
-usbCrc16:
-#else
 usbCrc16Append:
-#endif
     movw    ptrL, argPtrL
     ldi     resCrcL, 0xFF
     ldi     resCrcH, 0xFF
@@ -220,10 +207,8 @@ usbCrc16LoopTest:
     brsh    usbCrc16ByteLoop
     com     resCrcL
     com     resCrcH
-#if ! defined(USB_CRC_16_REQUIRED)
     st      ptr+, resCrcL
     st      ptr+, resCrcH
-#endif
     ret
 
 #else   // USB_USE_FAST_CRC
@@ -240,11 +225,7 @@ usbCrc16LoopTest:
 ;   scratch r23
 ;   resCrc  r24+r25 / r16+r17
 ;   ptr     X / Z
-#if defined(USB_CRC_16_REQUIRED)
-usbCrc16:
-#else
 usbCrc16Append:
-#endif
     movw    ptrL, argPtrL
 #    mov     ptrL, argPtrL
 #    mov     ptrH, argPtrH
@@ -271,23 +252,12 @@ usbCrcLoopEntry:
     subi    argLen, -1
     brcs    usbCrcByteLoop
 usbCrcReady:
-#if ! defined(USB_CRC_16_REQUIRED)
     st      ptr+, resCrcL
     st      ptr+, resCrcH
-#endif
     ret
 ; Thanks to Reimar Doeffinger for optimizing this CRC routine!
 
 #endif // USB_USE_FAST_CRC
-
-#if defined(USB_CRC_16_REQUIRED)
-; extern unsigned usbCrc16Append(unsigned char *data, unsigned char len);
-usbCrc16Append:
-    rcall   usbCrc16
-    st      ptr+, resCrcL
-    st      ptr+, resCrcH
-    ret
-#endif
 
 #undef argLen
 #undef argPtrL
@@ -389,26 +359,18 @@ usbMFTimeout:
 #   endif
 #endif
 
-#if USB_CFG_CHECK_CRC   /* separate dispatcher for CRC type modules */
-#   if USB_CFG_CLOCK_KHZ == 18000
-#       include "usbdrvasm18-crc.inc"
-#   else
-#       error "USB_CFG_CLOCK_KHZ is not one of the supported crc-rates!"
-#   endif
-#else   /* USB_CFG_CHECK_CRC */
-#   if USB_CFG_CLOCK_KHZ == 12000
-#       include "usbdrvasm12.inc"
-#   elif USB_CFG_CLOCK_KHZ == 12800
-#       include "usbdrvasm128.inc"
-#   elif USB_CFG_CLOCK_KHZ == 15000
-#       include "usbdrvasm15.inc"
-#   elif USB_CFG_CLOCK_KHZ == 16000
-#       include "usbdrvasm16.inc"
-#   elif USB_CFG_CLOCK_KHZ == 16500
-#       include "usbdrvasm165.inc"
-#   elif USB_CFG_CLOCK_KHZ == 20000
-#       include "usbdrvasm20.inc"
-#   else
-#       error "USB_CFG_CLOCK_KHZ is not one of the supported non-crc-rates!"
-#   endif
-#endif /* USB_CFG_CHECK_CRC */
+#if USB_CFG_CLOCK_KHZ == 12000
+#    include "usbdrvasm12.inc"
+#elif USB_CFG_CLOCK_KHZ == 12800
+#    include "usbdrvasm128.inc"
+#elif USB_CFG_CLOCK_KHZ == 15000
+#    include "usbdrvasm15.inc"
+#elif USB_CFG_CLOCK_KHZ == 16000
+#    include "usbdrvasm16.inc"
+#elif USB_CFG_CLOCK_KHZ == 16500
+#    include "usbdrvasm165.inc"
+#elif USB_CFG_CLOCK_KHZ == 20000
+#    include "usbdrvasm20.inc"
+#else
+#    error "USB_CFG_CLOCK_KHZ is not one of the supported non-crc-rates!"
+#endif
