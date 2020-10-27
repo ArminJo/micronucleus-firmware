@@ -7,7 +7,7 @@
 # Last Change:     Dec 7, 2018
 
 # Enable unsafe optimizions. This will disable several safety features in microncleus to save around 40 more bytes
-# 
+#
 # Disabled features:
 #   * Stack pointer and SREG initialization in CRT
 #   * Client side reset vector patching
@@ -28,13 +28,13 @@ BOOTLOADER_ADDRESS = 7a00
 
 # Note: the bootloader must reside in the space that is marked as bootloader flash space
 # in the fuse bits. (The ATmega328 prevents flash programming from code that is not in the
-# bootloader space.) But the application may also be in part of that space. 
+# bootloader space.) But the application may also be in part of that space.
 
 FUSEOPT = -U lfuse:w:0xff:m -U hfuse:w:0xd9:m -U efuse:w:0xfd:m
 FUSEOPT_DISABLERESET = -U lfuse:w:0xff:m -U hfuse:w:0x59:m -U efuse:w:0xfd:m
 
 #---------------------------------------------------------------------
-# ATMega328p
+# ATmega328p
 #---------------------------------------------------------------------
 # Fuse low byte:
 # 0xff = 1 1 1 1   1 1 1 1
@@ -68,7 +68,7 @@ FUSEOPT_DISABLERESET = -U lfuse:w:0xff:m -U hfuse:w:0x59:m -U efuse:w:0xfd:m
 #
 # Fuse extended byte:
 # 0xff = - - - -   - 1 0 1
-#        ^ ^ ^ ^   ^ \-+-/ 
+#        ^ ^ ^ ^   ^ \-+-/
 #        \---------/   +------ BODLEVEL 2..0 (brownout trigger level -> brownout detection at 2.7 V)
 #             +--------------- Unused
 ###############################################################################

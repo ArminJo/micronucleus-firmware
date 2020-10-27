@@ -526,7 +526,7 @@ int main(void) {
             LED_MACRO( idlePolls.b[0] );
 
             // Test whether another interrupt occurred during the processing of USBpoll and commands.
-            // If yes, we missed a data packet on the bus. Wait until the bus was idle for 8.8 µs to
+            // If yes, we missed a data packet on the bus. Wait until the bus was idle for 8.8 us to
             // allow synchronizing to the next incoming packet.
 
             if (USB_INTR_PENDING & (1 << USB_INTR_PENDING_BIT)) {

@@ -39,7 +39,7 @@
 #define USB_CFG_DRIVER_FLASH_PAGE       0
 /* If the device has more than 64 kBytes of flash, define this to the 64 k page
  * where the driver's constants (descriptors) are located. Or in other words:
- * Define this to 1 for boot loaders on the ATMega128.
+ * Define this to 1 for boot loaders on the ATmega128.
  */
 // Check CRC of all received data
 

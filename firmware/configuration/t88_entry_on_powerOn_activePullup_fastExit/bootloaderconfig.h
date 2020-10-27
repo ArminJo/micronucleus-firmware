@@ -68,8 +68,8 @@
 
 // setup interrupt for Pin Change for D+
 #define USB_INTR_CFG            PCMSK2 // Pin interrupt enable register
-#define USB_INTR_CFG_SET        (1 << USB_CFG_DPLUS_BIT) // mask for pin in pin interrupt enable register
-#define USB_INTR_CFG_CLR        0
+#define USB_INTR_CFG_SET        (1 << USB_CFG_DPLUS_BIT) // Mask for pin in pin interrupt enable register PCMSK to be set on usbInit
+#define USB_INTR_CFG_CLR        0 // Mask for pin in pin interrupt enable register PCMSK to be cleared on usbInit. 0 = no clear
 #define USB_INTR_ENABLE         PCICR // Global interrupt enable register
 #define USB_INTR_ENABLE_BIT     PCIE2 // Bit position in global interrupt enable register
 #define USB_INTR_PENDING        PCIFR // Register to read interrupt flag
