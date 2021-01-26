@@ -1,0 +1,72 @@
+# BuildBinaries.yml
+# Github workflow to build micronucleus binaries for  different platforms
+#
+# Copyright (C) 2021  Armin Joachimsmeyer
+# https://github.com/ArminJo/Github-Actions
+#
+name: BuildBinaries
+
+on:
+  push:
+    paths:
+    - '**/comandline/library/**'
+    - '**/comandline/micronucleus.c'
+    - '**BuildBinaries.yml'
+
+jobs:
+  build-all:
+    strategy:
+      matrix:
+         include:
+         - os: ubuntu-latest
+           shell: bash
+         - os: macos-latest
+           shell: bash
+#         - os: windows-2019
+#           shell: msys2 {0}
+
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: ${{ matrix.shell }}
+    steps:
+    - name: install dependencies
+      run: sudo sh -c "apt-get update && apt-get install libusb-dev"
+      if: runner.os == 'Linux'
+
+    - name: Checkout new BlueDisplay library
+      uses: msys2/setup-msys2@v2
+      with:
+        msystem: MINGW64
+        install: git base-devel binutils mingw-w64-x86_64-toolchain make zip mingw-w64-x86_64-libusb-win32
+        update: true
+      if: runner.os == 'Windows'
+
+    - name: install dependencies
+      run: brew install libusb-compat
+      if: runner.os == 'macOS'
+
+    - uses: actions/checkout@v2
+      with:
+        persist-credentials: false # otherwise, the token used is the GITHUB_TOKEN, instead of your personal token
+        fetch-depth: 0 # otherwise, you will failed to push refs to dest repo
+
+    - name: make
+      id: make
+      run:  |
+        cd commandline
+        make all
+      shell: bash {0} # Required to avoid an exit at first error
+
+    - name: Commit files
+      run: |
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        git config --local user.name "github-actions[bot]"
+        git commit --amend --no-edit --all --verbose
+
+    - name: Push binaries back to repo
+      uses: ad-m/github-push-action@master
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        directory: commandline
+        force: true
