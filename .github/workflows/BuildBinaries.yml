@@ -18,8 +18,8 @@ jobs:
     strategy:
       matrix:
          include:
-         - os: ubuntu-latest
-           shell: bash
+#         - os: ubuntu-latest
+#           shell: bash
          - os: macos-latest
            shell: bash
 #         - os: windows-2019
@@ -43,7 +43,18 @@ jobs:
       if: runner.os == 'Windows'
 
     - name: install dependencies
-      run: brew install libusb-compat
+      run: |
+        brew install libusb-compat
+        LIBUSB_PREFIX=$(brew --prefix libusb-compat)
+        PKG_CONFIG_PATH=$LIBUSB_PREFIX/lib/pkgconfig
+        echo PKG_CONFIG_PATH=$PKG_CONFIG_PATH
+        echo "pkg-config --cflags libusb"
+        pkg-config --cflags libusb
+        echo "pkg-config --libs libusb"
+        pkg-config --libs libusb
+        echo "find $(brew --prefix libusb-compat)/lib -name "*dylib" -type f -depth 1"
+        find $(brew --prefix libusb-compat)/lib -name "*dylib" -type f -depth 1
+      shell: bash {0} # Required to avoid an exit at first error
       if: runner.os == 'macOS'
 
     - uses: actions/checkout@v2
@@ -62,6 +73,7 @@ jobs:
       run: |
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
         git config --local user.name "github-actions[bot]"
+        git pull origin ${{github.ref}} --rebase --verbose
         git commit --amend --no-edit --all --verbose
 
     - name: Push binaries back to repo

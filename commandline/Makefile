@@ -16,21 +16,17 @@ ifeq ($(shell uname), Linux)
 	TARGET_DIR = Linux-x86_64
 	ZIPLIB=
 else ifeq ($(shell uname), Darwin)
-# You'll need to make sure you've got the `libusb` and `libusb-compat` libraries installed. The easist way to do this is Homebrew:
-# brew install libusb libusb-compat
-	USBFLAGS=$(PKG_CONFIG_PATH=$(brew --prefix libusb-compat)/lib/pkgconfig pkg-config --cflags libusb)
-	USBLIBS="$(PKG_CONFIG_PATH=$(brew --prefix libusb-compat)/lib/pkgconfig pkg-config --libs libusb) -lusb"
-#	USBFLAGS=$(shell libusb-config --cflags || libusb-legacy-config --cflags)
-#	USBLIBS=$(shell libusb-config --libs || libusb-legacy-config --libs)
+	USBFLAGS=$(shell libusb-config --cflags || libusb-legacy-config --cflags)
+	USBLIBS=$(shell libusb-config --libs || libusb-legacy-config --libs)
 	EXE_SUFFIX =
 	OSFLAG = -D MAC_OS
 	# Here we can choose to create a dynamic or static binary:
 	# USBLIBS = /opt/local/lib/libusb-legacy/libusb-legacy.a
-	USBLIBS = /usr/local/opt/libusb-compat/lib/libusb.a
+	USBLIBS += /usr/local/opt/libusb-compat/lib/libusb.a
 	USBLIBS += /usr/local/opt/libusb/lib/libusb-1.0.a
 #	USBLIBS += -mmacosx-version-min=10.5
-	USBLIBS += -framework CoreFoundation
-	USBLIBS += -framework IOKit
+#	USBLIBS += -framework CoreFoundation
+#	USBLIBS += -framework IOKit
 	# Uncomment these to create a dual architecture binary:
 	# OSFLAG += -arch x86_64 -arch i386
 	TARGET_DIR = Darwin-x86_64
