@@ -174,13 +174,13 @@
  *  The bootloader will only time out if a user program was loaded.
  *
  *  FAST_EXIT_NO_USB_MS        The bootloader will exit after this delay if no USB is connected.
- *                             Set to 0 to disable
+ *                             Set to < 120 to disable.
  *                             Adds ~6 bytes.
  *                             (This will wait for an USB SE0 reset from the host)
  *
  *  AUTO_EXIT_MS               The bootloader will exit after this delay if no USB communication
  *                             from the host tool was received.
- *                             Set to 0 to disable
+ *                             Set to 0 to disable -> never leave the bootloader except on receiving an exit command by USB.
  *
  *  All values are approx. in milliseconds
  */

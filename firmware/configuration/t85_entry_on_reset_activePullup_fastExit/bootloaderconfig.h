@@ -160,7 +160,7 @@
 
 #if ENTRYMODE==ENTRY_ALWAYS
   #define bootLoaderInit()
-  #define bootLoaderExit()
+  #define bootLoaderExit() {GPIOR0 = MCUSR; MCUSR = 0;} // Adds 6 bytes
   #define bootLoaderStartCondition() 1
 #elif ENTRYMODE==ENTRY_WATCHDOG
   #define bootLoaderInit()
@@ -175,7 +175,7 @@
 // Use "if (MCUSR != 0) tMCUSRStored = MCUSR; else tMCUSRStored = GPIOR0;"
 // In turn we can just clear MCUSR, which saves flash.
   #define bootLoaderInit()
-  #define bootLoaderExit() {GPIOR0=MCUSR; MCUSR = 0;} // Adds 6 bytes
+  #define bootLoaderExit() {GPIOR0 = MCUSR; MCUSR = 0;} // Adds 6 bytes
   #define bootLoaderStartCondition() (MCUSR == _BV(EXTRF)) // Adds 18 bytes
 #elif ENTRYMODE==ENTRY_JUMPER
   // Enable pull up on jumper pin and delay to stabilize input
@@ -185,7 +185,7 @@
 #elif ENTRYMODE==ENTRY_POWER_ON
   #define bootLoaderInit()
 // We must reset PORF flag after checking for entry condition to prepare for the next time.
-// To be able to interpret MCUSR flags in user program, it is copied to the OCR1C register.
+// To be able to interpret MCUSR flags in user program, it is copied to the GPIOR0 register.
 // Use "if (MCUSR != 0) tMCUSRStored = MCUSR; else tMCUSRStored = GPIOR0;"
   #define bootLoaderExit() {GPIOR0 = MCUSR; MCUSR = 0;} // Adds 6 bytes
   #define bootLoaderStartCondition() (MCUSR & _BV(PORF))
@@ -195,7 +195,7 @@
   #define bootLoaderStartCondition()  ((USBIN & USBIDLE) && (MCUSR & _BV(PORF))) // Adds 22 bytes
 #elif ENTRYMODE==ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_EXT_RESET
   #define bootLoaderInit()
-  #define bootLoaderExit() {GPIOR0=MCUSR; MCUSR = 0;} // Adds 6 bytes
+  #define bootLoaderExit() {GPIOR0 = MCUSR; MCUSR = 0;} // Adds 6 bytes
   #define bootLoaderStartCondition() ((USBIN & USBIDLE) && (MCUSR == _BV(EXTRF))) // Adds 22 bytes
 #else
    #error "No entry mode defined"
@@ -212,7 +212,7 @@
  *                             (This will wait for FAST_EXIT_NO_USB_MS milliseconds for an USB SE0 reset from the host, otherwise exit)
  *
  *  AUTO_EXIT_MS               The bootloader will exit after this delay if no USB communication from the host tool was received.
- *                             Set to 0 to disable
+ *                             Set to 0 to disable -> never leave the bootloader except on receiving an exit command by USB.
  *
  *  All values are approx. in milliseconds
  */
@@ -220,7 +220,7 @@
 // I observed 2 resets. First is 100 ms after initial connecting to USB lasting 65 ms and the second 90 ms later and also 65 ms.
 // On my old HP laptop I have different timing: First reset is 220 ms after initial connecting to USB lasting 300 ms and the second is missing.
 #define FAST_EXIT_NO_USB_MS      300 // Values below 120 are ignored. Effective timeout is 300 + FAST_EXIT_NO_USB_MS.
-#define AUTO_EXIT_MS           15000
+#define AUTO_EXIT_MS           15000 // Since we trigger it manually, we can give more time for detection by host
 
 /* ----------------------- Optional Timeout Config ------------------------ */
 

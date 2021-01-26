@@ -455,7 +455,7 @@ int main(void) {
                     USB_handler(); // call V-USB driver for USB receiving
                     USB_INTR_PENDING = 1 << USB_INTR_PENDING_BIT; // Clear int pending, in case timeout occurred during SYNC
                     /*
-                     * readme for 2.04 says: If you comment it out, idlepolls is only reset when traffic to the current endpoint is detected.
+                     * readme for 2.04 says: If you activate it, idlepolls is only reset when traffic to the current endpoint is detected.
                      * This will let micronucleus timeout also when traffic from other USB devices is present on the bus,
                      * but this leads to periodically reconnecting if no user program is existent. This behavior is like the one of the v1.06 bootloader.
                      */

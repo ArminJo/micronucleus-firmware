@@ -153,7 +153,7 @@
 
 #if ENTRYMODE==ENTRY_ALWAYS
   #define bootLoaderInit()
-  #define bootLoaderExit()
+  #define bootLoaderExit() {GPIOR0 = MCUSR; MCUSR = 0;} // Adds 6 bytes
   #define bootLoaderStartCondition() 1
 #elif ENTRYMODE==ENTRY_WATCHDOG
   #define bootLoaderInit()
@@ -168,7 +168,7 @@
 // Use "if (MCUSR != 0) tMCUSRStored = MCUSR; else tMCUSRStored = GPIOR0;"
 // In turn we can just clear MCUSR, which saves flash.
   #define bootLoaderInit()
-  #define bootLoaderExit() {GPIOR0=MCUSR; MCUSR = 0;} // Adds 6 bytes
+  #define bootLoaderExit() {GPIOR0 = MCUSR; MCUSR = 0;} // Adds 6 bytes
   #define bootLoaderStartCondition() (MCUSR == _BV(EXTRF)) // Adds 18 bytes
 #elif ENTRYMODE==ENTRY_JUMPER
   // Enable pull up on jumper pin and delay to stabilize input
@@ -178,7 +178,7 @@
 #elif ENTRYMODE==ENTRY_POWER_ON
   #define bootLoaderInit()
 // We must reset PORF flag after checking for entry condition to prepare for the next time.
-// To be able to interpret MCUSR flags in user program, it is copied to the OCR1C register.
+// To be able to interpret MCUSR flags in user program, it is copied to the GPIOR0 register.
 // Use "if (MCUSR != 0) tMCUSRStored = MCUSR; else tMCUSRStored = GPIOR0;"
   #define bootLoaderExit() {GPIOR0 = MCUSR; MCUSR = 0;} // Adds 6 bytes
   #define bootLoaderStartCondition() (MCUSR&_BV(PORF))
@@ -197,7 +197,7 @@
  *                             (This will wait for FAST_EXIT_NO_USB_MS milliseconds for an USB SE0 reset from the host, otherwise exit)
  *
  *  AUTO_EXIT_MS               The bootloader will exit after this delay if no USB communication from the host tool was received.
- *                             Set to 0 to disable
+ *                             Set to 0 to disable -> never leave the bootloader except on receiving an exit command by USB.
  *
  *  All values are approx. in milliseconds
  */

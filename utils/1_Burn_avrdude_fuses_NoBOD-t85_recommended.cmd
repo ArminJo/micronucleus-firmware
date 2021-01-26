@@ -1,7 +1,7 @@
 @echo off
 color f0
 title AvrDude GUI Command Window
-@Call SetPath
+@rem Call SetPath
 REM The files t85_no_pullup.hex and t85_entry_on_powerOn_no_pullup.hex are identical!
 @echo Upgrade Digispark Bootloader with spi programming by avrdude
 @echo.
@@ -13,10 +13,12 @@ REM The files t85_no_pullup.hex and t85_entry_on_powerOn_no_pullup.hex are ident
 @echo.
 set FILENAME=t85_entry_on_powerOn_activePullup_fastExit.hex
 @if exist %FILENAME% (
-  avrdude -pt85 -cstk500v1 -PCOM6 -b19200 -u -Uflash:w:%FILENAME%:a -Ulfuse:w:0xE1:m -Uhfuse:w:0xDF:m -Uefuse:w:0xFE:m
+@rem  avrdude -pt85 -cstk500v1 -PCOM6 -b19200 -u -Uflash:w:%FILENAME%:a -Ulfuse:w:0xE1:m -Uhfuse:w:0xDF:m -Uefuse:w:0xFE:m
+  ..\windows_exe\avrdude.exe -pt85 -cstk500v1 -PCOM6 -b19200 -u -Uflash:w:%FILENAME%:a -Ulfuse:w:0xE1:m -Uhfuse:w:0xDF:m -Uefuse:w:0xFE:m
   goto end
 )
 @rem Try another path
-avrdude -pt85 -cstk500v1 -PCOM6 -b19200 -u -Uflash:w:..\firmware\releases\%FILENAME%:a -Ulfuse:w:0xE1:m -Uhfuse:w:0xDF:m -Uefuse:w:0xFE:m
+@rem avrdude -pt85 -cstk500v1 -PCOM6 -b19200 -u -Uflash:w:..\firmware\releases\%FILENAME%:a -Ulfuse:w:0xE1:m -Uhfuse:w:0xDF:m -Uefuse:w:0xFE:m
+..\windows_exe\avrdude.exe -pt85 -cstk500v1 -PCOM6 -b19200 -u -Uflash:w:..\firmware\releases\%FILENAME%:a -Ulfuse:w:0xE1:m -Uhfuse:w:0xDF:m -Uefuse:w:0xFE:m
 :end
 pause
