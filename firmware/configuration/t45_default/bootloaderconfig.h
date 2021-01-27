@@ -163,6 +163,24 @@
 #endif
 
 /*
+ *  Define MCUSR handling here.
+ *
+ *  Default is to clear MCUSR only if the bootloader is entered.
+ *
+ *  SAVE_MCUSR  The content of the MCUSR register is stored in GPIOR0 register
+ *              and the MCUSR register is cleared, even if the bootloader was not entered.
+ *              The latter is required to prepare for a correct entry condition
+ *              at the next call of the bootloader.
+ *              Adds 6 bytes.
+ *
+ *              The MCUSR content can be accessed by user program with:
+ *              "if (MCUSR != 0) tMCUSRStored = MCUSR; else tMCUSRStored = GPIOR0;"
+ *              The first "if" covers the default bootloader configuration.
+ */
+
+#define SAVE_MCUSR
+
+/*
  * Define bootloader timeout value.
  *
  *  The bootloader will only time out if a user program was loaded.

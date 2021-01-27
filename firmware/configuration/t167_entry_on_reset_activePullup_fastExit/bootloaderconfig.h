@@ -168,22 +168,19 @@
 
 #if ENTRYMODE==ENTRY_ALWAYS
   #define bootLoaderInit()
-  #define bootLoaderExit() {GPIOR0 = MCUSR; MCUSR = 0;} // Adds 6 bytes
+  #define bootLoaderExit()
   #define bootLoaderStartCondition() 1
 #elif ENTRYMODE==ENTRY_WATCHDOG
   #define bootLoaderInit()
   #define bootLoaderExit()
   #define bootLoaderStartCondition() (MCUSR & _BV(WDRF))
 #elif ENTRYMODE==ENTRY_EXT_RESET
+  #define bootLoaderInit()
+  #define bootLoaderExit()
 // On my ATtiny167 I have always 0x07 BORF | EXTRF | PORF after power on.
 // After reset only EXTRF is NEWLY set.
 // So we must reset at least BORF and PORF flag ALWAYS after checking for entry condition,
 // otherwise this entry condition will NEVER be true if application does not reset PORF.
-// To be able to interpret MCUSR flags in user program, it is copied to the GPIOR0 register.
-// Use "if (MCUSR != 0) tMCUSRStored = MCUSR; else tMCUSRStored = GPIOR0;"
-// In turn we can just clear MCUSR, which saves flash.
-  #define bootLoaderInit()
-  #define bootLoaderExit() {GPIOR0 = MCUSR; MCUSR = 0;} // Adds 6 bytes
   #define bootLoaderStartCondition() (MCUSR == _BV(EXTRF)) // Adds 18 bytes
 #elif ENTRYMODE==ENTRY_JUMPER
   // Enable pull up on jumper pin and delay to stabilize input
@@ -192,22 +189,37 @@
   #define bootLoaderStartCondition() (!(JUMPER_INP & _BV(JUMPER_PIN)))
 #elif ENTRYMODE==ENTRY_POWER_ON
   #define bootLoaderInit()
-// We must reset PORF flag after checking for entry condition to prepare for the next time.
-// To be able to interpret MCUSR flags in user program, it is copied to the GPIOR0 register.
-// Use "if (MCUSR != 0) tMCUSRStored = MCUSR; else tMCUSRStored = GPIOR0;"
-  #define bootLoaderExit() {GPIOR0 = MCUSR; MCUSR = 0;} // Adds 6 bytes
+  #define bootLoaderExit()
   #define bootLoaderStartCondition() (MCUSR&_BV(PORF))
 #elif ENTRYMODE==ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_POWER_ON
   #define bootLoaderInit()
-  #define bootLoaderExit() {GPIOR0 = MCUSR; MCUSR = 0;} // Adds 6 bytes
+  #define bootLoaderExit()
   #define bootLoaderStartCondition()  ((USBIN & USBIDLE) && (MCUSR & _BV(PORF)))
 #elif ENTRYMODE==ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_EXT_RESET
   #define bootLoaderInit()
-  #define bootLoaderExit() {GPIOR0 = MCUSR; MCUSR = 0;} // Adds 6 bytes
+  #define bootLoaderExit()
   #define bootLoaderStartCondition() ((USBIN & USBIDLE) && (MCUSR == _BV(EXTRF)))
 #else
    #error "No entry mode defined"
 #endif
+
+/*
+ *  Define MCUSR handling here.
+ *
+ *  Default is to clear MCUSR only if the bootloader is entered.
+ *
+ *  SAVE_MCUSR  The content of the MCUSR register is stored in GPIOR0 register
+ *              and the MCUSR register is cleared, even if the bootloader was not entered.
+ *              The latter is required to prepare for a correct entry condition
+ *              at the next call of the bootloader.
+ *              Adds 6 bytes.
+ *
+ *              The MCUSR content can be accessed by user program with:
+ *              "if (MCUSR != 0) tMCUSRStored = MCUSR; else tMCUSRStored = GPIOR0;"
+ *              The first "if" covers the default bootloader configuration.
+ */
+
+#define SAVE_MCUSR
 
 /*
  * Define bootloader timeout value.

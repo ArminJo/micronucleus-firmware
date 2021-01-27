@@ -1,7 +1,8 @@
 /*
- * Project: Micronucleus -  v2.5
+ * Project: Micronucleus -  v2.4
  *
- * Micronucleus V2.5             (c) 2020 Armin Joachimsmeyer armin.joachimsmeyer@gmail.com
+ * Micronucleus V2.4             (c) 2020 Armin Joachimsmeyer armin.joachimsmeyer@gmail.com
+ * Micronucleus V2.04            (c) 2016 Tim Bo"scke - cpldcpu@gmail.com
  * Micronucleus V2.3             (c) 2016 Tim Bo"scke - cpldcpu@gmail.com
  *                               (c) 2014 Shay Green
  * Original Micronucleus         (c) 2012 Jenna Fox
@@ -26,7 +27,7 @@
  */
 
 #define MICRONUCLEUS_VERSION_MAJOR 2
-#define MICRONUCLEUS_VERSION_MINOR 5 // 165 (0xA5) is shown in W10 Device manager in BCD but as :5 instead of A5
+#define MICRONUCLEUS_VERSION_MINOR 4 // 164 (0xA4) is shown in W10 Device manager in BCD but as :4 instead of A4
 
 #define RECONNECT_DELAY_MILLIS 300 // Time between disconnect and connect. Even 250 is to fast!
 #define __DELAY_BACKWARD_COMPATIBLE__ // Saves 2 bytes at _delay_ms(). Must be declared before the include util/delay.h
@@ -50,10 +51,12 @@
 #endif
 
 // Postscript are the few bytes at the end of programmable memory which store user program reset vector and optionally OSCCAL calibration
-#if OSCCAL_SAVE_CALIB
+#ifndef POSTSCRIPT_SIZE
+#  if OSCCAL_SAVE_CALIB
 #define POSTSCRIPT_SIZE TINYVECTOR_OSCCAL_OFFSET
-#else
+#  else
 #define POSTSCRIPT_SIZE TINYVECTOR_RESET_OFFSET
+#  endif
 #endif
 #define PROGMEM_SIZE (BOOTLOADER_ADDRESS - POSTSCRIPT_SIZE) /* max size of user program */
 
@@ -91,11 +94,14 @@
 //   Byte 4:  SIGNATURE_1
 //   Byte 5:  SIGNATURE_2
 
-PROGMEM const uint8_t configurationReply[6] = { (((uint16_t) PROGMEM_SIZE) >> 8) & 0xff, ((uint16_t) PROGMEM_SIZE) & 0xff,
-SPM_PAGESIZE,
-MICRONUCLEUS_WRITE_SLEEP,
-SIGNATURE_1,
-SIGNATURE_2 };
+PROGMEM const uint8_t configurationReply[6] = { // dummy comment for eclipse formatter
+        (((uint16_t) PROGMEM_SIZE) >> 8) & 0xff, //
+        ((uint16_t) PROGMEM_SIZE) & 0xff,
+        SPM_PAGESIZE,
+        MICRONUCLEUS_WRITE_SLEEP,
+        SIGNATURE_1,
+        SIGNATURE_2 //
+        };
 
 typedef union {
     uint16_t w;
@@ -109,7 +115,7 @@ typedef union {
 register uint16_union_t currentAddress asm("r4");  // r4/r5 current progmem address, used for erasing and writing
 register uint16_union_t idlePolls asm("r6");  // r6/r7 idle counter - each tick is 5 milliseconds
 
-// sLoopCommand used to trigger functions to run in the main loop
+// command used to trigger functions to run in the main loop
 enum {
     cmd_local_nop = 0,
     cmd_device_info = 0,
@@ -119,7 +125,7 @@ enum {
     cmd_exit = 4,
     cmd_write_page = 64  // internal commands start at 64
 };
-register uint8_t sLoopCommand asm("r3");  // bind sLoopCommand to r3
+register uint8_t command asm("r3");  // bind command to r3
 
 /* ------------------------------------------------------------------------ */
 static inline void eraseApplication(void);
@@ -129,9 +135,15 @@ static uint8_t usbFunctionSetup(uint8_t data[8]);
 static inline void leaveBootloader(void);
 void blinkLED(uint8_t aBlinkCount);
 
+// This function is never called, it is just here to suppress a compiler warning for old configurations.
+USB_PUBLIC usbMsgLen_t __attribute__((unused)) usbFunctionDescriptor(struct usbRequest *rq) {
+    (void) rq;
+    return 0;
+}
+
 /*
  * erase all pages until bootloader, in reverse order (so our vectors stay in place for as long as possible)
- * to minimise the chance of leaving the device in a state where the bootloader wont run, if there's power failure
+ * to minimize the chance of leaving the device in a state where the bootloader wont run, if there's power failure
  * during upload
  */
 static inline void eraseApplication(void) {
@@ -229,11 +241,11 @@ static void writeWordToPageBuffer(uint16_t data) {
  *
  * For more explanations see usbdrv.h
  *
- * Prepares variables and sets sLoopCommand for command to be executed in the main loop
+ * Prepares variables and sets command for command to be executed in the main loop
  *
  */
 static uint8_t usbFunctionSetup(uint8_t data[8]) {
-    usbRequest_t *rq = (void *) data;
+    usbRequest_t *rq = (void*) data;
 
     idlePolls.b[1] = 0; // reset high byte of idle counter when we get usb class or vendor requests to start a new timeout
     if (rq->bRequest == cmd_device_info) { // get device info
@@ -264,11 +276,11 @@ static uint8_t usbFunctionSetup(uint8_t data[8]) {
         writeWordToPageBuffer(rq->wValue.word);
         writeWordToPageBuffer(rq->wIndex.word);
         if ((currentAddress.b[0] % SPM_PAGESIZE) == 0) {
-            sLoopCommand = cmd_write_page; // ask main loop to write our page
+            command = cmd_write_page; // ask main loop to write our page
         }
     } else {
         // Handle cmd_erase_application and cmd_exit
-        sLoopCommand = rq->bRequest & 0x3f;
+        command = rq->bRequest & 0x3f;
     }
     return 0;
 }
@@ -279,14 +291,23 @@ static uint8_t usbFunctionSetup(uint8_t data[8]) {
  */
 static void inactivateWatchdog(void) {
 #ifdef CCP
+#ifndef SAVE_MCUSR
+    MCUSR = 0;
+#endif
     // New ATtinies841/441 use a different unlock sequence and renamed registers
     CCP = 0xD8;
     WDTCSR = _BV(WDP2) | _BV(WDP1) | _BV(WDP0);
 #elif defined(WDTCR)
+#ifndef SAVE_MCUSR
+    MCUSR = 0;
+#endif
     WDTCR = _BV(WDCE) | _BV(WDE); // Unlock the watchdog register
     WDTCR = _BV(WDP2) | _BV(WDP1) | _BV(WDP0); // Do not enable watchdog. Set timeout to 2 seconds, just in case, it is fused on and can not disabled.
 #else
     wdt_reset();
+#ifndef SAVE_MCUSR
+    MCUSR = 0;
+#endif
     WDTCSR |= _BV(WDCE) | _BV(WDE);
     WDTCSR=0;
 #endif
@@ -310,6 +331,11 @@ __attribute__((__noreturn__)) static inline void leaveBootloader(void) {
 
     // bootLoaderExit() is a Macro defined in bootloaderconfig.h and mainly empty except for ENTRY_JUMPER, where it resets the pullup.
     bootLoaderExit();
+
+#ifdef SAVE_MCUSR // adds 6 bytes
+    GPIOR0 = MCUSR;
+    MCUSR = 0;
+#endif
 
 #if OSCCAL_RESTORE_DEFAULT
   OSCCAL=osccal_default;
@@ -372,7 +398,7 @@ int main(void) {
         idlePolls.b[1] = 0; // only set register 7, register 6 is almost random (determined by the usage before)
 #endif
 
-        sLoopCommand = cmd_local_nop; // initialize register 3
+        command = cmd_local_nop; // initialize register 3
         currentAddress.w = 0;
 
 #if ((OSCCAL_HAVE_XTAL == 0) || (FAST_EXIT_NO_USB_MS > 0)) && defined(START_WITHOUT_PULLUP) // Adds 14 bytes
@@ -381,7 +407,7 @@ int main(void) {
 
         /*
          * 1. Wait for 5 ms or USB transmission (and detect reset)
-         * 2. Interpret and execute USB sLoopCommand
+         * 2. Interpret and execute USB command
          * 3. Parse data packet and construct response (usbpoll)
          * 4. Check for timeout and exit to user program
          * 5. Blink LED
@@ -451,9 +477,9 @@ int main(void) {
 #endif
                 }
 
-                if (USB_INTR_PENDING & (1 << USB_INTR_PENDING_BIT)) {
+                if (USB_INTR_PENDING & (_BV(USB_INTR_PENDING_BIT))) {
                     USB_handler(); // call V-USB driver for USB receiving
-                    USB_INTR_PENDING = 1 << USB_INTR_PENDING_BIT; // Clear int pending, in case timeout occurred during SYNC
+                    USB_INTR_PENDING = _BV(USB_INTR_PENDING_BIT); // Clear int pending, in case timeout occurred during SYNC
                     /*
                      * readme for 2.04 says: If you activate it, idlepolls is only reset when traffic to the current endpoint is detected.
                      * This will let micronucleus timeout also when traffic from other USB devices is present on the bus,
@@ -463,7 +489,7 @@ int main(void) {
                     break;
                 }
 
-            } while (--t5msTimeoutCounter); // after 5 ms fastctr is 0.
+            } while (--t5msTimeoutCounter); // after 5 ms t5msTimeoutCounter is 0.
 
             asm volatile("wdr");
             // perform cyclically watchdog reset, for the case it is fused on and we can not disable it.
@@ -473,24 +499,24 @@ int main(void) {
             OSCCAL      = osccal_default;
 #endif
             /*
-             * sLoopCommand is only evaluated here and set by usbFunctionSetup()
+             * command is only evaluated here and set by usbFunctionSetup()
              */
-            if (sLoopCommand == cmd_erase_application) {
+            if (command == cmd_erase_application) {
                 eraseApplication();
             }
-            if (sLoopCommand == cmd_write_page) {
+            if (command == cmd_write_page) {
                 writeFlashPage();
             }
 #if OSCCAL_SLOW_PROGRAMMING
             OSCCAL      = osccal_tmp;
 #endif
 
-            if (sLoopCommand == cmd_exit) {
+            if (command == cmd_exit) {
                 if (!t5msTimeoutCounter) {
                     break;  // Only exit after 5 ms timeout
                 }
             } else {
-                sLoopCommand = cmd_local_nop;
+                command = cmd_local_nop;
             }
 
             {
@@ -529,7 +555,7 @@ int main(void) {
             // If yes, we missed a data packet on the bus. Wait until the bus was idle for 8.8 us to
             // allow synchronizing to the next incoming packet.
 
-            if (USB_INTR_PENDING & (1 << USB_INTR_PENDING_BIT)) {
+            if (USB_INTR_PENDING & (_BV(USB_INTR_PENDING_BIT))) {
                 // Usbpoll() collided with data packet
                 uint8_t ctr;
 
@@ -543,7 +569,7 @@ int main(void) {
                         : "=&d" (ctr)
                         : "M" ((uint8_t)(8.8f*(F_CPU/1.0e6f)/5.0f+0.5)), "I" (_SFR_IO_ADDR(USBIN)), "M" (USB_CFG_DMINUS_BIT)
                 );
-                USB_INTR_PENDING = 1 << USB_INTR_PENDING_BIT;
+                USB_INTR_PENDING = _BV(USB_INTR_PENDING_BIT);
             }
         } while (1);
 
@@ -588,7 +614,7 @@ int main(void) {
 #if LED_MODE!=NONE
 void blinkLED(uint8_t aBlinkCount)
 #else
-void blinkLED(uint8_t aBlinkCount  __attribute__((unused)))
+void blinkLED(uint8_t aBlinkCount __attribute__((unused)))
 #endif
 {
 #if LED_MODE!=NONE
