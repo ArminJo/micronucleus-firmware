@@ -13,8 +13,6 @@ ifeq ($(shell uname), Linux)
 #	USBLIBS=$(shell libusb-config --libs)
 	EXE_SUFFIX =
 	OSFLAG = -D LINUX
-	TARGET_DIR = Linux-x86_64
-	ZIPLIB=
 else ifeq ($(shell uname), Darwin)
 	USBFLAGS=$(shell libusb-config --cflags || libusb-legacy-config --cflags)
 	USBLIBS=$(shell libusb-config --libs || libusb-legacy-config --libs)
@@ -29,8 +27,6 @@ else ifeq ($(shell uname), Darwin)
 #	USBLIBS += -framework IOKit
 	# Uncomment these to create a dual architecture binary:
 	# OSFLAG += -arch x86_64 -arch i386
-	TARGET_DIR = Darwin-x86_64
-	ZIPLIB=$(shell $(find $(brew --prefix libusb-compat)/lib -name "*dylib" -type f -depth 1))
 else ifeq ($(shell uname), OpenBSD)
 	USBFLAGS=$(shell libusb-config --cflags || libusb-legacy-config --cflags)
 	USBLIBS=$(shell libusb-config --libs || libusb-legacy-config --libs)
@@ -46,8 +42,6 @@ else # Windows
 	USBLIBS = -lusb0
 	EXE_SUFFIX = .exe
 	OSFLAG = -D WIN
-	TARGET_DIR = Windows
-	ZIPLIB=/mingw64/bin/libusb*.dll
 endif
 
 LIBS    = $(USBLIBS)
@@ -57,7 +51,7 @@ LWLIBS = micronucleus_lib littleWire_util
 
 .PHONY:	clean library store micronucleus
 
-all: micronucleus store
+all: micronucleus
 	rm -f *.o
 
 library: $(LWLIBS)
@@ -69,11 +63,6 @@ library: $(LWLIBS)
 micronucleus: $(addsuffix .o, $(LWLIBS))
 	@echo Building command line tool: $@$(EXE_SUFFIX)...
 	$(CC) $(CFLAGS) -o $@$(EXE_SUFFIX) $@.c $^ $(LIBS)
-
-store: micronucleus
-	if [[ ! -d builds/$(TARGET_DIR)/ ]]; then mkdir builds/$(TARGET_DIR); fi
-	mv micronucleus$(EXE_SUFFIX) builds/$(TARGET_DIR)
-	if [[ -n "$(ZIPLIB)" ]]; then cp -p $(ZIPLIB) builds/$(TARGET_DIR); fi
 
 clean:
 	rm -f micronucleus *.o *.exe

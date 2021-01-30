@@ -18,8 +18,8 @@ jobs:
     strategy:
       matrix:
          include:
-#         - os: ubuntu-latest
-#           shell: bash
+         - os: ubuntu-latest
+           shell: bash
          - os: macos-latest
            shell: bash
 #         - os: windows-2019
@@ -29,12 +29,26 @@ jobs:
     defaults:
       run:
         shell: ${{ matrix.shell }}
+
     steps:
-    - name: install dependencies
-      run: sudo sh -c "apt-get update && apt-get install libusb-dev"
+
+    - uses: actions/checkout@v2
+      with:
+        persist-credentials: false # otherwise, the token used is the GITHUB_TOKEN, instead of your personal token
+        fetch-depth: 0 # otherwise, you will failed to push refs to dest repo
+
+    - name: install Linux dependencies and run make
+      run: |
+        sudo sh -c "apt-get update && apt-get install libusb-dev"
+        cd commandline
+        make
+        TARGET_DIR=Linux-x86_64
+        echo TARGET_DIR=$TARGET_DIR
+        if [[ ! -d builds/$TARGET_DIR/ ]]; then mkdir builds/$TARGET_DIR; fi
+        mv micronucleus builds/$TARGET_DIR
       if: runner.os == 'Linux'
 
-    - name: Checkout new BlueDisplay library
+    - name: Install Windows build system
       uses: msys2/setup-msys2@v2
       with:
         msystem: MINGW64
@@ -42,39 +56,45 @@ jobs:
         update: true
       if: runner.os == 'Windows'
 
-    - name: install dependencies
+    - name: install macOS dependencies
       run: |
         brew install libusb-compat
         LIBUSB_PREFIX=$(brew --prefix libusb-compat)
         PKG_CONFIG_PATH=$LIBUSB_PREFIX/lib/pkgconfig
         echo PKG_CONFIG_PATH=$PKG_CONFIG_PATH
-        echo "pkg-config --cflags libusb"
-        pkg-config --cflags libusb
-        echo "pkg-config --libs libusb"
-        pkg-config --libs libusb
         echo "find $(brew --prefix libusb-compat)/lib -name "*dylib" -type f -depth 1"
         find $(brew --prefix libusb-compat)/lib -name "*dylib" -type f -depth 1
+        cd commandline
+        echo make USBFLAGS="$(pkg-config --cflags libusb)" USBLIBS="$(pkg-config --libs libusb)"
+        make USBFLAGS="$(pkg-config --cflags libusb)" USBLIBS="$(pkg-config --libs libusb)"
+        TARGET_DIR=Darwin-x86_64
+        if [[ ! -d builds/$TARGET_DIR/ ]]; then mkdir builds/$TARGET_DIR; fi
+        mv micronucleus builds/$TARGET_DIR
+        EXTRALIB=$(find $(brew --prefix libusb-compat)/lib -name "*dylib" -type f -depth 1)
+        cp -p $EXTRALIB builds/$TARGET_DIR
       shell: bash {0} # Required to avoid an exit at first error
       if: runner.os == 'macOS'
 
-    - uses: actions/checkout@v2
-      with:
-        persist-credentials: false # otherwise, the token used is the GITHUB_TOKEN, instead of your personal token
-        fetch-depth: 0 # otherwise, you will failed to push refs to dest repo
-
-    - name: make
+    - name: make windows
       id: make
-      run:  |
+      run: |
         cd commandline
-        make all
+        mingw32-make
+        TARGET_DIR=Windows
+        if [[ ! -d builds/$TARGET_DIR/ ]]; then mkdir builds/$TARGET_DIR; fi
+        cp -p /mingw64/bin/libusb*.dll builds/$TARGET_DIR; fi
       shell: bash {0} # Required to avoid an exit at first error
+      if: runner.os == 'Windows'
 
     - name: Commit files
       run: |
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
         git config --local user.name "github-actions[bot]"
+        echo git status
+        git status
+        echo git commit --amend --no-edit --verbose commandline/builds/*/micronucleus*
+        git commit --amend --no-edit --verbose commandline/builds/*/micronucleus*
         git pull origin ${{github.ref}} --rebase --verbose
-        git commit --amend --no-edit --all --verbose
 
     - name: Push binaries back to repo
       uses: ad-m/github-push-action@master
