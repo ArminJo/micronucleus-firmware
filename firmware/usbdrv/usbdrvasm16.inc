@@ -33,10 +33,10 @@ of CPU cycles, but even an exact number of cycles!
 
 USB_INTR_VECTOR:
 ;order of registers pushed: YL, SREG, YH, [sofError], bitcnt, shift, x1, x2, x3, x4, cnt
-    push    YL                  ;[-25] push only what is necessary to sync with edge ASAP
-    in      YL, SREG            ;[-23]
-    push    YL                  ;[-22]
-    push    YH                  ;[-20]
+;    push    YL                  ;[-25] push only what is necessary to sync with edge ASAP
+;    in      YL, SREG            ;[-23]
+;    push    YL                  ;[-22]
+;    push    YH                  ;[-20]
 ;----------------------------------------------------------------------------
 ; Synchronize with sync pattern:
 ;----------------------------------------------------------------------------
@@ -212,10 +212,10 @@ macro POP_STANDARD ; 14 cycles
 #    pop     bitcnt
     endm
 macro POP_RETI     ; 7 cycles
-    pop     YH
-    pop     YL
-    out     SREG, YL
-    pop     YL
+;    pop     YH
+;    pop     YL
+;    out     SREG, YL
+;    pop     YL
     endm
 
 #include "asmcommon.inc"

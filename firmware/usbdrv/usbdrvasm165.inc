@@ -2,7 +2,7 @@
  * Project: V-USB, virtual USB port for Atmel's(r) AVR(r) microcontrollers
  * Author: Christian Starkjohann
  * Creation Date: 2007-04-22
- * 5/2020 ArminJo Saved 22 bytes by converting USB_INTR_VECTOR in *usbdrvasm165.inc* from ISR with pushes to a plain function.
+ * 5/2020 ArminJo Saved 16 bytes by converting USB_INTR_VECTOR in *usbdrvasm165.inc* from ISR with pushes to a plain function.
  * Tabsize: 4
  * Copyright: (c) 2007 by OBJECTIVE DEVELOPMENT Software GmbH
  * License: GNU GPL v2 (see License.txt), GNU GPL v3 or proprietary (CommercialLicense.txt)
@@ -37,10 +37,13 @@ of CPU cycles, but even an exact number of cycles!
 
 
 USB_INTR_VECTOR:
+; replacing YL with ZL or XL and YH with ZH or XH does not work :-(
+; But with YL the commenting of the next 3 lines works like a charm,
+; even so according to the avr-libc calling convention, Y must be saved.
 ;order of registers pushed: YL, SREG [sofError], r0, YH, shift, x1, x2, x3, x4, cnt
-    push    YL                  ;[-23] push only what is necessary to sync with edge ASAP
-    in      YL, SREG            ;[-21]
-    push    YL                  ;[-20]
+#    push    YL                  ;[-23] push only what is necessary to sync with edge ASAP
+#    in      YL, SREG            ;[-21]
+#    push    YL                  ;[-20]
 ;----------------------------------------------------------------------------
 ; Synchronize with sync pattern:
 ;----------------------------------------------------------------------------
@@ -334,9 +337,9 @@ macro POP_STANDARD ; 16 cycles
 #    pop     r0
     endm
 macro POP_RETI     ; 5 cycles
-    pop     YL
-    out     SREG, YL
-    pop     YL
+#    pop     YL
+#    out     SREG, YL
+#    pop     YL
     endm
 
 #include "asmcommon.inc"
