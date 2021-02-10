@@ -8,23 +8,17 @@ CC=gcc
 ifeq ($(shell uname), Linux)
 # If you get the error "usb.h: No such file or directory" you must run "sudo apt-get install libusb-dev"
 	USBFLAGS=$(shell libusb-config --cflags)
-	# Here we can choose to create a dynamic or static binary:
 	USBLIBS= -static $(shell libusb-config --libs)
-#	USBLIBS=$(shell libusb-config --libs)
 	EXE_SUFFIX =
 	OSFLAG = -D LINUX
 else ifeq ($(shell uname), Darwin)
 	USBFLAGS=$(shell libusb-config --cflags || libusb-legacy-config --cflags)
-	USBLIBS=$(shell libusb-config --libs || libusb-legacy-config --libs)
 	EXE_SUFFIX =
 	OSFLAG = -D MAC_OS
-	# Here we can choose to create a dynamic or static binary:
-	# USBLIBS = /opt/local/lib/libusb-legacy/libusb-legacy.a
-	USBLIBS += /usr/local/opt/libusb-compat/lib/libusb.a
+	USBLIBS = /usr/local/opt/libusb-compat/lib/libusb.a
 	USBLIBS += /usr/local/opt/libusb/lib/libusb-1.0.a
-#	USBLIBS += -mmacosx-version-min=10.5
-#	USBLIBS += -framework CoreFoundation
-#	USBLIBS += -framework IOKit
+	USBLIBS += -framework CoreFoundation
+	USBLIBS += -framework IOKit
 	# Uncomment these to create a dual architecture binary:
 	# OSFLAG += -arch x86_64 -arch i386
 else ifeq ($(shell uname), OpenBSD)
@@ -49,7 +43,7 @@ CFLAGS  = $(USBFLAGS) -Ilibrary -O -g $(OSFLAG)
 
 LWLIBS = micronucleus_lib littleWire_util
 
-.PHONY:	clean library store micronucleus
+.PHONY:	clean library micronucleus
 
 all: micronucleus
 	rm -f *.o

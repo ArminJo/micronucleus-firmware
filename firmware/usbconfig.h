@@ -22,8 +22,6 @@
 
 #include "bootloaderconfig.h"
 
-#define USB_INTR_VECTOR         USB_handler // The name must be any valid function name
-
 /* --------------------------- Functional Range ---------------------------- */
 
 /* Define this to 1 if the device has its own power supply. Set it to 0 if the

@@ -6,8 +6,6 @@
 # Configuration:   Default configuration + ENTRY_POWER_ON + START_WITHOUT_PULLUP + FAST_EXIT_NO_USB_MS=300 + LED
 # Last Change:     6/2020
 
-#CFLAGS += -DENABLE_SAFE_OPTIMIZATIONS  # This saves 10 bytes and disables reliable jump to 0x0000, which one should avoid anyway.
-
 F_CPU = 16000000
 DEVICE = attiny88
 

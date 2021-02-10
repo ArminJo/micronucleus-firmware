@@ -6,8 +6,6 @@
 # Configuration:   Default  + LED
 # Last Change:     6/2020
 
-#CFLAGS += -DENABLE_SAFE_OPTIMIZATIONS  # This saves 10 bytes and disables reliable jump to 0x0000, which one should avoid anyway.
-
 F_CPU = 16000000
 DEVICE = attiny88
 

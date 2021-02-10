@@ -107,6 +107,7 @@ int main(int argc, char **argv) {
       }
     } else if (strcmp(argv[arg_pointer], "--help") == 0 || strcmp(argv[arg_pointer], "-h") == 0) {
       puts(MICRONUCLEUS_COMMANDLINE_VERSION);
+      puts("");
       puts(usage);
       puts("");
       puts("  --type [intel-hex, raw]: Set upload file type to either intel hex or raw");
@@ -154,7 +155,7 @@ int main(int argc, char **argv) {
   if (file == NULL && erase_only == 0) {
     // print version if we are called without any parameter
     printf(MICRONUCLEUS_COMMANDLINE_VERSION);
-    printf("Neither filename nor --erase-only given!\n\n");
+    printf("\nNeither filename nor --erase-only given!\n\n");
     puts(usage);
     return EXIT_FAILURE;
   }

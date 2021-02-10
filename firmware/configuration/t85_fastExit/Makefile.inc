@@ -15,9 +15,6 @@
 #   * Setting the GIMSK or EIMSK register directly instead of keeping other bits. GICR contains other bits, which must be kept! - saves 2 bytes
 #     We only want one interrupt to be enabled, so keeping the other bits makes no sense.
 
-# Not needed, since we are not over the page boundary
-#CFLAGS += -DENABLE_SAFE_OPTIMIZATIONS  # This saves 10 bytes and disables reliable jump to 0x0000, which one should avoid anyway.
-
 F_CPU = 16500000
 DEVICE = attiny85
 
@@ -27,7 +24,9 @@ DEVICE = attiny85
 # - How many pages in is that? 6598 / 64 (tiny85 page size in bytes) = 103.09377
 # - round that down to 103
 # - our new bootloader address is 103 * 64 = 6592, in hex = 19C0
-# - For data size from 1536 up to 1600 the address is 19C0 (6586 free) for size from 1601 to 1664 the address is 1980 (6522 free)
+# - The available size for user program is (BOOTLOADER_ADDRESS - POSTSCRIPT_SIZE) with POSTSCRIPT_SIZE = 4 or 6
+# - For data size from 1470 up to 1536 the address is 1A00 (6650 free),
+# - for 1538 to 1600 it is 19C0 (6586 free), for 1602 to 1664 it is 1980 (6522 free)
 BOOTLOADER_ADDRESS = 19C0
 
 FUSEOPT = -U lfuse:w:0xe1:m -U hfuse:w:0xdd:m -U efuse:w:0xfe:m

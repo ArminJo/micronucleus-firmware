@@ -45,7 +45,7 @@ of CPU cycles, but even an exact number of cycles!
 ; bitcnt is used to determine when a stuff bit is due
 ; cnt holds the number of bytes left in the receive buffer
 
-USB_INTR_VECTOR:
+USB_handler:
 ;order of registers pushed: YL, SREG YH, [sofError], bitcnt, shift, x1, x2, x3, x4, cnt
     push    YL                  ;[-28] push only what is necessary to sync with edge ASAP
     in      YL, SREG            ;[-26]

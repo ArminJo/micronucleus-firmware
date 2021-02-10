@@ -1,26 +1,31 @@
 # Name: Makefile
 # Project: Micronucleus
-# Author: Jenna Fox; portions by Christian Starkjohann, Louis Beaudoin
+# Author: Jenna Fox; portions by Christian Starkjohann, Louis Beaudoin, many others
 # Creation Date: 2007-12-10
+# Latest updates: 2021-02-07
 # Tabsize: 4
 # Copyright: (c) 2007 by OBJECTIVE DEVELOPMENT Software GmbH
 # License: GNU GPL v2 (see License.txt)
 
 CONFIG ?= t85_default
-#CONFIG ?= t85_aggressive
-#CONFIG ?= t841_default
-#CONFIG ?= t167_default
 
 ###############################################################################
+# General build instructions:
+#     make CONFIG=<config>  # build a specific configuration
+#     make                  # build standard configuration
+#     make release          # will cycle through all configurations in the configuration folder and build them
+#     make clean            # cleans up last build files
+#     make dist-clean       # removes all hex files
+#
 # Configure the following variables according to your AVR.
 # Program the device with
-#     make fuse    			# to set the clock generator, boot section size etc.
-#     make flash   			# to load the boot loader into flash
-#     make disablereset		# use external reset line for IO (CAUTION: this is not easy to enable again, see README) 
+#     make fuse                 # to set the clock generator, boot section size etc.
+#     make flash                # to load the boot loader into flash
+#     make disablereset         # use external reset line for IO (CAUTION: this is not easy to enable again, see README) 
+###############################################################################
 
 CFLAGS =
-CONFIGBASEPATH	  = configuration
-CONFIGPATH	  = $(CONFIGBASEPATH)/$(CONFIG)
+CONFIGPATH = configuration/$(CONFIG)
 include $(CONFIGPATH)/Makefile.inc
 
 PROGRAMMER ?= -c USBasp
@@ -74,33 +79,31 @@ read_fuses:
 
 clean:
 	@rm -f main.hex main.bin main.c.lst main.map main.raw *.o usbdrv/*.o main.s usbdrv/oddebug.s usbdrv/usbdrv.s usbdrv/oddebug.c.lst main.lss main.lst
-	@rm -f bootloader.* upgrade.hex upgrade.bin upgrade.c.lst upgrade.map main.s upgrade.lss upgrade.lst upgrade.lss
+	@rm -f bootloader.* upgrade.hex upgrade.bin upgrade.c.lst upgrade.map main.s upgrade.lss upgrade.lst upgrade.lss size.out size.txt
 
-distclean: clean
-	@rm *~
-
+dist-clean:
+	@rm -f upgrades/* releases/*
 
 # file targets:
-main.bin:	$(OBJECTS)
+main.bin: $(OBJECTS)
 	@$(CC) $(CFLAGS) -o main.bin $(OBJECTS) $(LDFLAGS)
 	@avr-objdump -d -S main.bin > main.lss
 
-
-main.hex:	main.bin
+main.hex: main.bin
 	@echo Building Micronucleus configuration: $(CONFIG)
 	@rm -f main.hex main.eep.hex
 	@avr-objcopy -j .text -j .data -O ihex main.bin main.hex
-	@echo Size of binary hexfile. Use the "data" size to calculate the bootloader address:
-	@avr-size main.hex
-# Output to logfile
+# 	@echo Size of binary hexfile. Use the "data" size to calculate the bootloader address:
+#	@avr-size main.hex
+#   if you don't have python installed, you can comment out the next lines and use the two above
 	@echo Building Micronucleus configuration: $(CONFIG) >> build.log
-	@echo Size of binary hexfile. Use the "data" size to calculate the bootloader address: >> build.log
-	@avr-size main.hex >> build.log
+	@avr-size -A -t main.hex > size.txt
+	@python CalculateSize.py < size.txt > size.out
+	@cat size.out >> build.log
 	@echo - >> build.log
+	@cat size.out
 
-
-
-disasm:	main.bin upgrade.bin
+disasm: main.bin upgrade.bin
 	@avr-objdump -d -S main.bin >main.lss
 	@avr-nm -l -S -n main.bin > main.lst
 	@avr-objdump -d -S upgrade.bin > upgrade.lss
@@ -112,17 +115,14 @@ APP_ADDRESS = 80
 CFLAGS_U = -Wall -g2 -Os -fno-move-loop-invariants -fno-tree-scev-cprop -fno-inline-small-functions -I. -Ilibs-device -mmcu=$(DEVICE) -DF_CPU=$(F_CPU) $(DEFINES) -DBOOTLOADER_ADDRESS=0x$(BOOTLOADER_ADDRESS)
 LDFLAGS_U = -Wl,--relax,--gc-sections -Wl,--section-start=.text=$(APP_ADDRESS),-Map=upgrade.map
 
-
 upgrade.o: upgrade.c bootloader.h
 	@$(CC) $(CFLAGS_U) -c $< -o $@ $(LDFLAGS_U) -Wa,-ahls=$<.lst
-
 
 upgrade.bin:	upgrade.o bootloader.o
 	@$(CC) $(CFLAGS_U) -o upgrade.bin upgrade.o bootloader.o $(LDFLAGS_U)
 	@avr-objdump -d -S upgrade.bin > upgrade.lss
 
-
-upgrade.hex:	upgrade.bin
+upgrade.hex: upgrade.bin
 	@rm -f upgrade.hex upgrade.eep.hex
 	@avr-objcopy -j .text -j .data -O ihex upgrade.bin upgrade-app.hex
 # for internal echo command, mainly on windows
@@ -134,7 +134,7 @@ else
 endif
 	@cat upgrade-app.hex >> upgrade.hex
 	@rm upgrade-app.hex
-	@avr-size upgrade.hex
+#	@avr-size upgrade.hex
 
 
 bootloader.raw: main.hex
@@ -167,4 +167,35 @@ else
 	@echo "extern const uint8_t" $*_size_sym"[];" >> $@
 	@echo "#define $*_size ( (int) $*_size_sym )" >> $@
 	@echo "#define $*_address 0x$(BOOTLOADER_ADDRESS)" >> $@
+endif
+
+release:
+# for internal echo command, mainly on windows
+ifeq ($(OS),Windows_NT)
+	@echo off
+	@if not exist releases MKDIR releases
+	@if not exist upgrades MKDIR upgrades
+	@FOR /D  %%C IN (configuration/*) DO ( echo. \
+		&& echo ********************************************************** \
+		&& echo make Configuration %%C \
+		&& echo ********************************************************** \
+		&& make clean \
+		&& make CONFIG=%%C \
+		&& mv main.hex releases\%%C.hex \
+		&& mv upgrade.hex upgrades\upgrade-%%C.hex \
+	)
+	make clean
+
+else
+# for unix echo command
+	@mkdir -p releases
+	@mkdir -p upgrades
+	@rm -f build.log
+	@for config in `ls configuration` ; do \
+		make clean; \
+		make CONFIG=$$config; \
+		mv main.hex releases/$$config.hex; \
+		mv upgrade.hex upgrades/upgrade-$$config.hex; \
+		done
+	@make clean
 endif

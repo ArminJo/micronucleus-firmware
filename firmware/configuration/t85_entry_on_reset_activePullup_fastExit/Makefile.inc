@@ -5,8 +5,8 @@
 # Controller type: ATtiny 85 - 16.5 MHz
 # Configuration:   Default + ENTRY_EXT_RESET + START_WITHOUT_PULLUP + LED
 # Last Change:     Jun 16,2020
- 
- 
+
+
 F_CPU = 16500000
 DEVICE = attiny85
 
@@ -16,7 +16,9 @@ DEVICE = attiny85
 # - How many pages in is that? 6068 / 64 (tiny85 page size in bytes) = 94.8125 | 102.625
 # - round that down to 94 | 102
 # - our new bootloader address is 94 | 102 * 64 = 6016 | 6528, in hex = 1780 | 1980
-# - For data size from 1536 up to 1600 the address is 19C0 (6586 free) for size from 1601 to 1664 the address is 1980 (6522 free)
+# - The available size for user program is (BOOTLOADER_ADDRESS - POSTSCRIPT_SIZE) with POSTSCRIPT_SIZE = 4 or 6
+# - For data size from 1470 up to 1536 the address is 1A00 (6650 free),
+# - for 1538 to 1600 it is 19C0 (6586 free), for 1602 to 1664 it is 1980 (6522 free)
 BOOTLOADER_ADDRESS = 19C0
 
 FUSEOPT = -U lfuse:w:0xe1:m -U hfuse:w:0xdd:m -U efuse:w:0xfe:m
@@ -33,7 +35,7 @@ FUSEOPT_DISABLERESET = -U lfuse:w:0xe1:m -U efuse:w:0xfe:m -U hfuse:w:0x5d:m
 #
 # Fuse high byte:
 # 0xdd = 1 1 0 1   1 1 0 1
-#        ^ ^ ^ ^   ^ \-+-/ 
+#        ^ ^ ^ ^   ^ \-+-/
 #        | | | |   |   +------ BODLEVEL 2..0 (brownout trigger level -> 2.7V)
 #        | | | |   +---------- EESAVE (preserve EEPROM on Chip Erase -> not preserved)
 #        | | | +-------------- WDTON (watchdog timer always on -> disable)
@@ -43,7 +45,7 @@ FUSEOPT_DISABLERESET = -U lfuse:w:0xe1:m -U efuse:w:0xfe:m -U hfuse:w:0x5d:m
 #
 # Fuse high byte ("no reset": external reset disabled, can't program through SPI anymore)
 # 0x5d = 0 1 0 1   1 1 0 1
-#        ^ ^ ^ ^   ^ \-+-/ 
+#        ^ ^ ^ ^   ^ \-+-/
 #        | | | |   |   +------ BODLEVEL 2..0 (brownout trigger level -> 2.7V)
 #        | | | |   +---------- EESAVE (preserve EEPROM on Chip Erase -> not preserved)
 #        | | | +-------------- WDTON (watchdog timer always on -> disable)

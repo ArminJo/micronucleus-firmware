@@ -19,7 +19,7 @@ AVR_ARCHITECTURE_PARAMETER = --binary-architecture avr:35
 #
 # For 167 we have  16384 - 1436 = 14948. 14948 / 128 = 116,78125. 116 * 128 = 14848, in hex 3A00
 # - For data from 1281 to 1408 the address is 3A80 for size from 1409 to 1536 the address is 3A00
-BOOTLOADER_ADDRESS = 3A00
+BOOTLOADER_ADDRESS = 3A80
 
 FUSEOPT = # TODO
 FUSEOPT_DISABLERESET = # TODO

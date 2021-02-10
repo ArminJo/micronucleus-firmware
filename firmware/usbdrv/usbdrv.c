@@ -308,19 +308,17 @@ usbRequest_t    *rq = (void *)data;
 /* This function is similar to usbFunctionRead(), but it's also called for
  * data handled automatically by the driver (e.g. descriptor reads).
  */
-static uchar usbDeviceRead(uchar *data, uchar len)
+static uchar usbDeviceRead(uchar *data, usbMsgLen_t len)
 {
     if(len > 0){    /* don't bother app with 0 sized reads */
-        {
-            uchar i = len;
-            usbMsgPtr_t r = usbMsgPtr;
-                do{
-                    uchar c = USB_READ_FLASH(r);    /* assign to char size variable to enforce byte ops */
-                    *data++ = c;
-                    r++;
-                }while(--i);
-            usbMsgPtr = r;
-        }
+        uchar i = len;
+        usbMsgPtr_t r = usbMsgPtr;
+            do{
+                uchar c = USB_READ_FLASH(r);    /* assign to char size variable to enforce byte ops */
+                *data++ = c;
+                r++;
+            }while(--i);
+        usbMsgPtr = r;
     }
     return len;
 }
@@ -336,16 +334,18 @@ usbMsgLen_t wantLen;
 uchar       len;
 
     wantLen = usbMsgLen;
-    if(wantLen > 8)
+    if(wantLen > 8) {
         wantLen = 8;
+    }
     usbMsgLen -= wantLen;
     usbTxBuf[0] ^= USBPID_DATA0 ^ USBPID_DATA1; /* DATA toggling */
     len = usbDeviceRead(usbTxBuf + 1, wantLen);
     if(len <= 8){           /* valid data packet */
         usbCrc16Append(&usbTxBuf[1], len);
         len += 4;           /* length including sync byte */
-        if(len < 12)        /* a partial package identifies end of message */
+        if(len < 12) {       /* a partial package identifies end of message */
             usbMsgLen = USB_NO_MSG;
+        }
     }else{
         len = USBPID_STALL;   /* stall the endpoint */
         usbMsgLen = USB_NO_MSG;

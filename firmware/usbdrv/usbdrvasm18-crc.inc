@@ -110,7 +110,7 @@ macro CRC_CLEANUP_AND_CHECK
     endm
 
 
-USB_INTR_VECTOR:
+USB_handler:
 ;order of registers pushed: YL, SREG, YH, [sofError], x4, shift, x1, x2, x3, x5, cnt, ZL, ZH
     push    YL                  ;[-28] push only what is necessary to sync with edge ASAP
     in      YL, SREG            ;[-26]

@@ -97,7 +97,7 @@ layout of samples and operations:
 #define phase   x3
 
 
-USB_INTR_VECTOR:
+USB_handler:
 ;order of registers pushed: YL, SREG [sofError], YH, shift, x1, x2, x3, cnt, r0
     push    YL              ;2 push only what is necessary to sync with edge ASAP
     in      YL, SREG        ;1

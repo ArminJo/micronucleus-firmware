@@ -1,105 +1,80 @@
-Building Micronucleus configuration: BitBoss 
-Size of binary hexfile. Use the "data" size to calculate the bootloader address: 
-   text	   data	    bss	    dec	    hex	filename
-      0	   1562	      0	   1562	    61a	main.hex
-- 
 Building Micronucleus configuration: m168p_extclock 
-Size of binary hexfile. Use the "data" size to calculate the bootloader address: 
-   text	   data	    bss	    dec	    hex	filename
-      0	   1484	      0	   1484	    5cc	main.hex
+8K  Device -- Codesize: 1496 bytes, BOOTLOADER_ADDRESS: 0x1A00, Free user memory 6650 bytes.
+16K Device -- Codesize: 1496 bytes, BOOTLOADER_ADDRESS: 0x3A00, Free user memory 14842 bytes.
 - 
 Building Micronucleus configuration: m328p_extclock 
-Size of binary hexfile. Use the "data" size to calculate the bootloader address: 
-   text	   data	    bss	    dec	    hex	filename
-      0	   1484	      0	   1484	    5cc	main.hex
+8K  Device -- Codesize: 1496 bytes, BOOTLOADER_ADDRESS: 0x1A00, Free user memory 6650 bytes.
+16K Device -- Codesize: 1496 bytes, BOOTLOADER_ADDRESS: 0x3A00, Free user memory 14842 bytes.
 - 
 Building Micronucleus configuration: Nanite841 
-Size of binary hexfile. Use the "data" size to calculate the bootloader address: 
-   text	   data	    bss	    dec	    hex	filename
-      0	   1568	      0	   1568	    620	main.hex
+8K  Device -- Codesize: 1570 bytes, BOOTLOADER_ADDRESS: 0x19C0, Free user memory 6586 bytes.
+16K Device -- Codesize: 1570 bytes, BOOTLOADER_ADDRESS: 0x3980, Free user memory 14714 bytes.
 - 
 Building Micronucleus configuration: t167_default 
-Size of binary hexfile. Use the "data" size to calculate the bootloader address: 
-   text	   data	    bss	    dec	    hex	filename
-      0	   1328	      0	   1328	    530	main.hex
+8K  Device -- Codesize: 1340 bytes, BOOTLOADER_ADDRESS: 0x1AC0, Free user memory 6842 bytes.
+16K Device -- Codesize: 1340 bytes, BOOTLOADER_ADDRESS: 0x3A80, Free user memory 14970 bytes.
 - 
 Building Micronucleus configuration: t167_entry_on_powerOn_activePullup_fastExit 
-Size of binary hexfile. Use the "data" size to calculate the bootloader address: 
-   text	   data	    bss	    dec	    hex	filename
-      0	   1378	      0	   1378	    562	main.hex
+8K  Device -- Codesize: 1390 bytes, BOOTLOADER_ADDRESS: 0x1A80, Free user memory 6778 bytes.
+16K Device -- Codesize: 1390 bytes, BOOTLOADER_ADDRESS: 0x3A80, Free user memory 14970 bytes.
 - 
 Building Micronucleus configuration: t167_entry_on_reset_activePullup_fastExit 
-Size of binary hexfile. Use the "data" size to calculate the bootloader address: 
-   text	   data	    bss	    dec	    hex	filename
-      0	   1378	      0	   1378	    562	main.hex
+8K  Device -- Codesize: 1390 bytes, BOOTLOADER_ADDRESS: 0x1A80, Free user memory 6778 bytes.
+16K Device -- Codesize: 1390 bytes, BOOTLOADER_ADDRESS: 0x3A80, Free user memory 14970 bytes.
 - 
 Building Micronucleus configuration: t45_default 
-Size of binary hexfile. Use the "data" size to calculate the bootloader address: 
-   text	   data	    bss	    dec	    hex	filename
-      0	   1534	      0	   1534	    5fe	main.hex
+8K  Device -- Codesize: 1534 bytes, BOOTLOADER_ADDRESS: 0x1A00, Free user memory 6650 bytes.
+16K Device -- Codesize: 1534 bytes, BOOTLOADER_ADDRESS: 0x3A00, Free user memory 14842 bytes.
 - 
 Building Micronucleus configuration: t841_default 
-Size of binary hexfile. Use the "data" size to calculate the bootloader address: 
-   text	   data	    bss	    dec	    hex	filename
-      0	   1534	      0	   1534	    5fe	main.hex
+8K  Device -- Codesize: 1536 bytes, BOOTLOADER_ADDRESS: 0x1A00, Free user memory 6650 bytes.
+16K Device -- Codesize: 1536 bytes, BOOTLOADER_ADDRESS: 0x3A00, Free user memory 14842 bytes.
 - 
 Building Micronucleus configuration: t84_default 
-Size of binary hexfile. Use the "data" size to calculate the bootloader address: 
-   text	   data	    bss	    dec	    hex	filename
-      0	   1498	      0	   1498	    5da	main.hex
+8K  Device -- Codesize: 1500 bytes, BOOTLOADER_ADDRESS: 0x1A00, Free user memory 6650 bytes.
+16K Device -- Codesize: 1500 bytes, BOOTLOADER_ADDRESS: 0x3A00, Free user memory 14842 bytes.
 - 
 Building Micronucleus configuration: t85_aggressive 
-Size of binary hexfile. Use the "data" size to calculate the bootloader address: 
-   text	   data	    bss	    dec	    hex	filename
-      0	   1370	      0	   1370	    55a	main.hex
+8K  Device -- Codesize: 1382 bytes, BOOTLOADER_ADDRESS: 0x1A80, Free user memory 6778 bytes.
+16K Device -- Codesize: 1382 bytes, BOOTLOADER_ADDRESS: 0x3A80, Free user memory 14970 bytes.
 - 
 Building Micronucleus configuration: t85_default 
-Size of binary hexfile. Use the "data" size to calculate the bootloader address: 
-   text	   data	    bss	    dec	    hex	filename
-      0	   1534	      0	   1534	    5fe	main.hex
+8K  Device -- Codesize: 1534 bytes, BOOTLOADER_ADDRESS: 0x1A00, Free user memory 6650 bytes.
+16K Device -- Codesize: 1534 bytes, BOOTLOADER_ADDRESS: 0x3A00, Free user memory 14842 bytes.
 - 
 Building Micronucleus configuration: t85_entry_on_powerOn 
-Size of binary hexfile. Use the "data" size to calculate the bootloader address: 
-   text	   data	    bss	    dec	    hex	filename
-      0	   1570	      0	   1570	    622	main.hex
+8K  Device -- Codesize: 1570 bytes, BOOTLOADER_ADDRESS: 0x19C0, Free user memory 6586 bytes.
+16K Device -- Codesize: 1570 bytes, BOOTLOADER_ADDRESS: 0x3980, Free user memory 14714 bytes.
 - 
 Building Micronucleus configuration: t85_entry_on_powerOn_activePullup_fastExit 
-Size of binary hexfile. Use the "data" size to calculate the bootloader address: 
-   text	   data	    bss	    dec	    hex	filename
-      0	   1582	      0	   1582	    62e	main.hex
+8K  Device -- Codesize: 1582 bytes, BOOTLOADER_ADDRESS: 0x19C0, Free user memory 6586 bytes.
+16K Device -- Codesize: 1582 bytes, BOOTLOADER_ADDRESS: 0x3980, Free user memory 14714 bytes.
 - 
 Building Micronucleus configuration: t85_entry_on_powerOn_activePullup_fastExit_noLED 
-Size of binary hexfile. Use the "data" size to calculate the bootloader address: 
-   text	   data	    bss	    dec	    hex	filename
-      0	   1564	      0	   1564	    61c	main.hex
+8K  Device -- Codesize: 1564 bytes, BOOTLOADER_ADDRESS: 0x19C0, Free user memory 6586 bytes.
+16K Device -- Codesize: 1564 bytes, BOOTLOADER_ADDRESS: 0x3980, Free user memory 14714 bytes.
 - 
 Building Micronucleus configuration: t85_entry_on_powerOn_fastExit 
-Size of binary hexfile. Use the "data" size to calculate the bootloader address: 
-   text	   data	    bss	    dec	    hex	filename
-      0	   1578	      0	   1578	    62a	main.hex
+8K  Device -- Codesize: 1578 bytes, BOOTLOADER_ADDRESS: 0x19C0, Free user memory 6586 bytes.
+16K Device -- Codesize: 1578 bytes, BOOTLOADER_ADDRESS: 0x3980, Free user memory 14714 bytes.
 - 
 Building Micronucleus configuration: t85_entry_on_powerOn_pullupAt0 
-Size of binary hexfile. Use the "data" size to calculate the bootloader address: 
-   text	   data	    bss	    dec	    hex	filename
-      0	   1558	      0	   1558	    616	main.hex
+8K  Device -- Codesize: 1558 bytes, BOOTLOADER_ADDRESS: 0x19C0, Free user memory 6586 bytes.
+16K Device -- Codesize: 1558 bytes, BOOTLOADER_ADDRESS: 0x3980, Free user memory 14714 bytes.
 - 
 Building Micronucleus configuration: t85_entry_on_reset_activePullup_fastExit 
-Size of binary hexfile. Use the "data" size to calculate the bootloader address: 
-   text	   data	    bss	    dec	    hex	filename
-      0	   1582	      0	   1582	    62e	main.hex
+8K  Device -- Codesize: 1582 bytes, BOOTLOADER_ADDRESS: 0x19C0, Free user memory 6586 bytes.
+16K Device -- Codesize: 1582 bytes, BOOTLOADER_ADDRESS: 0x3980, Free user memory 14714 bytes.
 - 
 Building Micronucleus configuration: t85_fastExit 
-Size of binary hexfile. Use the "data" size to calculate the bootloader address: 
-   text	   data	    bss	    dec	    hex	filename
-      0	   1560	      0	   1560	    618	main.hex
+8K  Device -- Codesize: 1560 bytes, BOOTLOADER_ADDRESS: 0x19C0, Free user memory 6586 bytes.
+16K Device -- Codesize: 1560 bytes, BOOTLOADER_ADDRESS: 0x3980, Free user memory 14714 bytes.
 - 
 Building Micronucleus configuration: t88_default 
-Size of binary hexfile. Use the "data" size to calculate the bootloader address: 
-   text	   data	    bss	    dec	    hex	filename
-      0	   1448	      0	   1448	    5a8	main.hex
+8K  Device -- Codesize: 1460 bytes, BOOTLOADER_ADDRESS: 0x1A40, Free user memory 6714 bytes.
+16K Device -- Codesize: 1460 bytes, BOOTLOADER_ADDRESS: 0x3A00, Free user memory 14842 bytes.
 - 
 Building Micronucleus configuration: t88_entry_on_powerOn_activePullup_fastExit 
-Size of binary hexfile. Use the "data" size to calculate the bootloader address: 
-   text	   data	    bss	    dec	    hex	filename
-      0	   1478	      0	   1478	    5c6	main.hex
+8K  Device -- Codesize: 1490 bytes, BOOTLOADER_ADDRESS: 0x1A00, Free user memory 6650 bytes.
+16K Device -- Codesize: 1490 bytes, BOOTLOADER_ADDRESS: 0x3A00, Free user memory 14842 bytes.
 - 

@@ -37,7 +37,7 @@ DATAx (rx) to ACK/NAK/STALL (tx)                    2   7.5    16-60
 ;max allowable interrupt latency: 34 cycles -> max 25 cycles interrupt disable
 ;max stack usage: [ret(2), YL, SREG, YH, shift, x1, x2, x3, cnt, x4] = 11 bytes
 ;Numbers in brackets are maximum cycles since SOF.
-USB_INTR_VECTOR:
+USB_handler:
 ;order of registers pushed: YL, SREG [sofError], YH, shift, x1, x2, x3, cnt
     push    YL              ;2 [35] push only what is necessary to sync with edge ASAP
     in      YL, SREG        ;1 [37]

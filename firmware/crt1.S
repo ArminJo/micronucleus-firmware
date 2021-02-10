@@ -96,7 +96,7 @@ __init:
     .section .init2,"ax",@progbits
     clr        R1
 
-#if ! defined(ENABLE_UNSAFE_OPTIMIZATIONS) && ! defined(ENABLE_SAFE_OPTIMIZATIONS)
+#if ! defined(ENABLE_UNSAFE_OPTIMIZATIONS)
     // 0x3f,r1 -> reset status register especially the interrupt enable bit,
     // but the interrupt enable bit is always in a disable state after reset!
     // So it would allow a jmp 0000 instead of an reset to safely enter the bootloader

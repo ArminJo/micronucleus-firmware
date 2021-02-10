@@ -71,7 +71,6 @@ If not otherwise noted, the OSCCAL value is calibrated (+/- 1%) after boot for a
 - [ENTRY_EXT_RESET](#entry_ext_reset-entry-condition) - Only enter bootloader on reset, not on power up.
 - [ENTRY_D_MINUS_PULLUP_ACTIVATED](#entry_d_minus_pullup_activated_and_entry_power_on-entry-condition) - Only enter if pull-up connected and powered.
 - [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit) - If not connected to USB (e.g. powered via VIN) the user program starts after 300 ms (+ initial 300 ms) -> 600 ms.
-- [ENABLE_SAFE_OPTIMIZATIONS](#enable_safe_optimizations) - jmp 0x0000 does not initialize the stackpointer.
 - [LED_MODE=ACTIVE_HIGH](https://github.com/ArminJo/micronucleus-firmware/blob/master/firmware/main.c#L527) - The built in LED flashes during the 5 seconds of the bootloader waiting for commands.
 
 # Configuration Options
@@ -116,12 +115,7 @@ This configuration flag overrides `START_WITHOUT_PULLUP` (using both flags is us
 ### To support low energy applications
 The `START_WITHOUT_PULLUP` configuration adds 16 to 18 bytes for an additional check. It is only required if the bootloader can be entered without a pull-up attached activated at the D- pin. Since this check was contained by default in all pre 2.0 versions, it is obvious that **it can also be used for boards with a pull-up**.
 
-## [`ENABLE_SAFE_OPTIMIZATIONS`](/firmware/crt1.S#L99)
-This configuration is referenced in the [Makefile.inc](/firmware/configuration/t85_fastExit/Makefile.inc#L18) file and will [disable the restoring of the stack pointer](https://github.com/ArminJo/micronucleus-firmware/blob/master/firmware/crt1.S#L102) at the start of program, whis is normally done by reset anyway. These optimization disables reliable entering the bootloader with `jmp 0x0000`, which you should not do anyway - better use the watchdog timer reset functionality.<br/>
-- Gains 10 bytes.
-
 ## [`ENABLE_UNSAFE_OPTIMIZATIONS`](/firmware/crt1.S#L99)
-- Includes [`ENABLE_SAFE_OPTIMIZATIONS`](#enable_safe_optimizations).
 - The bootloader reset vector is written by the host and not by the bootloader itself. In case of an disturbed communication the reset vector may be wrong -but I have never experienced it.
 
 You have a slightly bigger chance to brick the bootloader, which reqires it to be reprogrammed by [avrdude](windows_exe) and an ISP or an Arduino as ISP. Command files for this can be found [here](/utils).
@@ -301,7 +295,7 @@ INT1 9 (D3) PA3  4|    |17  PB3 (D11) 4 OC1BV USB-
 ### Version 2.5
 - Saved 2 bytes by removing for loop at leaveBootloader().
 - Saved 2 bytes by defining __DELAY_BACKWARD_COMPATIBLE__ for _delay_ms().
-- Saved 22 bytes by converting USB_INTR_VECTOR in *usbdrvasm165.inc* from ISR with pushes to a plain function.
+- Saved 22 bytes by converting USB_handler in *usbdrvasm165.inc* from ISR with pushes to a plain function.
 - Saved 2 bytes by improving small version of usbCrc16 in *usbdrvasm.S*.
 - Saved 4 bytes by inlining usbCrc16 in *usbdrvasm.S*.
 - Renamed `AUTO_EXIT_NO_USB_MS` to `FAST_EXIT_NO_USB_MS` and implemented it.

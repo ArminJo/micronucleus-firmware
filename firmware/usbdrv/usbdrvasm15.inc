@@ -33,7 +33,7 @@ of CPU cycles, but even an exact number of cycles!
 ; order of registers pushed:
 ;	YL, SREG [sofError] YH, shift, x1, x2, x3, bitcnt, cnt, x4
 ;----------------------------------------------------------------------------
-USB_INTR_VECTOR:
+USB_handler:
     push    YL                   ;2 	push only what is necessary to sync with edge ASAP
     in      YL, SREG             ;1
     push    YL                   ;2

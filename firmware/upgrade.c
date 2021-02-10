@@ -18,7 +18,7 @@
 // is complete. You can also connect an LED with pb1 positive and pb0 or gnd negative and
 // it will blink
 
-#include "./utils.h"
+#include "utils.h"
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <avr/pgmspace.h>
