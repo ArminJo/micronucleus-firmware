@@ -4,7 +4,7 @@ Created: September 2012
   Changes for Micronucleus protocol version V2.x
   (c) 2014 T. Bo"scke
   Improved error messages version 2.5
-  (c) 2021 T. ArminJo
+  (c) 2021 ArminJo
 
   Permission is hereby granted, free of charge, to any person obtaining a copy of
   this software and associated documentation files (the "Software"), to deal in
@@ -142,7 +142,7 @@ int main(int argc, char **argv) {
         printf("Did not understand --timeout value\n");
         return EXIT_FAILURE;
       }
-    } else if (argv[arg_pointer][0] == '-') {
+    } else if (strlen(argv[arg_pointer]) > 1 && argv[arg_pointer][0] == '-') {
       fprintf(stderr, "Unrecognized option: %s\n", argv[arg_pointer]);
       return EXIT_FAILURE;
     } else {

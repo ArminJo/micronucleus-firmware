@@ -11,8 +11,8 @@ on:
     paths:
     - '**/comandline/library/**'
     - '**/comandline/micronucleus.c'
-#    - '**/comandline/builds/**/package.json'
-#    - '**BuildBinaries.yml'
+    - '**/comandline/builds/**/package.json'
+    - '**BuildBinaries.yml'
 
 jobs:
   build-all-executables:
@@ -170,11 +170,11 @@ jobs:
         set -o verbose
         mkdir micronucleus # temporary tar directory
         chmod +x commandline/micronucleus
-        mv commandline/micronucleus micronucleus
-        tar -czvf $TARBALL_NAME micronucleus # create arduino tarball
-        cp commandline/builds/$TARGET_DIR/package.json micronucleus
+        mv commandline/micronucleus micronucleus # move executable in right directory
+        tar -czvf $TARBALL_NAME micronucleus # create arduino tarball in base directory
+        cp commandline/builds/$TARGET_DIR/package.json micronucleus # add package.json for PIO tarball
         cd micronucleus
-        tar -czvf $TARBALL_NAME_PIO micronucleus package.json # create PIO tarball
+        tar -czvf $TARBALL_NAME_PIO micronucleus package.json # create PIO tarball in micronucleus directory
         ls -l
 
         cd ../commandline
@@ -184,8 +184,21 @@ jobs:
           mkdir builds/$TARGET_DIR
         fi
 
+        echo ls -l builds/$TARGET_DIR
         ls -l builds/$TARGET_DIR # show old content which we had checked out
-        # process Arduino tarball
+
+        # move and process executable
+        if [[ ! -e builds/$TARGET_DIR/micronucleus ]]; then
+          echo mv ../micronucleus/micronucleus builds/$TARGET_DIR
+          mv ../micronucleus/micronucleus builds/$TARGET_DIR
+          echo git -add builds/$TARGET_DIR/micronucleus
+          git add builds/$TARGET_DIR/micronucleus
+        else
+          echo mv ../micronucleus/micronucleus builds/$TARGET_DIR
+          mv ../micronucleus/micronucleus builds/$TARGET_DIR
+        fi
+
+        # move and process Arduino tarball
         if [[ ! -e builds/$TARGET_DIR/$TARBALL_NAME ]]; then
           echo mv ../$TARBALL_NAME builds/$TARGET_DIR
           mv ../$TARBALL_NAME builds/$TARGET_DIR
@@ -196,7 +209,7 @@ jobs:
           mv ../$TARBALL_NAME builds/$TARGET_DIR
         fi
 
-        # process PIO tarball
+        # move and process PIO tarball
         if [[ ! -e builds/$TARGET_DIR/$TARBALL_NAME_PIO ]]; then
           echo mv ../micronucleus/$TARBALL_NAME_PIO builds/$TARGET_DIR
           mv ../micronucleus/$TARBALL_NAME_PIO builds/$TARGET_DIR
@@ -207,6 +220,7 @@ jobs:
           mv ../micronucleus/$TARBALL_NAME_PIO builds/$TARGET_DIR
         fi
         # show new content
+        echo ls -l builds/$TARGET_DIR
         ls -l builds/$TARGET_DIR
 
     - name: Commit and push files
