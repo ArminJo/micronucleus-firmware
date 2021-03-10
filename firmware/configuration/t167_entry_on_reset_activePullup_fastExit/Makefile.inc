@@ -3,7 +3,7 @@
 # License: GNU GPL v2 (see License.txt)
 #
 # Controller type: ATtiny 167
-# Configuration:   Default configuration + ENTRY_EXT_RESET + START_WITHOUT_PULLUP + LED
+# Configuration:   Default configuration + ENTRY_EXT_RESET + LED
 # Last Change:     Jun 16,2020
 
 

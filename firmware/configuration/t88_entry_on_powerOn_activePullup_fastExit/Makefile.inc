@@ -3,7 +3,7 @@
 # License: GNU GPL v2 (see License.txt)
 
 # Controller type: ATtiny 88 - 16 MHz - China MHETtiny88 board
-# Configuration:   Default configuration + ENTRY_POWER_ON + START_WITHOUT_PULLUP + FAST_EXIT_NO_USB_MS=300 + LED
+# Configuration:   Default configuration + ENTRY_POWER_ON + FAST_EXIT_NO_USB_MS=300 + LED
 # Last Change:     6/2020
 
 F_CPU = 16000000

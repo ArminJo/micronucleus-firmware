@@ -3,7 +3,7 @@
 # License: GNU GPL v2 (see License.txt)
 
 # Controller type: ATtiny 85 - 16.5 MHz
-# Configuration:   Default + ENTRY_EXT_RESET + START_WITHOUT_PULLUP + LED
+# Configuration:   Default + ENTRY_EXT_RESET + LED
 # Last Change:     Jun 16,2020
 
 

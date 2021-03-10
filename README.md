@@ -1,5 +1,5 @@
 # Micronucleus USB Bootloader for ATtinies / Digisparks
-### Version 2.5.1
+### Version 2.5.3 - work in progress
 [![License: GPL v2](https://img.shields.io/badge/License-GPLv2-blue.svg)](https://www.gnu.org/licenses/gpl-2.0)
 [![Commits since latest](https://img.shields.io/github/commits-since/ArminJo/micronucleus-firmware/latest)](https://github.com/ArminJo/ServoEasmicronucleus-firmwareing/commits/master)
 [![Hit Counter](https://hitcounter.pythonanywhere.com/count/tag.svg?url=https://github.com/ArminJo/micronucleus-firmware)](https://github.com/brentvollebregt/hit-counter)
@@ -43,20 +43,19 @@ If not otherwise noted, the OSCCAL value is calibrated (+/- 1%) after boot for a
 |  |  |  |  |
 | t85_default | 6650 | 1512 | - |
 | t85_entry_on_powerOn | 6586 | 1548 | [ENTRY_POWER_ON](#entry_power_on-entry-condition), LED_MODE=ACTIVE_HIGH |
-| t85_entry_on_powerOn_<br/>fastExit | 6586 | 1560 | [ENTRY_POWER_ON](#entry_power_on-entry-condition), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), LED_MODE=ACTIVE_HIGH |
-| **t85_entry_on_powerOn_<br/>activePullup_fastExit**<br/>[recommended configuration](#recommended-configuration) | 6586 | 1560 | [ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_POWER_ON](#entry_d_minus_pullup_activated_and_entry_power_on-entry-condition), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), LED_MODE=ACTIVE_HIGH |
-| t85_entry_on_powerOn_<br/>activePullup_fastExit_noLED| 6586 | 1542 | [ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_POWER_ON](#entry_d_minus_pullup_activated_and_entry_power_on-entry-condition), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit) |
+| t85_entry_on_powerOn_<br/>fastExit | 6586 | 1570 | [ENTRY_POWER_ON](#entry_power_on-entry-condition), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), LED_MODE=ACTIVE_HIGH |
+| **t85_entry_on_powerOn_<br/>activePullup_fastExit**<br/>[recommended configuration](#recommended-configuration) | 6586 | 1574 | [ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_POWER_ON](#entry_d_minus_pullup_activated_and_entry_power_on-entry-condition), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), LED_MODE=ACTIVE_HIGH |
+| t85_entry_on_powerOn_<br/>activePullup_fastExit_noLED| 6586 | 1556 | [ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_POWER_ON](#entry_d_minus_pullup_activated_and_entry_power_on-entry-condition), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit) |
 | t85_entry_on_powerOn_<br/>pullupAt0 | 6650 | 1536 | [ENTRY_POWER_ON](#entry_power_on-entry-condition), USB_CFG_PULLUP_IOPORTNAME + USB_CFG_PULLUP_BIT |
-| t85_entry_on_reset_<br/>activePullup_fastExit | 6586 | 1582 | [ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_EXT_RESET](#entry_d_minus_pullup_activated_and_entry_ext_reset-entry-condition), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), LED_MODE=ACTIVE_HIGH |
-| t85_entry_on_reset_<br/>activePullup_fastExit | 6586 | 1560 | [ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_EXT_RESET](#entry_d_minus_pullup_activated_and_entry_ext_reset-entry-condition), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit),<br/>AUTO_EXIT_MS=15000 Bootloader timeout increased to 15 seconds (if connected to USB),<br/>LED_MODE=ACTIVE_HIGH. |
-| t85_fastExit | 6586 | 1538 | [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), LED_MODE=ACTIVE_HIGH |
+| t85_entry_on_reset_<br/>activePullup_fastExit | 6586 | 1574 | [ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_EXT_RESET](#entry_d_minus_pullup_activated_and_entry_ext_reset-entry-condition), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit),<br/>AUTO_EXIT_MS=15000 Bootloader timeout increased to 15 seconds (if connected to USB),<br/>LED_MODE=ACTIVE_HIGH. |
+| t85_fastExit | 6586 | 1552 | [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), LED_MODE=ACTIVE_HIGH |
 |  |  |  |  |
-| t88_default | 6714 | 1436 | LED_MODE=ACTIVE_HIGH |
-| **t88_entry_on_powerOn_<br/>activePullup_fastExit**<br/>[recommended configuration](#recommended-configuration) | 6714 | 1466 |  [ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_POWER_ON](#entry_d_minus_pullup_activated_and_entry_power_on-entry-condition), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), LED_MODE=ACTIVE_HIGH |
+| t88_default | 6778 | 1348 | LED_MODE=ACTIVE_HIGH<br/>For 16 MHz quartz |
+| **t88_entry_on_powerOn_<br/>activePullup_fastExit**<br/>[recommended configuration](#recommended-configuration) | 6778 | 1392 |  [ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_POWER_ON](#entry_d_minus_pullup_activated_and_entry_power_on-entry-condition), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), LED_MODE=ACTIVE_HIGH<br/>For 16 MHz quartz |
 |  |  |  |  |
 | t167_default | 14970 | 1340 | - |
-| **t167_entry_on_powerOn_<br/>activePullup_fastExit**<br/>[recommended configuration](#recommended-configuration) | 14970 | 1390 | [ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_POWER_ON](#entry_d_minus_pullup_activated_and_entry_power_on-entry-condition), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), LED_MODE=ACTIVE_HIGH |
-| t167_entry_on_reset_<br/>activePullup_fastExit | 14970 | 1390 | [ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_EXT_RESET](#entry_d_minus_pullup_activated_and_entry_ext_reset-entry-condition), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), <br/>AUTO_EXIT_MS=15000 Bootloader timeout increased to 15 seconds (if connected to USB),<br/>LED_MODE=ACTIVE_HIGH. |
+| **t167_entry_on_powerOn_<br/>activePullup_fastExit**<br/>[recommended configuration](#recommended-configuration) | 14970 | 1404 | [ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_POWER_ON](#entry_d_minus_pullup_activated_and_entry_power_on-entry-condition), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), LED_MODE=ACTIVE_HIGH<br/>For 16 MHz quartz |
+| t167_entry_on_reset_<br/>activePullup_fastExit | 14970 | 1404 | [ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_EXT_RESET](#entry_d_minus_pullup_activated_and_entry_ext_reset-entry-condition), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), <br/>AUTO_EXIT_MS=15000 Bootloader timeout increased to 15 seconds (if connected to USB),<br/>LED_MODE=ACTIVE_HIGH.<br/>For 16 MHz quartz |
 |  |  |  |  |
 | Nanite841 | 6586 | 1546 |  |
 | t84_default | 6650 | 1478 |  |
@@ -68,17 +67,18 @@ If not otherwise noted, the OSCCAL value is calibrated (+/- 1%) after boot for a
 - [ENTRY_POWER_ON](#entry_power_on-entry-condition) - Only enter bootloader on power on, not on reset or brownout.
 - [ENTRY_EXT_RESET](#entry_ext_reset-entry-condition) - Only enter bootloader on reset, not on power up.
 - [ENTRY_D_MINUS_PULLUP_ACTIVATED](#entry_d_minus_pullup_activated_and_entry_power_on-entry-condition) - Only enter if pull-up connected and powered.
-- [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit) - If not connected to USB (e.g. powered via VIN) the user program starts after 300 ms (+ initial 300 ms) -> 600 ms.
+- [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit) - If not connected to USB (e.g. powered via VIN) the user program starts after 300 ms (+ initial 300 ms) -> 600 ms. If connected to USB but no upload happens the user program starts after around 1.5 seconds.
 - [LED_MODE=ACTIVE_HIGH](https://github.com/ArminJo/micronucleus-firmware/blob/master/firmware/main.c#L527) - The built in LED flashes during the 5 seconds of the bootloader waiting for commands.
 
 # Configuration Options
 
 ## [`FAST_EXIT_NO_USB_MS`](/firmware/configuration/t85_fastExit/bootloaderconfig.h#L195) for fast bootloader exit
 If the bootloader is entered, it requires minimum 300 ms to initialize USB connection (disconnect and reconnect). 
-100 ms after this 300 ms initialization, the bootloader receives a reset, if the host application wants to program the device.<br/>
-The 100 ms time to reset may depend on the type of host CPU etc., so I took 200 ms to be safe.<br/>
+100 ms after this 300 ms initialization, the bootloader receives a reset.<br/>
+The 100 ms time to reset may depend on the type of host CPU etc., so I took 200 ms to be safe to detect a reset.<br/>
 This configuration waits for 200 ms after initialization for a reset and if no reset detected it exits the bootloader and starts the user program.<br/>
-With this configuration the **user program is started with a 500 ms delay after power up or reset** even if we do not specify a special entry condition.
+With this configuration the **user program is started with a 500 ms delay after power up or reset** if no USB is attached, even if we do not specify a special entry condition.<br/>
+IF USB is attached, we wait another 1200 ms (to cover slow hosts, otherwise 500 would be OK) after the reset for the host upload program (micronucleus.exe) to request the configuration information. If no upload program is detected, we start the user program.
 
 ## [`ENTRY_POWER_ON`](/firmware/configuration/t85_entry_on_powerOn/bootloaderconfig.h#L108) entry condition
 The `ENTRY_POWER_ON` configuration adds 18 bytes to the ATtiny85 default configuration.<br/>
@@ -92,13 +92,12 @@ The content of the `MCUSR` is copied to the `GPIOR0` register before clearing it
 **ATTENTION! If the external reset pin is disabled, this entry mode will brick the board!**
 
 ## [`ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_POWER_ON`](/firmware/configuration/t85_entry_on_powerOn_activePullup_fastExit/bootloaderconfig.h#L138) entry condition
-Activate the bootloader only if the D- pin is high, i.e. a pull-up resistor is attached and powered **and** we have an `ENTRY_POWER_ON` condition (ref. described above).<br/>
+Activate the bootloader only if the D- pin is high, i.e. a pull-up resistor is attached and powered **and** we have an `ENTRY_POWER_ON` condition (ref. described [above](#entry_power_on-entry-condition)).<br/>
 Useful if the pull-up is powered by USB V+ and NOT ATtiny VCC to save power.
 In this case often a schottky diode is connected between USB V+ and VCC (5V).<br/>
 The `ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_POWER_ON` configuration adds 54 bytes to the ATtiny85 default configuration.<br/>
 The content of the `MCUSR` is copied to the `GPIOR0` register to enable the user program to evaluate it and then cleared to prepare for next boot.<br/>
 In this configuration **a power up with USB disconnected or a reset will immediately start your user program** without any delay.<br/>
-This configuration flag overrides `START_WITHOUT_PULLUP` (using both flags is useless and wastes bytes).
 
 ## [`ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_EXT_RESET`](/firmware/configuration/t85_entry_on_reset_activePullup/bootloaderconfig.h#L138) entry condition
 Activate the bootloader only if the D- pin is high, i.e. a pull-up resistor is attached and powered **and** we have an `ENTRY_EXT_RESET` condition.<br/>
@@ -107,11 +106,6 @@ In this case often a schottky diode is connected between V* and VCC.<br/>
 The `ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_EXT_RESET` configuration adds 54 bytes to the ATtiny85 default configuration.<br/>
 The content of the `MCUSR` is copied to the `GPIOR0` register to enable the user program to evaluate it and then cleared to prepare for next boot.<br/>
 In this configuration **a power up with USB disconnected or a reset will immediately start your user program** without any delay.<br/>
-This configuration flag overrides `START_WITHOUT_PULLUP` (using both flags is useless and wastes bytes).
-
-## [`START_WITHOUT_PULLUP`](/firmware/configuration/t85_default/bootloaderconfig.h#L220)
-### To support low energy applications
-The `START_WITHOUT_PULLUP` configuration adds 16 to 18 bytes for an additional check. It is only required if the bootloader can be entered without a pull-up attached activated at the D- pin. Since this check was contained by default in all pre 2.0 versions, it is obvious that **it can also be used for boards with a pull-up**.
 
 ## [`ENABLE_UNSAFE_OPTIMIZATIONS`](/firmware/crt1.S#L99)
 - The bootloader reset vector is written by the host and not by the bootloader itself. In case of an disturbed communication the reset vector may be wrong -but I have never experienced it.
@@ -125,9 +119,9 @@ This configuration has the following features:
 - A hardware reset (e.g., Digispark P5 shorted to ground or brownout happened) will always immediately run the user program.
 - If no user program is loaded, the LED quickly flashes indefinitely.
 - At power-on, we distinguish 3 cases.
-  1 The board is connected to an USB. In this case, the bootloader attempts to load a program from the host (*entry_on_powerOn* / `ENTRY_POWER_ON`) and starts the user program after 6 s timeout or after upload completion. The built-in LED flashes while the bootloader is waiting for user program upload and during the upload phase (`LED_MODE=ACTIVE_HIGH`).
-  2 The board is **not** connected to an USB. In this case, the bootloader starts the already installed user program after 600 milliseconds (`FAST_EXIT_NO_USB_MS=300` means *Fast exit of bootloader after 300+300 ms*). The 600 ms are required to decide if there is an USB host attached or not.
-  3 The **board is modified** and not connected to an USB **or the pull-up resistor is removed**. In this case, the pull-up is inactive and the bootloader immediately starts the installed user program (without startup delay, without hang-up and without affecting the internal LED at boot). This is referred to the `ENTRY_D_MINUS_PULLUP_ACTIVATED` part of the configuration flags. The builtin LED remains off in this case (`LED_MODE=ACTIVE_HIGH` has no effect here).
+1. The board is connected to an USB. In this case, the bootloader waits for the host program (micronucleus.exe) to upload a program and starts the user program after around 1.5 seconds timeout or after upload completion. The built-in LED flashes while the bootloader is waiting for user program upload and during the upload phase (`LED_MODE=ACTIVE_HIGH`).
+2. The board is **not** connected to an USB. In this case, the bootloader starts the already installed user program after 600 milliseconds (`FAST_EXIT_NO_USB_MS=300` means *Fast exit of bootloader after 300+300 ms*). The 600 ms are required to decide if there is an USB host attached or not.
+3. The **board pull-up resistor supply is modified to be USB-VCC and not CPU-VCC** and not connected to an USB **or the pull-up resistor is removed**. In this case, the pull-up is inactive and the bootloader immediately starts the installed user program (without startup delay, without hang-up and without affecting the internal LED at boot). This is referred to the `ENTRY_D_MINUS_PULLUP_ACTIVATED` part of the configuration flags. The builtin LED remains off in this case (`LED_MODE=ACTIVE_HIGH` has no effect here).
 
 ### Hex files for these configuration are available in the [releases](/firmware/releases) and [upgrades](/firmware/upgrades) folders.
 
@@ -147,6 +141,8 @@ Subtracting this (+ 6 byte for postscript) from the total amount of memory will 
 
 E.g. for *t85_default.hex* with the new compiler we get 1548 as data size. The next multiple of 64 is 1600 (25 * 64) => (8192 - (1600 + 6)) = **6586 bytes are free**.<br/>
 In this case we have 52 bytes left for configuration extensions before using another 64 byte page.<br/>
+For data size from 1470 up to 1536 the address is 1A00 (6650 free), for 1538 to 1600 it is 19C0 (6586 free), for 1602 to 1664 it is 1980 (6522 free).
+
 For *t167_default.hex* (as well as for the other t167 configurations) with the new compiler we get 1436 as data size. The next multiple of 128 is 1536 (12 * 128) => (16384 - (1536 + 6)) = 14842 bytes are free.
 
 # Bootloader memory comparison of different releases for [*t85_default.hex*](firmware/releases/t85_default.hex).
@@ -154,16 +150,18 @@ For *t167_default.hex* (as well as for the other t167 configurations) with the n
 - V1.11 6330 bytes free
 - V2.3  6522 bytes free
 - V2.04 6522 bytes free
-- V2.5  **6586** bytes free
+- V2.5  **6650** bytes free
 
 # USB device manager entry / disconnect from USB
-To avoid periodically disconnect->connect if no sketch is loaded and an unknown USB Device (Device Descriptor Request Failed) entry in device manager when entering user program, **the bootloader finishes without an active disconnect from USB**.<br/>
+To avoid periodically disconnect->connect if no sketch is loaded and to avoid an unknown USB Device (Device Descriptor Request Failed) entry in device manager when entering user program, **the bootloader finishes without an active disconnect from USB**.<br/>
 This means that you still can see a libusb-win32 decive / Digispark Bootloader in the Device manager, even when it is not alive, since your program has taken over the control of the CPU.<br/>
 This behavior is compatible to the old v1 micronucleus versions, which also do not disconnect from the host.
-**You can avoid this by actively disconnecting from the host by pulling the D- line to low for around 300 milliseconds.**<br/>
+**You can avoid this by actively disconnecting from the host by pulling the D- line to low for up to 300 milliseconds.**<br/>
 E.g a short beep at startup with tone(3, 2000, 200) will pull the D- line low and keep the module disconnected.
 
-# Measured Digispark (fast 64 MHz PLL clock) supply current
+# Reducing current of digispark bords for low power applications
+
+## Measured Digispark (ATtiny85 fast 64 MHz PLL clock) supply current
 | Current | Voltage | Clock | Configuration | 
 |-:|-:|-:|:-:|
 | **20 mA** | 5 V | 16.5 MHz | Standard Hardware |
@@ -194,7 +192,7 @@ E.g a short beep at startup with tone(3, 2000, 200) will pull the D- line low an
 BOD can only be disabled by setting fuses via ISP programmer](https://www.google.de/search?q=arduino+as+isp) and a connecting adapter.
 For reprogramming the fuses, you can use [this script](https://github.com/ArminJo/micronucleus-firmware/blob/master/utils/Write%2085%20Fuses%20E1%20DF%20FE%20-%20Digispark%20default%20without%20BOD%20and%20Pin5.cmd).<br/>
 
-# Current per device @ 5 volt
+## Current per device @ 5 volt
 | Current | Device |
 | -:|:-:|
 |   3 mA | Voltage regulator (1.5 mA at 3.8 V)|
@@ -206,6 +204,7 @@ For reprogramming the fuses, you can use [this script](https://github.com/ArminJ
 |   3 mA | CPU + timer @1 MHz |
 |  20 µA | BOD |
 | 212 µA | ADC |
+|   5 µA | Watchdog |
 
 With fast PLL Clock and standard fuses, the **start-up time from sleep is around 64ms and requires 2/3 of regular CPU power**!<br/>
 If we use the longest sleep time of 8 seconds and an empty loop, this result in an **average current consumption of 23 µA** (1 year with a 200 mAh button cell 2032).<br/>
@@ -213,7 +212,7 @@ The start-up time from sleep can be reduced (at own risk of unstable clock) to 5
 This results in an average current consumption of **9 µA** (2.5 years with a 200 mAh button cell 2032).<br/>
 This long startup time can be dramatically reduced to 6 clock cycles by [changing fuses to use the internal 8Mhz clock](https://github.com/ArminJo/micronucleus-firmware/blob/master/utils/Write%2085%20Fuses%20E2%20DF%20FF%20-%20ISP%20Mode%20%3D%208MHz%20without%20BOD%20and%20Pin5.cmd), but this **disables the possibility to program the Digispark board via USB** and enables availability of whole memory for your program.
 
-# Reducing current of digispark bords for low power applications
+## Modifying the board
 Here is an [Instructable](https://www.instructables.com/Reducing-Battery-Power-Consumption-for-Digispark-A/) covering the topic.
 ### Disabling the power LED
 Break the copper wire that connects the power LED to the diode with a knife or remove / disable the 102 resistor.
@@ -310,15 +309,23 @@ USB+  INT0    PD2   2|      |VIN
   USB- has a 1k0 pullup resistor to indicate a low-speed device.
   USB+ and USB- are each terminated on the host side with 15k to 25k pull-down resistors.
 
-  Pins not connected: PB6 is CLOCK_IN, PC7 is 25
+  Pins not available: PB6 is CLOCK_IN, PC7 is 25
 
 ```
 # Revision History
-### Version 2.5.1 - work in progress
+### Version 2.5.3 - work in progress
+
+### Version 2.5.2
+- Swapped D+ and D- again and set `OSCCAL_HAVE_XTAL`for t88 to support MH-ET LIVE Tiny88 boards.
+- Renamed the different pre-built configurations.
+- Saved 22 bytes by changing OSCCAL calibration function to Nerdralph's version.
+- Removed `START_WITHOUT_PULLUP` and extended `FAST_EXIT_NO_USB_MS`.
+- Executables are now included.
+
+### Version 2.5.1
 - Saved 28 bytes by `#define USB_CFG_DESCR_PROPS_STRINGS 1`. See #10, thanks to [nerdralph](https://github.com/nerdralph).
 - Use 12 byted by re enabling push and pop of Y register in *usbdrvasm165.inc*. See #11.
 - Swapped D+ and D- for t88 to support MH-ET LIVE Tiny88 boards.
-- Renamed the different pre-built configurations.
 
 ### Version 2.5
 - Saved 2 bytes by removing for loop at leaveBootloader().

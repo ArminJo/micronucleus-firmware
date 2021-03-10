@@ -18,10 +18,10 @@ CONFIG ?= t85_default
 #     make dist-clean       # removes all hex files
 #
 # Configure the following variables according to your AVR.
-# Program the device with
-#     make fuse                 # to set the clock generator, boot section size etc.
-#     make flash                # to load the boot loader into flash
-#     make disablereset         # use external reset line for IO (CAUTION: this is not easy to enable again, see README) 
+# Program the device with:
+#     make fuse            # to set the clock generator, boot section size etc.
+#     make flash           # to load the boot loader into flash
+#     make disablereset	   # use external reset line for IO (CAUTION: this is not easy to enable again, see README) 
 ###############################################################################
 
 CFLAGS =
@@ -43,7 +43,6 @@ CFLAGS += -nostartfiles -ffunction-sections -fdata-sections -fpack-struct -fno-i
 LDFLAGS = -Wl,--relax,--section-start=.text=$(BOOTLOADER_ADDRESS),--gc-sections,-Map=main.map
 
 OBJECTS =  crt1.o usbdrv/usbdrvasm.o usbdrv/oddebug.o main.o 
-#OBJECTS += osccalASM.o
 OBJECTS += osccal.o
 
 # Detect shell type

@@ -6,11 +6,10 @@ if not exist releases MKDIR releases
 if not exist upgrades MKDIR upgrades
 
 rem Set TARGET=t85_entry_on_powerOn
-rem Set TARGET=t85_entry_on_power_on_activePullup_fastExit
 rem Set TARGET=t85_entry_on_reset_activePullup
-rem Set TARGET=t85_entry_on_powerOn_activePullup_fastExit
+Set TARGET=t85_entry_on_powerOn_activePullup_fastExit
 rem Set TARGET=t85_aggressive
-Set TARGET=t167_default
+rem Set TARGET=t167_default
 
 echo.
 echo **********************************************************
