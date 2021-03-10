@@ -1,5 +1,5 @@
 @echo Upgrade Digispark Bootloader with micronucleus upload
-set FILENAME=upgrade-t167_entry_on_reset_activePullup.hex
+set FILENAME=upgrade-t167_entry_on_reset_activePullup_fastExit.hex
 @if exist %FILENAME% (
   ..\commandline\builds\x86_64-mingw32\micronucleus --no-ansi --run --timeout 60 %FILENAME%
   goto end

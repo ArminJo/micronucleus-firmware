@@ -1,7 +1,7 @@
 @Call SetPath
 @echo.
 @echo Upgrade Digispark Bootloader with spi programming by avrdude
-set FILENAME=t85_entry_on_reset_activePullup.hex
+set FILENAME=t85_entry_on_reset_activePullup_fastExit.hex
 @if exist %FILENAME% (
   avrdude -pt85 -cstk500v1 -PCOM6 -b19200 -u -Uflash:w:%FILENAME%:a
   goto end
