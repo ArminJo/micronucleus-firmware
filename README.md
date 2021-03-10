@@ -39,29 +39,27 @@ This can only be done by means of a [High Voltage programmer](https://github.com
 If not otherwise noted, the OSCCAL value is calibrated (+/- 1%) after boot for all ATtiny85 configurations
 | Configuration | Free FLASH | Boot-<br/>loader size | Non default config flags set |
 |---------------|-----------------|-----------------|------------------------------|
-| t85_aggressive<br/><br/>It works for my Digispark boards without any problems :-) | 6780 | 1364 | [Do not provide calibrated OSCCAL, if no USB attached](/firmware/configuration/t85_aggressive/bootloaderconfig.h#L220), [ENABLE_UNSAFE_OPTIMIZATIONS](#enable_unsafe_optimizations)<br/>Relying on calibrated 16MHz internal clock stability, not using the 16.5 MHz USB driver version with integrated PLL. This causes the main memory saving. |
+| t85_aggressive<br/><br/>It works for my Digispark boards without any problems :-) | 6778 | 1360 | [Do not provide calibrated OSCCAL, if no USB attached](/firmware/configuration/t85_aggressive/bootloaderconfig.h#L220), [ENABLE_UNSAFE_OPTIMIZATIONS](#enable_unsafe_optimizations)<br/>Relying on calibrated 16MHz internal clock stability, not using the 16.5 MHz USB driver version with integrated PLL. This causes the main memory saving. |
 |  |  |  |  |
-| t85_default | 6650 | 1528 | - |
-| t85_entry_on_powerOn | 6586 | 1570 | [ENTRY_POWER_ON](#entry_power_on-entry-condition), LED_MODE=ACTIVE_HIGH |
-| t85_entry_on_powerOn_<br/>fastExit | 6586 | 1578 | [ENTRY_POWER_ON](#entry_power_on-entry-condition), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), LED_MODE=ACTIVE_HIGH |
-| **t85_entry_on_powerOn_<br/>activePullup_fastExit**<br/>[recommended configuration](#recommended-configuration) | 6586 | 1582 | [ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_POWER_ON](#entry_d_minus_pullup_activated_and_entry_power_on-entry-condition), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), LED_MODE=ACTIVE_HIGH |
-| t85_entry_on_powerOn_<br/>activePullup_fastExit_noLED| 6586 | 1564 | [ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_POWER_ON](#entry_d_minus_pullup_activated_and_entry_power_on-entry-condition), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit) |
-| t85_entry_on_powerOn_<br/>pullupAt0 | 6586 | 1558 | [ENTRY_POWER_ON](#entry_power_on-entry-condition), USB_CFG_PULLUP_IOPORTNAME + USB_CFG_PULLUP_BIT |
-| t85_fastExit | 6586 | 1554 | [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), LED_MODE=ACTIVE_HIGH |
-| t85_entry_on_reset_<br/>activePullup | 6586 | 1582 | [ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_EXT_RESET](#entry_d_minus_pullup_activated_and_entry_ext_reset-entry-condition), LED_MODE=ACTIVE_HIGH |
-| t85_entry_on_reset_<br/>activePullup_fastExit | 6586 | 1582 | [ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_EXT_RESET](#entry_d_minus_pullup_activated_and_entry_ext_reset-entry-condition), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit),<br/>AUTO_EXIT_MS=15000 Bootloader timeout increased to 15 seconds (if connected to USB),<br/>LED_MODE=ACTIVE_HIGH. |
+| t85_default | 6650 | 1512 | - |
+| t85_entry_on_powerOn | 6586 | 1548 | [ENTRY_POWER_ON](#entry_power_on-entry-condition), LED_MODE=ACTIVE_HIGH |
+| t85_entry_on_powerOn_<br/>fastExit | 6586 | 1560 | [ENTRY_POWER_ON](#entry_power_on-entry-condition), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), LED_MODE=ACTIVE_HIGH |
+| **t85_entry_on_powerOn_<br/>activePullup_fastExit**<br/>[recommended configuration](#recommended-configuration) | 6586 | 1560 | [ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_POWER_ON](#entry_d_minus_pullup_activated_and_entry_power_on-entry-condition), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), LED_MODE=ACTIVE_HIGH |
+| t85_entry_on_powerOn_<br/>activePullup_fastExit_noLED| 6586 | 1542 | [ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_POWER_ON](#entry_d_minus_pullup_activated_and_entry_power_on-entry-condition), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit) |
+| t85_entry_on_powerOn_<br/>pullupAt0 | 6650 | 1536 | [ENTRY_POWER_ON](#entry_power_on-entry-condition), USB_CFG_PULLUP_IOPORTNAME + USB_CFG_PULLUP_BIT |
+| t85_entry_on_reset_<br/>activePullup_fastExit | 6586 | 1582 | [ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_EXT_RESET](#entry_d_minus_pullup_activated_and_entry_ext_reset-entry-condition), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), LED_MODE=ACTIVE_HIGH |
+| t85_entry_on_reset_<br/>activePullup_fastExit | 6586 | 1560 | [ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_EXT_RESET](#entry_d_minus_pullup_activated_and_entry_ext_reset-entry-condition), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit),<br/>AUTO_EXIT_MS=15000 Bootloader timeout increased to 15 seconds (if connected to USB),<br/>LED_MODE=ACTIVE_HIGH. |
+| t85_fastExit | 6586 | 1538 | [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), LED_MODE=ACTIVE_HIGH |
 |  |  |  |  |
-| t88_default | 6714 | 1442 | LED_MODE=ACTIVE_HIGH |
-| **t88_entry_on_powerOn_<br/>activePullup_fastExit**<br/>[recommended configuration](#recommended-configuration) | 6650 | 1478 |  [ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_POWER_ON](#entry_d_minus_pullup_activated_and_entry_power_on-entry-condition), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), LED_MODE=ACTIVE_HIGH |
+| t88_default | 6714 | 1436 | LED_MODE=ACTIVE_HIGH |
+| **t88_entry_on_powerOn_<br/>activePullup_fastExit**<br/>[recommended configuration](#recommended-configuration) | 6714 | 1466 |  [ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_POWER_ON](#entry_d_minus_pullup_activated_and_entry_power_on-entry-condition), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), LED_MODE=ACTIVE_HIGH |
 |  |  |  |  |
-| t167_default | 14970 | 1322 | - |
-| t167_entry_on_powerOn_<br/>no_pullup | 14842 | 1366 | [ENTRY_POWER_ON](#entry_power_on-entry-condition), [ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_POWER_ON](#entry_d_minus_pullup_activated_and_entry_power_on-entry-condition), LED_MODE=ACTIVE_HIGH |
-| **t167_entry_on_powerOn_<br/>activePullup_fastExit**<br/>[recommended configuration](#recommended-configuration) | 14842 | 1378 | [ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_POWER_ON](#entry_d_minus_pullup_activated_and_entry_power_on-entry-condition), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), LED_MODE=ACTIVE_HIGH |
-| t167_entry_on_reset_<br/>activePullup_fastExit | 14842 | 1378 | [ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_EXT_RESET](#entry_d_minus_pullup_activated_and_entry_ext_reset-entry-condition), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), <br/>AUTO_EXIT_MS=15000 Bootloader timeout increased to 15 seconds (if connected to USB),<br/>LED_MODE=ACTIVE_HIGH. |
+| t167_default | 14970 | 1340 | - |
+| **t167_entry_on_powerOn_<br/>activePullup_fastExit**<br/>[recommended configuration](#recommended-configuration) | 14970 | 1390 | [ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_POWER_ON](#entry_d_minus_pullup_activated_and_entry_power_on-entry-condition), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), LED_MODE=ACTIVE_HIGH |
+| t167_entry_on_reset_<br/>activePullup_fastExit | 14970 | 1390 | [ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_EXT_RESET](#entry_d_minus_pullup_activated_and_entry_ext_reset-entry-condition), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), <br/>AUTO_EXIT_MS=15000 Bootloader timeout increased to 15 seconds (if connected to USB),<br/>LED_MODE=ACTIVE_HIGH. |
 |  |  |  |  |
-| Nanite841 |  | 1566 |  |
-| BitBoss |  | 1560 |  |
-| t84_default |  | 1492 |  |
+| Nanite841 | 6586 | 1546 |  |
+| t84_default | 6650 | 1478 |  |
 |  |  |  |  |
 | m168p_extclock |  | 1482 |  |
 | m328p_extclock |  | 1482 |  |
@@ -265,7 +263,7 @@ Now we have 3 power supply variants:
 ```
 
 ### ATtiny167 on Digispark pro
-Digital Pin numbers in braces are for ATTinyCore library
+Digital Pin numbers in parenthesis are for ATTinyCore library
 
 ```
                   +-\/-+
@@ -283,6 +281,36 @@ INT1 9 (D3) PA3  4|    |17  PB3 (D11) 4 OC1BV USB-
   USB+ and USB- are each connected to a 3.3 volt Zener to GND and with a 51 Ohm series resistor to the ATtiny pin.
   USB- has a 1k5 pull-up resistor to indicate a low-speed device.
   USB+ and USB- are each terminated on the host side with 15k to 25k pull-down resistors.
+
+```
+
+### MH-ET LIVE Tiny88 (16.0MHz) board
+Digital Pin numbers in parenthesis are for ATTinyCore library
+
+```
+                       USB
+                     +-\__/-+
+              PA2  15|      |14  PB7
+              PA3  16|      |13  PB5 SCK
+           17 PA0  A6|      |12  PB4 MISO
+           18 PA1  A7|      |11  PB3 MOSI
+     (D17) 19 PC0  A0|      |10  PB2 OC1B/PWM SS
+     (D18) 20 PC1  A1|      |9   PB1 OC1A/PWM
+     (D19) 21 PC2  A2|      |8   PB0
+     (D20) 22 PC3  A3|      |7   PD7 RX
+SDA  (D21) 23 PC4  A4|      |6   PD6 TX
+SCL  (D22) 24 PC5  A5|      |5   PD5
+     (D23)    PC1  25|      |4   PD4
+RESET         PC6 RST|      |3   PD3 INT1
+LED           PD0   0|      |5V
+USB-          PD1   1|      |GND
+USB+  INT0    PD2   2|      |VIN
+                     +------+
+  USB+ and USB- are each connected to a 3.3 volt Zener to GND and with a 68 Ohm series resistor to the ATtiny pin.
+  USB- has a 1k0 pullup resistor to indicate a low-speed device.
+  USB+ and USB- are each terminated on the host side with 15k to 25k pull-down resistors.
+
+  Pins not connected: PB6 is CLOCK_IN, PC7 is 25
 
 ```
 # Revision History
