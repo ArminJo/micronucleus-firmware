@@ -8,11 +8,13 @@ name: BuildBinaries
 
 on:
   push:
+    tags-ignore:
+    - '*'
     paths:
     - '**/comandline/library/**'
     - '**/comandline/micronucleus.c'
     - '**/comandline/builds/**/package.json'
-    - '**BuildBinaries.yml'
+#    - '**BuildBinaries.yml'
 
 jobs:
   build-all-executables:
