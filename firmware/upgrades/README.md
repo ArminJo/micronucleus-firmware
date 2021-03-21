@@ -12,7 +12,7 @@ For Linux install the compiler, library and tools with your package system, e.g.
 ## Creating an Upgrade
 Executing 'make' will build 'main.hex' (the bootloader itself) and 'upgrade.hex' (the upgrade program with new bootloader included).<br/>
 If you see the error `'bootloader_size' undeclared` during make, try to switch at 2 places the echo commands to the other (operating system) flavor.<br/>
-Next upload the 'upgrade.hex' file generated in this folder, via whichever bootloader you're using, or an ISP or whatever - everything should work. If you're using micronucleus and have the command line tool installed: micronucleus --run upgrade.hex.<br/>
+Next, upload the 'upgrade.hex' file generated in this folder, via whichever bootloader you're using, or an ISP or whatever - everything should work. If you're using micronucleus and have the command line tool installed: micronucleus --run upgrade.hex.<br/>
 
 Pre-built upgrades (based on ./releases/*.hex) are available in directory ./upgrades. Shell script MK_ALL.sh was tested under linux / debian stable.
 

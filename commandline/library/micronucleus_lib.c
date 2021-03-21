@@ -105,7 +105,7 @@ micronucleus* micronucleus_connect(int fast_mode) {
           nucleus->bootloader_start = nucleus->pages*nucleus->page_size;
 
           if ((nucleus->version.major>=2)&&(!fast_mode)) {
-            // firmware v2 reports more aggressive write times. Add 2ms if fast mode is not used.
+            // firmware v2 reports more agressive write times. Add 2ms if fast mode is not used.
             nucleus->write_sleep = (buffer[3] & 127) + 2;
           } else {
             nucleus->write_sleep = (buffer[3] & 127);

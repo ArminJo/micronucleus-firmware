@@ -32,6 +32,22 @@ like e.g. the [Burn_upgrade-t85_default.cmd](utils/Burn_upgrade-t85_default.cmd)
 
 ### If you want to burn the bootloader to an **ATtiny87** or **ATtiny167** with avrdude, you must use the [avrdude.config file](https://raw.githubusercontent.com/ArminJo/micronucleus-firmware/master/windows_exe/avrdude.conf) in [the windows_exe directory](https://github.com/ArminJo/micronucleus-firmware/tree/master/windows_exe) where [ATtiny87](https://github.com/ArminJo/micronucleus-firmware/blob/master/windows_exe/avrdude.conf#L15055) and [ATtiny167](https://github.com/ArminJo/micronucleus-firmware/blob/master/windows_exe/avrdude.conf#L15247) specifications are added.
 
+# Fuse setting
+The meaning of fuses can be seen with the [Engbedded Atmel AVR® Fuse Calculator](https://www.engbedded.com/fusecalc/).
+Windows helper scripts for setting fuses can be found [here](https://github.com/ArminJo/micronucleus-firmware/tree/master/utils).
+
+The default fuses for a **Digispark** board are:<br/>
+- ATtiny85 Lfuse: 0xE1 - (digispark default) PLL Clock + Startup 64 ms
+- ATtiny85 Hfuse: 0xDD - External Reset pin enabled (Pin5 not usable as I/O) + BOD 2.7 V + Enable Serial Program and Data Downloading
+- ATtiny85 Efuse: 0xFE - self programming enabled.
+
+BOD enabled requires additional 20 µA in sleep state and therefore may be not desirable for low power battery applications. To disable BOD, use 0xDF as Hfuse.
+
+The default fuses for a **Digispark Pro** board are:<br/>
+- ATtiny167 Lfuse: 0xFF - External crystal osc. Frequency 8-16 MHz + Startup 65 ms
+- ATtiny167 Hfuse: 0xDC - External Reset pin enabled + BOD 4.3Volt + Enable Serial Program and Data Downloading
+- ATtiny167 Efuse: 0xFE - self programming enabled.
+
 # Flash the bootloader to a bricked device
 This can only be done by means of a [High Voltage programmer](https://github.com/ArminJo/ATtiny-HighVoltageProgrammer_FuseEraser).
 
@@ -39,7 +55,7 @@ This can only be done by means of a [High Voltage programmer](https://github.com
 If not otherwise noted, the OSCCAL value is calibrated (+/- 1%) after boot for all ATtiny85 configurations
 | Configuration | Free FLASH | Boot-<br/>loader size | Non default config flags set |
 |---------------|-----------------|-----------------|------------------------------|
-| t85_aggressive<br/><br/>It works for my Digispark boards without any problems :-) | 6778 | 1360 | [Do not provide calibrated OSCCAL, if no USB attached](/firmware/configuration/t85_aggressive/bootloaderconfig.h#L220), [ENABLE_UNSAFE_OPTIMIZATIONS](#enable_unsafe_optimizations)<br/>Relying on calibrated 16MHz internal clock stability, not using the 16.5 MHz USB driver version with integrated PLL. This causes the main memory saving. |
+| t85_agressive<br/><br/>It works for my Digispark boards without any problems :-) | 6778 | 1360 | [Do not provide calibrated OSCCAL, if no USB attached](/firmware/configuration/t85_agressive/bootloaderconfig.h#L220), [ENABLE_UNSAFE_OPTIMIZATIONS](#enable_unsafe_optimizations)<br/>Relying on calibrated 16MHz internal clock stability, not using the 16.5 MHz USB driver version with integrated PLL. This causes the main memory saving. |
 |  |  |  |  |
 | t85_default | 6650 | 1512 | - |
 | t85_entry_on_powerOn | 6586 | 1548 | [ENTRY_POWER_ON](#entry_power_on-entry-condition), LED_MODE=ACTIVE_HIGH |
@@ -127,12 +143,12 @@ This configuration has the following features:
 
 ## Create your own configuration
 You can easily create your own configuration by adding a new *firmware/configuration* directory and adjusting *bootloaderconfig.h* and *Makefile.inc*. Before you run the *firmware/make_all.cmd* script, check the arduino directory path in the [`firmware/SetPath.cmd`](https://github.com/ArminJo/micronucleus-firmware/firmware/SetPath.cmd#L1) file.<br/>
-If changes to the configuration lead to an increase in bootloader size, it may be necessary to change the bootloader start address as described [above](#computing-the-values) or in the *Makefile.inc*.
-Feel free to supply a pull request if you added and tested a previously unsupported device.
+If changes to the configuration lead to an increase in bootloader size, i.e. you see errors like `address 0x2026 of main.bin section '.text' is not within region 'text'`, it may be necessary to change/decrease the bootloader start address as described [below](https://github.com/ArminJo/micronucleus-firmware#computing-the-bootloader-start-address) and in the *Makefile.inc*.<br/>
+Feel free to supply a pull request, if you added and tested a previously unsupported device.
 
-# Compile instructions for the bootloader are [here](firmware#compiling)
+# Compile instructions for the bootloader are [here](firmware#compiling-the-bootloader-firmware)
 
-## Computing the values
+## Computing the bootloader start address
 The actual memory footprint for each configuration can be found in the file [*firmware/build.log*](firmware/build.log).<br/>
 Bytes used by the mironucleus bootloader can be computed by taking the data size value in *build.log*, 
 rounding it up to the next multiple of the page size which is e.g. 64 bytes for ATtiny85 and 128 bytes for ATtiny176.<br/>
@@ -143,7 +159,8 @@ E.g. for *t85_default.hex* with the new compiler we get 1548 as data size. The n
 In this case we have 52 bytes left for configuration extensions before using another 64 byte page.<br/>
 For data size from 1470 up to 1536 the address is 1A00 (6650 free), for 1538 to 1600 it is 19C0 (6586 free), for 1602 to 1664 it is 1980 (6522 free).
 
-For *t167_default.hex* (as well as for the other t167 configurations) with the new compiler we get 1436 as data size. The next multiple of 128 is 1536 (12 * 128) => (16384 - (1536 + 6)) = 14842 bytes are free.
+For *t167_default.hex* (as well as for the other t167 configurations) with the new compiler we get 1436 as data size. The next multiple of 128 is 1536 (12 * 128) => (16384 - (1536 + 6)) = 14842 bytes are free.<br/>
+For data from 1281 to 1408 the address is 3A80, for size from 1409 to 1536 the address is 3A00
 
 # Bootloader memory comparison of different releases for [*t85_default.hex*](firmware/releases/t85_default.hex).
 - V1.6  6012 bytes free
@@ -210,14 +227,14 @@ With fast PLL Clock and standard fuses, the **start-up time from sleep is around
 If we use the longest sleep time of 8 seconds and an empty loop, this result in an **average current consumption of 23 µA** (1 year with a 200 mAh button cell 2032).<br/>
 The start-up time from sleep can be reduced (at own risk of unstable clock) to 5 ms using [this fuse settings](https://github.com/ArminJo/micronucleus-firmware/blob/master/utils/Write%2085%20Fuses%20C1%20DF%20FE%20-%20Digispark%20default%20without%20BOD%20and%20Pin5%20and%20fast%20startup.cmd).
 This results in an average current consumption of **9 µA** (2.5 years with a 200 mAh button cell 2032).<br/>
-This long startup time can be dramatically reduced to 6 clock cycles by [changing fuses to use the internal 8Mhz clock](https://github.com/ArminJo/micronucleus-firmware/blob/master/utils/Write%2085%20Fuses%20E2%20DF%20FF%20-%20ISP%20Mode%20%3D%208MHz%20without%20BOD%20and%20Pin5.cmd), but this **disables the possibility to program the Digispark board via USB** and enables availability of whole memory for your program.
+This startup time can even be reduced to 6 clock cycles by [changing fuses to use the internal 8Mhz clock](https://github.com/ArminJo/micronucleus-firmware/blob/master/utils/Write%2085%20Fuses%20E2%20DF%20FF%20-%20ISP%20Mode%20%3D%208MHz%20without%20BOD%20and%20Pin5.cmd), but this **disables the possibility to program the Digispark board via USB** and and on the other hand removes the need for a bootloader and therefore leaves the whole memory for your program.
 
 ## Modifying the board
 Here is an [Instructable](https://www.instructables.com/Reducing-Battery-Power-Consumption-for-Digispark-A/) covering the topic.
 ### Disabling the power LED
 Break the copper wire that connects the power LED to the diode with a knife or remove / disable the 102 resistor.
 ### Removing the VIN voltage regulator
-First lift the outer pins with the help of a solder iron and a pin. Then solder the big connector and remove the regulator. For small regulators, use much solder and heat up all 3 pins together, then remove it.
+First, lift the outer pins with the help of a solder iron and a pin. Then solder the big connector and remove the regulator. For small regulators, use much solder and heat up all 3 pins together, then remove it.
 ### Disconnecting the USB D- Pullup resistor (marked 152) from 5 volt (VCC)
 Break the copper wire on the side of the resistor that points to the ATtiny.<br/>
 **This disables the USB interface** and in turn the possibility to program the Digispark board via USB. To **enable it again**, but still save power, **connect the resistor (marked 152) directly to the USB V+** that is easily available at the outer side of the schottky diode.<br/>

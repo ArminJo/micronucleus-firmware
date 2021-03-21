@@ -75,6 +75,15 @@
 #define USB_INTR_PENDING        GIFR  // Register to read interrupt flag
 #define USB_INTR_PENDING_BIT    PCIF  // Bit position in register to read interrupt flag
 
+// Theoretical this should work, but I get "Starting to upload ... >> Flash write error: Input/output error has occured" when a application is still loaded
+//#define USB_INTR_CFG            MCUCR // requires 4 bit extra code size since sbi is not possible for MCUCR
+//#define USB_INTR_CFG_SET        (1 << ISC00)
+//#define USB_INTR_CFG_CLR        0
+//#define USB_INTR_ENABLE         GIMSK
+//#define USB_INTR_ENABLE_BIT     INT0
+//#define USB_INTR_PENDING        GIFR
+//#define USB_INTR_PENDING_BIT    INTF0
+
 /* ------------------------------------------------------------------------- */
 /*       Configuration relevant to the CPU the bootloader is running on      */
 /* ------------------------------------------------------------------------- */
@@ -169,6 +178,7 @@
   #define bootLoaderStartCondition() (MCUSR == _BV(EXTRF)) // Adds 18 bytes
 #elif ENTRYMODE==ENTRY_JUMPER
   // Enable pull up on jumper pin and delay to stabilize input
+  // delay can be omitted to save memory, if external capacitance at the jumper pin is low
   #define bootLoaderInit()   {JUMPER_DDR &= ~_BV(JUMPER_PIN); JUMPER_PORT |= _BV(JUMPER_PIN); _delay_ms(1);}
   #define bootLoaderExit()   {JUMPER_PORT &= ~_BV(JUMPER_PIN);}
   #define bootLoaderStartCondition() (!(JUMPER_INP & _BV(JUMPER_PIN)))
