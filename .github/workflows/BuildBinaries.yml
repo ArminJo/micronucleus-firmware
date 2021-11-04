@@ -8,8 +8,10 @@ name: BuildBinaries
 
 on:
   push:
-#    tags-ignore:
-#    - '*.*' # do not run it on release build
+    branches:
+    - master
+    tags-ignore:
+    - '*.*' # do not run it on release build
     paths:
     - '**/comandline/library/**'
     - '**/comandline/micronucleus.c'
@@ -245,23 +247,25 @@ jobs:
           exit 0
         fi
 
+        echo "git config pull.rebase false  # merge (the default strategy)"
+        git config pull.rebase false
         # required to rebase with the push results of the parallel jobs
         # Lets hope that we do not run into a race condition between pull and push
         #git pull --ff-only --verbose # -> Not possible to fast-forward, aborting
         echo "git pull --verbose # required to rebase with the push results of the parallel jobs"
-        git pull --verbose # -> Merge made by the 'recursive' strategy
+        git pull --verbose # -> Merge made by the 'recursive' strategy OR [up to date]      master     -> origin/master
 
         # not required for us
         #repo_uri="https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git"
         #git remote set-url "$remote_name" "$repo_uri" # includes access token
         #git push --force origin ${{github.ref}}
 
-        echo git push
+        echo "git push # try to push the merged version the first time"
         git push
         if [[ $? -ne 0 ]]; then
           # try 4 times with random delays
           for ((i = 0 ; i < 4 ; i++)); do
-            RETRY_DELAY=$[ ( $RANDOM % 10 )  + 10 ]
+            RETRY_DELAY=$[ ( $RANDOM % 20 ) + 15 ]
             echo "Race condition, retry in ${RETRY_DELAY} seconds"
             sleep ${RETRY_DELAY}s
             echo git pull --verbose
@@ -270,6 +274,9 @@ jobs:
               echo git push
               git push
             fi
-            if [[ $? -eq 0 ]]; then break; fi
+            if [[ $? -eq 0 ]]; then
+              echo git push was successful exit retry loop
+              break
+            fi
           done
         fi
