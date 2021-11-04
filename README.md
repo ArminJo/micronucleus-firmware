@@ -51,6 +51,10 @@ The default fuses for a **Digispark Pro** board are:<br/>
 # Flash the bootloader to a bricked device
 This can only be done by means of a [High Voltage programmer](https://github.com/ArminJo/ATtiny-HighVoltageProgrammer_FuseEraser).
 
+# If nothing works...
+Try another **Cable**, try another **USB-Port**, try another **Board**, try another **Bootloader-variant**, try another **Computer**, try another **OS**.<br/>
+In this order.
+
 # Configuration overview
 If not otherwise noted, the OSCCAL value is calibrated (+/- 1%) after boot for all ATtiny85 configurations
 | Configuration | Free FLASH | Boot-<br/>loader size | Non default config flags set |
