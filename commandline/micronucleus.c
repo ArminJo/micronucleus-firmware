@@ -205,6 +205,7 @@ int main(int argc, char **argv) {
             delay(50);
         }
     }
+
     printProgress(1.0);
 
     printf("> Device has firmware version %d.%d\n", my_device->version.major, my_device->version.minor);
@@ -493,8 +494,9 @@ static int parseRaw(char *filename, unsigned char *data_buffer, int *start_addre
     int byte = 0;
     while (1) {
         byte = getc(input);
-        if (byte == EOF)
+        if (byte == EOF) {
             break;
+        }
 
         *data_buffer = byte;
         data_buffer += 1;
