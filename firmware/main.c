@@ -126,7 +126,7 @@ PROGMEM const uint8_t configurationReply[8] = { // dummy comment for eclipse for
         SIGNATURE_1,
         SIGNATURE_2,
         FAST_EXIT_FEATURE_FLAG | ENTRYMODE, //
-                0x15 // 0x15 -> Application version 1.5
+                0x0 // 0x15 -> Application version 1.5
         };
 #endif
 

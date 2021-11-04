@@ -244,9 +244,9 @@ int main(int argc, char **argv) {
         }
         printf("> Bootloader exit condition: ");
         if (my_device->bootloader_feature_flags & FAST_EXIT_FEATURE_FLAG) {
-            printf("> The bootloader exits fast (< 1 second) if no USB detected.\n");
+            printf("The bootloader exits fast (< 1 second) if no USB detected.\n");
         } else {
-            printf("> The bootloader exits after 6 seconds (default) if no uploading detected.\n");
+            printf("The bootloader exits after 6 seconds (default) if no uploading detected.\n");
         }
         if (my_device->bootloader_feature_flags & SAVE_MCUSR_FEATURE_FLAG) {
             printf("> Bootloader saves MCUSR contents in GPIOR0 register.\n");
