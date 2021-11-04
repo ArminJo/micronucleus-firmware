@@ -79,13 +79,15 @@ micronucleus* micronucleus_connect(int fast_mode) {
         }
 
         if (nucleus->version.major>=2) {  // Version 2.x
-          // get 6 byte nucleus info
-          unsigned char buffer[6];
+          // get 6 or 8 byte nucleus info
+          unsigned char buffer[8];
           errno = 0;
-          int res = usb_control_msg(nucleus->device, USB_ENDPOINT_IN| USB_TYPE_VENDOR | USB_RECIP_DEVICE, 0, 0, 0, (char *)buffer, 6, MICRONUCLEUS_USB_TIMEOUT);
+          int res = usb_control_msg(nucleus->device, USB_ENDPOINT_IN| USB_TYPE_VENDOR | USB_RECIP_DEVICE, 0, 0, 0, (char *)buffer, 8, MICRONUCLEUS_USB_TIMEOUT);
 
-          // Device descriptor was found, but talking to it was not successful. This can happen when the device is being reset.
-          if (res<0) return NULL;
+          if (res<0){
+              // Device descriptor was found, but talking to it was not successful. This can happen when the device is being reset.
+              return NULL;
+          }
 
           // Only seen on windows.
           // This happens if the USB device is not listening, but did not disconnect from the USB bus,
@@ -96,6 +98,14 @@ micronucleus* micronucleus_connect(int fast_mode) {
           }
 
           assert(res >= 6);
+
+          if (res==8) {
+            nucleus->bootloader_feature_flags = buffer[6];
+            nucleus->application_version = buffer[7];
+            nucleus->v2AdditionsAvailable = 1;
+          } else {
+              nucleus->v2AdditionsAvailable = 0;
+          }
 
           nucleus->flash_size = (buffer[0]<<8) + buffer[1];
           nucleus->page_size = buffer[2];

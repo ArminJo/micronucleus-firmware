@@ -8,13 +8,13 @@ name: BuildBinaries
 
 on:
   push:
-    tags-ignore:
-    - '*'
+#    tags-ignore:
+#    - '*.*' # do not run it on release build
     paths:
     - '**/comandline/library/**'
     - '**/comandline/micronucleus.c'
     - '**/comandline/builds/**/package.json'
-#    - '**BuildBinaries.yml'
+    - '**BuildBinaries.yml'
 
 jobs:
   build-all-executables:
@@ -211,7 +211,7 @@ jobs:
           mv ../$TARBALL_NAME builds/$TARGET_DIR
         fi
 
-        # move and process PIO tarball
+        # move and process PlatformIO tarball
         if [[ ! -e builds/$TARGET_DIR/$TARBALL_NAME_PIO ]]; then
           echo mv ../micronucleus/$TARBALL_NAME_PIO builds/$TARGET_DIR
           mv ../micronucleus/$TARBALL_NAME_PIO builds/$TARGET_DIR
@@ -247,9 +247,9 @@ jobs:
 
         # required to rebase with the push results of the parallel jobs
         # Lets hope that we do not run into a race condition between pull and push
-        #echo git pull --ff-only --verbose
-        #git pull --ff-only --verbose
-        echo git pull --verbose
+        echo git pull --ff-only --verbose # required, otherwise we get the error "You have divergent branches and need to specify how to reconcile them."
+        git pull --ff-only --verbose
+        "echo git pull --verbose \# required \\# to rebase with the push results of the parallel jobs"
         git pull --verbose
 
         # not required for us
