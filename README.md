@@ -77,6 +77,7 @@ If not otherwise noted, the OSCCAL value is calibrated (+/- 1%) after boot for a
 | **t167_entry_on_powerOn_<br/>activePullup_fastExit**<br/>[recommended configuration](#recommended-configuration) | 14970 | 1406 | [ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_POWER_ON](#entry_d_minus_pullup_activated_and_entry_power_on-entry-condition), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), LED_MODE=ACTIVE_HIGH<br/>For 16 MHz quartz |
 | t167_entry_on_reset_<br/>activePullup_fastExit | 14970 | 1406 | [ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_EXT_RESET](#entry_d_minus_pullup_activated_and_entry_ext_reset-entry-condition), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), <br/>AUTO_EXIT_MS=15000 Bootloader timeout increased to 15 seconds (if connected to USB),<br/>LED_MODE=ACTIVE_HIGH.<br/>For 16 MHz quartz |
 |  |  |  |  |
+| t4313_default | 6714 | 1460 |  |
 | Nanite841 | 6586 | 1548 |  |
 | t84_default | 6650 | 1480 |  |
 |  |  |  |  |

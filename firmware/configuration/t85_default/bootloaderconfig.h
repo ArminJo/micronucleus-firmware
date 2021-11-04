@@ -109,7 +109,7 @@
  *
  *  ENTRY_POWER_ON      Activate the bootloader after power on. This is what you need
  *                      for normal development with Digispark boards.
- *                      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ *                      !!! If SAVE_MCUSR (below) is NOT defined !!!
  *                      Since the reset flags are no longer cleared by micronucleus
  *                      you must clear them with "MCUSR = 0;" in your setup() routine
  *                      after saving or evaluating them to make this mode work.
@@ -195,7 +195,7 @@
   #define bootLoaderExit()
   #define bootLoaderStartCondition() ((USBIN & USBIDLE) && (MCUSR == _BV(EXTRF))) // Adds 22 bytes
 #else
-   #error "No entry mode defined"
+   #error "No valid entry mode defined"
 #endif
 
 /*

@@ -3,12 +3,12 @@
  * This file (together with some settings in Makefile.inc) configures the boot loader
  * according to the hardware.
  *
- * Controller type: ATtiny 84 - 12 MHz
+ * Controller type: ATtiny 4313 - 20 MHz
  * Configuration:   Default configuration
- *       USB D- :   PB0
- *       USB D+ :   PB1
+ *       USB D- :   PD0
+ *       USB D+ :   PD1
  *       Entry  :   Always
- *       LED    :   PB2, Active Low
+ *       LED    :   PB7, Active Low
  *       OSCCAL :   Revert to precalibrated value (8 MHz)
  * Note: can use 12 MHz V-USB without PLL due to stable RC-osc in ATTiny84A
  *
@@ -23,7 +23,7 @@
 /*      Change this according to your CPU and USB configuration              */
 /* ------------------------------------------------------------------------- */
 
-#define USB_CFG_IOPORTNAME      B
+#define USB_CFG_IOPORTNAME      D
   /* This is the port where the USB bus is connected. When you configure it to
    * "B", the registers PORTB, PINB and DDRB will be used.
    */
@@ -68,27 +68,22 @@
 
 
 // setup interrupt for Pin Change for D+
-#define USB_INTR_CFG            PCMSK1
+#define USB_INTR_CFG            PCMSK2
 #define USB_INTR_CFG_SET        (1 << USB_CFG_DPLUS_BIT)
 #define USB_INTR_CFG_CLR        0
 #define USB_INTR_ENABLE         GIMSK
-#define USB_INTR_ENABLE_BIT     PCIE1
+#define USB_INTR_ENABLE_BIT     PCIE2
 #define USB_INTR_PENDING        GIFR
-#define USB_INTR_PENDING_BIT    PCIF1
+#define USB_INTR_PENDING_BIT    PCIF2
 
 /* ------------------------------------------------------------------------- */
 /*       Configuration relevant to the CPU the bootloader is running on      */
 /* ------------------------------------------------------------------------- */
 
 // how many milliseconds should host wait till it sends another erase or write?
-// needs to be above 4.5 (and a whole integer) as avr freezes for 4.5ms
-
+// needs to be above 4.5 (and a whole integer) as avr freezes maximum for 4.5ms
+// while writing a FLASH page (even for 128 byte page size:-))
 #define MICRONUCLEUS_WRITE_SLEEP 5
-
-// ATtiny84 does not know WDTCR
-#ifndef WDTCR
-#define WDTCR WDTCSR
-#endif
 
 /* ---------------------- feature / code size options ---------------------- */
 /*               Configure the behavior of the bootloader here               */
@@ -103,6 +98,16 @@
  *
  *  ENTRY_ALWAYS        Always activate the bootloader after reset. Requires the least
  *                      amount of code.
+ *
+ *  ENTRY_POWER_ON      Activate the bootloader after power on. This is what you need
+ *                      for normal development with Digispark boards.
+ *                      !!! If SAVE_MCUSR (below) is NOT defined !!!
+ *                      Since the reset flags are no longer cleared by micronucleus
+ *                      you must clear them with "MCUSR = 0;" in your setup() routine
+ *                      after saving or evaluating them to make this mode work.
+ *                      If you do not reset the flags, the bootloader will be entered even
+ *                      after reset, since the "power on reset flag" PORF in MCUSR is still set.
+ *                      Adds 18 bytes.
  *
  *  ENTRY_WATCHDOG      Activate the bootloader after a watchdog reset. This can be used
  *                      to enter the bootloader from the user program.
@@ -130,7 +135,7 @@
  *
  */
 
-#define JUMPER_PIN    PB0
+#define JUMPER_PIN    PB6
 #define JUMPER_PORT   PORTB
 #define JUMPER_DDR    DDRB
 #define JUMPER_INP    PINB
@@ -141,10 +146,11 @@
 #define ENTRY_EXT_RESET 2
 #define ENTRY_JUMPER    3
 #define ENTRY_POWER_ON  4
+// some useful combinations with ENTRY_D_MINUS_PULLUP_ACTIVATED
 #define ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_POWER_ON  5
 #define ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_EXT_RESET 6
 
-#define ENTRYMODE ENTRY_ALWAYS
+#define ENTRYMODE ENTRY_JUMPER
 
 #if ENTRYMODE==ENTRY_ALWAYS
   #define bootLoaderInit()
@@ -189,29 +195,32 @@
  *
  *  The bootloader will only time out if a user program was loaded.
  *
- *  FAST_EXIT_NO_USB_MS        The bootloader will exit after this delay if no USB is connected.
+ *  FAST_EXIT_NO_USB_MS        The bootloader will exit after this delay if no USB is connected after the initial 300 ms disconnect and connect.
  *                             Set to < 120 to disable.
- *                             Adds ~6 bytes.
- *                             (This will wait for an USB SE0 reset from the host)
+ *                             Adds 8 bytes.
+ *                             (This will wait for FAST_EXIT_NO_USB_MS milliseconds for an USB SE0 reset from the host, otherwise exit)
  *
- *  AUTO_EXIT_MS               The bootloader will exit after this delay if no USB communication
- *                             from the host tool was received.
+ *  AUTO_EXIT_MS               The bootloader will exit after this delay if no USB communication from the host tool was received.
  *                             Set to 0 to disable -> never leave the bootloader except on receiving an exit command by USB.
  *
  *  All values are approx. in milliseconds
  */
 
-#define FAST_EXIT_NO_USB_MS    0
+// I observed 2 resets. First is 100 ms after initial connecting to USB lasting 65 ms and the second 90 ms later and also 65 ms.
+// On my old HP laptop I have different timing: First reset is 220 ms after initial connecting to USB lasting 300 ms and the second is missing.
+#define FAST_EXIT_NO_USB_MS       0 // Values below 120 are ignored. Effective timeout is 300 + FAST_EXIT_NO_USB_MS.
 #define AUTO_EXIT_MS           6000
+
+/* ----------------------- Optional Timeout Config ------------------------ */
 
  /*
  *  Defines the setting of the RC-oscillator calibration after quitting the bootloader. (OSCCAL)
  *
- *  OSCCAL_RESTORE_DEFAULT    Set this to '1' to revert to OSCCAL factore calibration after bootloader exit.
- *                            This is 8 MHz +/-2% on most devices or 16 MHz on the ATtiny 85 with activated PLL.
+ *  OSCCAL_RESTORE_DEFAULT    Set this to '1' to revert to OSCCAL factory calibration after bootloader exit.
+ *                            This is 8 MHz +/-2% on most devices for 16 MHz on the ATtiny 85 with activated PLL.
  *                            Adds ~14 bytes.
  *
- *  OSCCAL_SAVE_CALIB         Set this to '1' to save the OSCCAL calibration during program upload.
+ *  OSCCAL_SAVE_CALIB         Set this to '1' to save the OSCCAL calibration during program upload in FLASH.
  *                            This value will be reloaded after reset and will also be used for the user
  *                            program unless "OSCCAL_RESTORE_DEFAULT" is active. This allows calibrate the internal
  *                            RC oscillator to the F_CPU target frequency +/-1% from the USB timing. Please note
@@ -233,9 +242,9 @@
  *  comes with its own OSCCAL calibration or an external clock source is used.
  */
 
-#define OSCCAL_RESTORE_DEFAULT 1
+#define OSCCAL_RESTORE_DEFAULT 0
 #define OSCCAL_SAVE_CALIB 0
-#define OSCCAL_HAVE_XTAL 0
+#define OSCCAL_HAVE_XTAL 1
 
 /*
  *  Defines handling of an indicator LED while the bootloader is active.
@@ -250,11 +259,15 @@
  *
  */
 
-#define LED_MODE    ACTIVE_LOW
+#define NONE        0
+#define ACTIVE_HIGH 1
+#define ACTIVE_LOW  2
+
+#define LED_MODE    NONE
 
 #define LED_DDR     DDRB
 #define LED_PORT    PORTB
-#define LED_PIN     PB2
+#define LED_PIN     PB7
 
 /*
  *  This is the implementation of the LED code. Change the configuration above unless you want to
@@ -266,12 +279,8 @@
  *                            Use to define pattern.
 */
 
-#define NONE        0
-#define ACTIVE_HIGH 1
-#define ACTIVE_LOW  2
-
 #if LED_MODE==ACTIVE_HIGH
-  #define LED_INIT(x)   LED_DDR = _BV(LED_PIN);
+  #define LED_INIT(x)   LED_DDR |= _BV(LED_PIN);
   #define LED_EXIT(x)   {LED_DDR &= ~_BV(LED_PIN);LED_PORT &= ~_BV(LED_PIN);}
   #define LED_MACRO(x)  if ( x & 0x4c ) {LED_PORT &= ~_BV(LED_PIN);} else {LED_PORT |= _BV(LED_PIN);}
 #elif LED_MODE==ACTIVE_LOW
