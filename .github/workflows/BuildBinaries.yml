@@ -247,10 +247,9 @@ jobs:
 
         # required to rebase with the push results of the parallel jobs
         # Lets hope that we do not run into a race condition between pull and push
-        echo git pull --ff-only --verbose # required, otherwise we get the error "You have divergent branches and need to specify how to reconcile them."
-        git pull --ff-only --verbose
-        "echo git pull --verbose \# required \\# to rebase with the push results of the parallel jobs"
-        git pull --verbose
+        #git pull --ff-only --verbose # -> Not possible to fast-forward, aborting
+        echo "git pull --verbose # required to rebase with the push results of the parallel jobs"
+        git pull --verbose # -> Merge made by the 'recursive' strategy
 
         # not required for us
         #repo_uri="https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git"
@@ -265,10 +264,12 @@ jobs:
             RETRY_DELAY=$[ ( $RANDOM % 10 )  + 10 ]
             echo "Race condition, retry in ${RETRY_DELAY} seconds"
             sleep ${RETRY_DELAY}s
-            echo git pull
-            git pull
-            echo git push
-            git push
+            echo git pull --verbose
+            git pull --verbose
+            if [[ $? -eq 0 ]]; then
+              echo git push
+              git push
+            fi
             if [[ $? -eq 0 ]]; then break; fi
           done
         fi
