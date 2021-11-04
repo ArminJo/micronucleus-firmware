@@ -11,7 +11,7 @@ on:
     branches:
     - master
     tags-ignore:
-    - '*.*' # do not run it on release build
+    - '*.*' # do not run it on release build - must be combined with branches specification, otherwise no build is triggered
     paths:
     - '**/comandline/library/**'
     - '**/comandline/micronucleus.c'

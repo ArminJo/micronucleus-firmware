@@ -76,10 +76,10 @@ int main(int argc, char **argv) {
     int file_type = FILE_TYPE_INTEL_HEX;
     int arg_pointer = 1;
 #if defined(WIN)
-  char* usage = "usage: micronucleus [--help] [--run] [--dump-progress] [--fast-mode] [--type intel-hex|raw] [--timeout integer] (--erase-only | filename)";
+  char* usage = "usage: micronucleus [--help] [--run] [--dump-progress] [--fast-mode] [--type intel-hex|raw] [--timeout integer] (--erase-only | --info | filename)";
   #else
     char *usage =
-            "usage: micronucleus [--help] [--run] [--dump-progress] [--fast-mode] [--type intel-hex|raw] [--timeout integer] [--no-ansi] (--erase-only | filename)";
+            "usage: micronucleus [--help] [--run] [--dump-progress] [--fast-mode] [--type intel-hex|raw] [--timeout integer] [--no-ansi] (--erase-only | --info | filename)";
 #endif
     progress_step = 0;
     progress_total_steps = 5; // steps: waiting, connecting, parsing, erasing, writing, (running)?
@@ -157,10 +157,10 @@ int main(int argc, char **argv) {
         arg_pointer += 1;
     }
 
-    if (file == NULL && erase_only == 0) {
+    if (file == NULL && erase_only == 0 && info_only == 0) {
         // print version if we are called without any parameter
         printf(MICRONUCLEUS_COMMANDLINE_VERSION);
-        printf("\nNeither filename nor --erase-only given!\n\n");
+        printf("\nNeither filename nor --erase-only nor --info given!\n\n");
         puts(usage);
         return EXIT_FAILURE;
     }
@@ -211,51 +211,50 @@ int main(int argc, char **argv) {
     if (my_device->signature1) {
         printf("> Device signature: 0x1e%02x%02x \n", (int) my_device->signature1, (int) my_device->signature2);
     }
-    if (my_device->v2AdditionsAvailable) {
+    // Additions since version 2.6 of bootloader
+    if (my_device->version.major >= 2 && my_device->version.minor >= 6) {
         printf("> Bootloader entry condition: ");
         switch (my_device->bootloader_feature_flags & 0x07) {
         case (ENTRY_ALWAYS):
-            printf("Always activate the bootloader after reset.\n");
+            printf("The bootloader is always activated after reset.\n");
             break;
         case (ENTRY_WATCHDOG):
-            printf("Activate the bootloader after a watchdog reset.\n");
+            printf("The bootloader is activated after a watchdog reset.\n");
             break;
         case (ENTRY_EXT_RESET):
-            printf("Activate the bootloader after an external reset.\n");
+            printf("The bootloader is activated after an external reset.\n");
             break;
         case (ENTRY_JUMPER):
-            printf("Activate the bootloader when a specific pin is pulled low.\n");
+            printf("The bootloader is activated when a specific pin is pulled low.\n");
             break;
         case (ENTRY_POWER_ON):
-            printf("Activate the bootloader after power on.\n");
+            printf("The bootloader is activated after power on.\n");
             break;
         case (ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_POWER_ON):
-            printf("Activate the bootloader if the D- pin is high, i.e. a pullup resistor is attached\n");
-            printf("    and powered and a power on condition was detected.\n");
+            printf(
+                    "The bootloader is activated if the D- pin is high, i.e. a pullup resistor is attached and powered and a power on condition was detected.\n");
             break;
         case (ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_EXT_RESET):
-            printf("Activate the bootloader if the D- pin is high, i.e. a pullup resistor is attached\n");
-            printf("    and an external reset was detected.\n");
+            printf(
+                    "The bootloader is activated if the D- pin is high, i.e. a pullup resistor is attached and an external reset was detected.\n");
             break;
         default:
             printf("Unknown entry condition 0x%1x\n", my_device->bootloader_feature_flags & 0x07);
             break;
-
         }
-        if ((my_device->bootloader_feature_flags & FAST_EXIT_FEATURE_FLAG)
-                && (my_device->bootloader_feature_flags & SAVE_MCUSR_FEATURE_FLAG)) {
-            printf("> Bootloader saves MCUSR contents in GPIOR0 register and exits fast if no USB detected.\n");
+        printf("> Bootloader exit condition: ");
+        if (my_device->bootloader_feature_flags & FAST_EXIT_FEATURE_FLAG) {
+            printf("> The bootloader exits fast (< 1 second) if no USB detected.\n");
         } else {
-            if (my_device->bootloader_feature_flags & FAST_EXIT_FEATURE_FLAG) {
-                printf("> Bootloader exits fast if no USB detected.\n");
-            }
-            if (my_device->bootloader_feature_flags & SAVE_MCUSR_FEATURE_FLAG) {
-                printf("> Bootloader saves MCUSR contents in GPIOR0 register.\n");
-            }
+            printf("> The bootloader exits after 6 seconds (default) if no uploading detected.\n");
         }
+        if (my_device->bootloader_feature_flags & SAVE_MCUSR_FEATURE_FLAG) {
+            printf("> Bootloader saves MCUSR contents in GPIOR0 register.\n");
+        }
+
         if (my_device->application_version != 0) {
-            printf("> Application provided version: 0x%02x%02x \n", (unsigned int) (my_device->application_version) >> 4,
-                    (unsigned int) my_device->application_version & 0xF0);
+            printf("> Device has application version: %d.%d \n", (unsigned int) (my_device->application_version) >> 4,
+                    (unsigned int) my_device->application_version & 0x0F);
         }
     }
     printf("> Available space for user applications: %d bytes\n", my_device->flash_size);

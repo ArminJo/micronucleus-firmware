@@ -89,7 +89,6 @@ typedef struct _micronucleus {
   unsigned char signature2; // only used in protocol v2
   unsigned char bootloader_feature_flags; // additions to protocol v2
   unsigned char application_version; // additions to protocol v2
-  unsigned char v2AdditionsAvailable;
 } micronucleus;
 
 typedef void (*micronucleus_callback)(float progress);

@@ -27,7 +27,7 @@
  */
 
 #define MICRONUCLEUS_VERSION_MAJOR 2
-#define MICRONUCLEUS_VERSION_MINOR 5
+#define MICRONUCLEUS_VERSION_MINOR 6
 
 #define RECONNECT_DELAY_MILLIS 300 // Time between disconnect and connect. Even 250 is to fast!
 #define __DELAY_BACKWARD_COMPATIBLE__ // Saves 2 bytes at _delay_ms(). Must be declared before the include util/delay.h
@@ -93,15 +93,42 @@
 //    Bit 7 '1': Page erase time equals page write time divided by 4
 //   Byte 4:  SIGNATURE_1
 //   Byte 5:  SIGNATURE_2
+//   Byte 6:  Bootloader feature flags
+//   Byte 7:  Application major version<< 4 | Application minor version, 0 = no entry
+#if FAST_EXIT_NO_USB_MS > 120
+#define FAST_EXIT_FEATURE_FLAG 0x10
+#else
+#define FAST_EXIT_FEATURE_FLAG 0x00
+#endif
+#if defined(SAVE_MCUSR)
+#define SAVE_MCUSR_FEATURE_FLAG 0x20
+#else
+#define SAVE_MCUSR_FEATURE_FLAG 0x00
+#endif
 
-PROGMEM const uint8_t configurationReply[6] = { // dummy comment for eclipse formatter
+#if defined(STORE_CONFIGURATION_REPLY_IN_RAM)
+const uint8_t configurationReply[8] = { // dummy comment for eclipse formatter
+    (((uint16_t) PROGMEM_SIZE) >> 8) & 0xff,//
+    ((uint16_t) PROGMEM_SIZE) & 0xff,
+    SPM_PAGESIZE,
+    MICRONUCLEUS_WRITE_SLEEP,
+    SIGNATURE_1,
+    SIGNATURE_2,
+    FAST_EXIT_FEATURE_FLAG | ENTRYMODE, //
+    0x0// 0x15 -> Application version 1.5
+};
+#else
+PROGMEM const uint8_t configurationReply[8] = { // dummy comment for eclipse formatter
         (((uint16_t) PROGMEM_SIZE) >> 8) & 0xff, //
         ((uint16_t) PROGMEM_SIZE) & 0xff,
         SPM_PAGESIZE,
         MICRONUCLEUS_WRITE_SLEEP,
         SIGNATURE_1,
-        SIGNATURE_2 //
+        SIGNATURE_2,
+        FAST_EXIT_FEATURE_FLAG | ENTRYMODE, //
+                0x15 // 0x15 -> Application version 1.5
         };
+#endif
 
 typedef union {
     uint16_t w;
@@ -250,6 +277,9 @@ static uint8_t usbFunctionSetup(uint8_t data[8]) {
     idlePolls.b[1] = 0; // reset high byte of idle counter when we get usb class or vendor requests to start a new timeout
     if (rq->bRequest == cmd_device_info) { // get device info
         usbMsgPtr = (usbMsgPtr_t) configurationReply;
+#if defined(STORE_CONFIGURATION_REPLY_IN_RAM)
+        usbMsgPtrIsRAMAddress = 0;
+#endif
         return sizeof(configurationReply);
     } else if (rq->bRequest == cmd_transfer_page) {
         // Set page address. Address zero always has to be written first to ensure reset vector patching.

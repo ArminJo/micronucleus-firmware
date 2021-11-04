@@ -1,80 +1,80 @@
 Building Micronucleus configuration: m168p_extclock 
-8K  Device -- Codesize: 1496 bytes, BOOTLOADER_ADDRESS: 0x1A00, Free user memory 6650 bytes.
-16K Device -- Codesize: 1496 bytes, BOOTLOADER_ADDRESS: 0x3A00, Free user memory 14842 bytes.
+8K  Device -- Codesize: 1498 bytes, BOOTLOADER_ADDRESS: 0x1A00, Free user memory 6650 bytes.
+16K Device -- Codesize: 1498 bytes, BOOTLOADER_ADDRESS: 0x3A00, Free user memory 14842 bytes.
 - 
 Building Micronucleus configuration: m328p_extclock 
-8K  Device -- Codesize: 1496 bytes, BOOTLOADER_ADDRESS: 0x1A00, Free user memory 6650 bytes.
-16K Device -- Codesize: 1496 bytes, BOOTLOADER_ADDRESS: 0x3A00, Free user memory 14842 bytes.
+8K  Device -- Codesize: 1498 bytes, BOOTLOADER_ADDRESS: 0x1A00, Free user memory 6650 bytes.
+16K Device -- Codesize: 1498 bytes, BOOTLOADER_ADDRESS: 0x3A00, Free user memory 14842 bytes.
 - 
 Building Micronucleus configuration: Nanite841 
-8K  Device -- Codesize: 1546 bytes, BOOTLOADER_ADDRESS: 0x19C0, Free user memory 6586 bytes.
-16K Device -- Codesize: 1546 bytes, BOOTLOADER_ADDRESS: 0x3980, Free user memory 14714 bytes.
-- 
-Building Micronucleus configuration: t167_default 
-8K  Device -- Codesize: 1340 bytes, BOOTLOADER_ADDRESS: 0x1AC0, Free user memory 6842 bytes.
-16K Device -- Codesize: 1340 bytes, BOOTLOADER_ADDRESS: 0x3A80, Free user memory 14970 bytes.
-- 
-Building Micronucleus configuration: t167_entry_on_powerOn_activePullup_fastExit 
-8K  Device -- Codesize: 1404 bytes, BOOTLOADER_ADDRESS: 0x1A80, Free user memory 6778 bytes.
-16K Device -- Codesize: 1404 bytes, BOOTLOADER_ADDRESS: 0x3A80, Free user memory 14970 bytes.
-- 
-Building Micronucleus configuration: t167_entry_on_reset_activePullup_fastExit 
-8K  Device -- Codesize: 1404 bytes, BOOTLOADER_ADDRESS: 0x1A80, Free user memory 6778 bytes.
-16K Device -- Codesize: 1404 bytes, BOOTLOADER_ADDRESS: 0x3A80, Free user memory 14970 bytes.
-- 
-Building Micronucleus configuration: t45_default 
-8K  Device -- Codesize: 1512 bytes, BOOTLOADER_ADDRESS: 0x1A00, Free user memory 6650 bytes.
-16K Device -- Codesize: 1512 bytes, BOOTLOADER_ADDRESS: 0x3A00, Free user memory 14842 bytes.
-- 
-Building Micronucleus configuration: t841_default 
-8K  Device -- Codesize: 1512 bytes, BOOTLOADER_ADDRESS: 0x1A00, Free user memory 6650 bytes.
-16K Device -- Codesize: 1512 bytes, BOOTLOADER_ADDRESS: 0x3A00, Free user memory 14842 bytes.
-- 
-Building Micronucleus configuration: t84_default 
-8K  Device -- Codesize: 1478 bytes, BOOTLOADER_ADDRESS: 0x1A00, Free user memory 6650 bytes.
-16K Device -- Codesize: 1478 bytes, BOOTLOADER_ADDRESS: 0x3A00, Free user memory 14842 bytes.
-- 
-Building Micronucleus configuration: t85_aggressive 
-8K  Device -- Codesize: 1360 bytes, BOOTLOADER_ADDRESS: 0x1A80, Free user memory 6778 bytes.
-16K Device -- Codesize: 1360 bytes, BOOTLOADER_ADDRESS: 0x3A80, Free user memory 14970 bytes.
-- 
-Building Micronucleus configuration: t85_default 
-8K  Device -- Codesize: 1512 bytes, BOOTLOADER_ADDRESS: 0x1A00, Free user memory 6650 bytes.
-16K Device -- Codesize: 1512 bytes, BOOTLOADER_ADDRESS: 0x3A00, Free user memory 14842 bytes.
-- 
-Building Micronucleus configuration: t85_entry_on_powerOn 
 8K  Device -- Codesize: 1548 bytes, BOOTLOADER_ADDRESS: 0x19C0, Free user memory 6586 bytes.
 16K Device -- Codesize: 1548 bytes, BOOTLOADER_ADDRESS: 0x3980, Free user memory 14714 bytes.
 - 
+Building Micronucleus configuration: t167_default 
+8K  Device -- Codesize: 1342 bytes, BOOTLOADER_ADDRESS: 0x1AC0, Free user memory 6842 bytes.
+16K Device -- Codesize: 1342 bytes, BOOTLOADER_ADDRESS: 0x3A80, Free user memory 14970 bytes.
+- 
+Building Micronucleus configuration: t167_entry_on_powerOn_activePullup_fastExit 
+8K  Device -- Codesize: 1406 bytes, BOOTLOADER_ADDRESS: 0x1A80, Free user memory 6778 bytes.
+16K Device -- Codesize: 1406 bytes, BOOTLOADER_ADDRESS: 0x3A80, Free user memory 14970 bytes.
+- 
+Building Micronucleus configuration: t167_entry_on_reset_activePullup_fastExit 
+8K  Device -- Codesize: 1406 bytes, BOOTLOADER_ADDRESS: 0x1A80, Free user memory 6778 bytes.
+16K Device -- Codesize: 1406 bytes, BOOTLOADER_ADDRESS: 0x3A80, Free user memory 14970 bytes.
+- 
+Building Micronucleus configuration: t45_default 
+8K  Device -- Codesize: 1514 bytes, BOOTLOADER_ADDRESS: 0x1A00, Free user memory 6650 bytes.
+16K Device -- Codesize: 1514 bytes, BOOTLOADER_ADDRESS: 0x3A00, Free user memory 14842 bytes.
+- 
+Building Micronucleus configuration: t841_default 
+8K  Device -- Codesize: 1514 bytes, BOOTLOADER_ADDRESS: 0x1A00, Free user memory 6650 bytes.
+16K Device -- Codesize: 1514 bytes, BOOTLOADER_ADDRESS: 0x3A00, Free user memory 14842 bytes.
+- 
+Building Micronucleus configuration: t84_default 
+8K  Device -- Codesize: 1480 bytes, BOOTLOADER_ADDRESS: 0x1A00, Free user memory 6650 bytes.
+16K Device -- Codesize: 1480 bytes, BOOTLOADER_ADDRESS: 0x3A00, Free user memory 14842 bytes.
+- 
+Building Micronucleus configuration: t85_agressive 
+8K  Device -- Codesize: 1362 bytes, BOOTLOADER_ADDRESS: 0x1A80, Free user memory 6778 bytes.
+16K Device -- Codesize: 1362 bytes, BOOTLOADER_ADDRESS: 0x3A80, Free user memory 14970 bytes.
+- 
+Building Micronucleus configuration: t85_default 
+8K  Device -- Codesize: 1514 bytes, BOOTLOADER_ADDRESS: 0x1A00, Free user memory 6650 bytes.
+16K Device -- Codesize: 1514 bytes, BOOTLOADER_ADDRESS: 0x3A00, Free user memory 14842 bytes.
+- 
+Building Micronucleus configuration: t85_entry_on_powerOn 
+8K  Device -- Codesize: 1550 bytes, BOOTLOADER_ADDRESS: 0x19C0, Free user memory 6586 bytes.
+16K Device -- Codesize: 1550 bytes, BOOTLOADER_ADDRESS: 0x3980, Free user memory 14714 bytes.
+- 
 Building Micronucleus configuration: t85_entry_on_powerOn_activePullup_fastExit 
-8K  Device -- Codesize: 1574 bytes, BOOTLOADER_ADDRESS: 0x19C0, Free user memory 6586 bytes.
-16K Device -- Codesize: 1574 bytes, BOOTLOADER_ADDRESS: 0x3980, Free user memory 14714 bytes.
+8K  Device -- Codesize: 1576 bytes, BOOTLOADER_ADDRESS: 0x19C0, Free user memory 6586 bytes.
+16K Device -- Codesize: 1576 bytes, BOOTLOADER_ADDRESS: 0x3980, Free user memory 14714 bytes.
 - 
 Building Micronucleus configuration: t85_entry_on_powerOn_activePullup_fastExit_noLED 
-8K  Device -- Codesize: 1556 bytes, BOOTLOADER_ADDRESS: 0x19C0, Free user memory 6586 bytes.
-16K Device -- Codesize: 1556 bytes, BOOTLOADER_ADDRESS: 0x3980, Free user memory 14714 bytes.
+8K  Device -- Codesize: 1558 bytes, BOOTLOADER_ADDRESS: 0x19C0, Free user memory 6586 bytes.
+16K Device -- Codesize: 1558 bytes, BOOTLOADER_ADDRESS: 0x3980, Free user memory 14714 bytes.
 - 
 Building Micronucleus configuration: t85_entry_on_powerOn_fastExit 
-8K  Device -- Codesize: 1570 bytes, BOOTLOADER_ADDRESS: 0x19C0, Free user memory 6586 bytes.
-16K Device -- Codesize: 1570 bytes, BOOTLOADER_ADDRESS: 0x3980, Free user memory 14714 bytes.
+8K  Device -- Codesize: 1572 bytes, BOOTLOADER_ADDRESS: 0x19C0, Free user memory 6586 bytes.
+16K Device -- Codesize: 1572 bytes, BOOTLOADER_ADDRESS: 0x3980, Free user memory 14714 bytes.
 - 
 Building Micronucleus configuration: t85_entry_on_powerOn_pullupAt0 
-8K  Device -- Codesize: 1536 bytes, BOOTLOADER_ADDRESS: 0x1A00, Free user memory 6650 bytes.
-16K Device -- Codesize: 1536 bytes, BOOTLOADER_ADDRESS: 0x3A00, Free user memory 14842 bytes.
+8K  Device -- Codesize: 1538 bytes, BOOTLOADER_ADDRESS: 0x19C0, Free user memory 6586 bytes.
+16K Device -- Codesize: 1538 bytes, BOOTLOADER_ADDRESS: 0x3980, Free user memory 14714 bytes.
 - 
 Building Micronucleus configuration: t85_entry_on_reset_activePullup_fastExit 
-8K  Device -- Codesize: 1574 bytes, BOOTLOADER_ADDRESS: 0x19C0, Free user memory 6586 bytes.
-16K Device -- Codesize: 1574 bytes, BOOTLOADER_ADDRESS: 0x3980, Free user memory 14714 bytes.
+8K  Device -- Codesize: 1576 bytes, BOOTLOADER_ADDRESS: 0x19C0, Free user memory 6586 bytes.
+16K Device -- Codesize: 1576 bytes, BOOTLOADER_ADDRESS: 0x3980, Free user memory 14714 bytes.
 - 
 Building Micronucleus configuration: t85_fastExit 
-8K  Device -- Codesize: 1552 bytes, BOOTLOADER_ADDRESS: 0x19C0, Free user memory 6586 bytes.
-16K Device -- Codesize: 1552 bytes, BOOTLOADER_ADDRESS: 0x3980, Free user memory 14714 bytes.
+8K  Device -- Codesize: 1554 bytes, BOOTLOADER_ADDRESS: 0x19C0, Free user memory 6586 bytes.
+16K Device -- Codesize: 1554 bytes, BOOTLOADER_ADDRESS: 0x3980, Free user memory 14714 bytes.
 - 
 Building Micronucleus configuration: t88_default 
-8K  Device -- Codesize: 1348 bytes, BOOTLOADER_ADDRESS: 0x1A80, Free user memory 6778 bytes.
-16K Device -- Codesize: 1348 bytes, BOOTLOADER_ADDRESS: 0x3A80, Free user memory 14970 bytes.
+8K  Device -- Codesize: 1350 bytes, BOOTLOADER_ADDRESS: 0x1A80, Free user memory 6778 bytes.
+16K Device -- Codesize: 1350 bytes, BOOTLOADER_ADDRESS: 0x3A80, Free user memory 14970 bytes.
 - 
 Building Micronucleus configuration: t88_entry_on_powerOn_activePullup_fastExit 
-8K  Device -- Codesize: 1392 bytes, BOOTLOADER_ADDRESS: 0x1A80, Free user memory 6778 bytes.
-16K Device -- Codesize: 1392 bytes, BOOTLOADER_ADDRESS: 0x3A80, Free user memory 14970 bytes.
+8K  Device -- Codesize: 1394 bytes, BOOTLOADER_ADDRESS: 0x1A80, Free user memory 6778 bytes.
+16K Device -- Codesize: 1394 bytes, BOOTLOADER_ADDRESS: 0x3A80, Free user memory 14970 bytes.
 - 

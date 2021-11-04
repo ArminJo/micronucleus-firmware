@@ -102,9 +102,6 @@ micronucleus* micronucleus_connect(int fast_mode) {
           if (res==8) {
             nucleus->bootloader_feature_flags = buffer[6];
             nucleus->application_version = buffer[7];
-            nucleus->v2AdditionsAvailable = 1;
-          } else {
-              nucleus->v2AdditionsAvailable = 0;
           }
 
           nucleus->flash_size = (buffer[0]<<8) + buffer[1];
