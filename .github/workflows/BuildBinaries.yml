@@ -7,17 +7,17 @@
 name: BuildBinaries
 
 on:
-  workflow_dispatch: # to run it manually
-  push:
-    branches:
-      - master
-    tags-ignore:
-      - '*.*' # do not run it on release build - must be combined with branches specification, otherwise no build is triggered
-    paths:
-      - '**/comandline/library/**'
-      - '**/comandline/micronucleus.c'
-      - '**/comandline/builds/**/package.json'
-      - '**BuildBinaries.yml'
+  workflow_dispatch: # To run it manually, since the push trigger was not reliable :-(
+#  push:
+#    branches:
+#      - master
+#    tags-ignore:
+#      - '*.*' # do not run it on release build - must be combined with branches specification, otherwise no build is triggered
+#    paths:
+#      - '**/comandline/library/**'
+#      - '**/comandline/micronucleus.c'
+#      - '**/comandline/builds/**/package.json'
+#      - '**BuildBinaries.yml'
 
 jobs:
   build-all-executables:
@@ -170,8 +170,8 @@ jobs:
       if: runner.os != 'Windows'
       run: |
         TARGET_DIR=${{ matrix.target-dir }}
-        TARBALL_NAME=micronucleus-cli-2.5-$TARGET_DIR.tar.gz
-        TARBALL_NAME_PIO=micronucleus-cli-2.5-pio-$TARGET_DIR.tar.gz
+        TARBALL_NAME=micronucleus-cli-2.6-$TARGET_DIR.tar.gz
+        TARBALL_NAME_PIO=micronucleus-cli-2.6-pio-$TARGET_DIR.tar.gz
         set -o verbose
         mkdir micronucleus # temporary tar directory
         chmod +x commandline/micronucleus
