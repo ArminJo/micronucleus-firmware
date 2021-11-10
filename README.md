@@ -64,17 +64,17 @@ If not otherwise noted, the OSCCAL value is calibrated (+/- 1%) after boot for a
 | t85_default | 6650 | 1514 | - |
 | t85_entry_on_powerOn | 6586 | 1550 | [ENTRY_POWER_ON](#entry_power_on-entry-condition), LED_MODE=ACTIVE_HIGH |
 | t85_entry_on_powerOn_<br/>fastExit | 6586 | 1572 | [ENTRY_POWER_ON](#entry_power_on-entry-condition), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), LED_MODE=ACTIVE_HIGH |
-| **t85_entry_on_powerOn_<br/>activePullup_fastExit**<br/>[recommended configuration](#recommended-configuration) | 6586 | 1576 | [ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_POWER_ON](#entry_d_minus_pullup_activated_and_entry_power_on-entry-condition), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), LED_MODE=ACTIVE_HIGH |
+| <a id="t85recommended"/> **t85_entry_on_powerOn_<br/>activePullup_fastExit**<br/>[recommended configuration](#recommended-configuration) | 6586 | 1576 | [ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_POWER_ON](#entry_d_minus_pullup_activated_and_entry_power_on-entry-condition), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), LED_MODE=ACTIVE_HIGH |
 | t85_entry_on_powerOn_<br/>activePullup_fastExit_noLED| 6586 | 1558 | [ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_POWER_ON](#entry_d_minus_pullup_activated_and_entry_power_on-entry-condition), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit) |
 | t85_entry_on_powerOn_<br/>pullupAt0 | 6650 | 1538 | [ENTRY_POWER_ON](#entry_power_on-entry-condition), USB_CFG_PULLUP_IOPORTNAME + USB_CFG_PULLUP_BIT |
 | t85_entry_on_reset_<br/>activePullup_fastExit | 6586 | 1576 | [ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_EXT_RESET](#entry_d_minus_pullup_activated_and_entry_ext_reset-entry-condition), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit),<br/>AUTO_EXIT_MS=15000 Bootloader timeout increased to 15 seconds (if connected to USB),<br/>LED_MODE=ACTIVE_HIGH. |
 | t85_fastExit | 6586 | 1554 | [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), LED_MODE=ACTIVE_HIGH |
 |  |  |  |  |
 | t88_default | 6778 | 1350 | LED_MODE=ACTIVE_HIGH<br/>For 16 MHz quartz |
-| **t88_entry_on_powerOn_<br/>activePullup_fastExit**<br/>[recommended configuration](#recommended-configuration) | 6778 | 1394 |  [ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_POWER_ON](#entry_d_minus_pullup_activated_and_entry_power_on-entry-condition), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), LED_MODE=ACTIVE_HIGH<br/>For 16 MHz quartz |
+| <a id="t88recommended">**t88_entry_on_powerOn_<br/>activePullup_fastExit**</a><br/>[recommended configuration](#recommended-configuration) | 6778 | 1394 |  [ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_POWER_ON](#entry_d_minus_pullup_activated_and_entry_power_on-entry-condition), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), LED_MODE=ACTIVE_HIGH<br/>For 16 MHz quartz |
 |  |  |  |  |
 | t167_default | 14970 | 1342 | - |
-| **t167_entry_on_powerOn_<br/>activePullup_fastExit**<br/>[recommended configuration](#recommended-configuration) | 14970 | 1406 | [ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_POWER_ON](#entry_d_minus_pullup_activated_and_entry_power_on-entry-condition), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), LED_MODE=ACTIVE_HIGH<br/>For 16 MHz quartz |
+| <a id="t167recommended"/>**t167_entry_on_powerOn_<br/>activePullup_fastExit**<br/>[recommended configuration](#recommended-configuration) | 14970 | 1406 | [ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_POWER_ON](#entry_d_minus_pullup_activated_and_entry_power_on-entry-condition), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), LED_MODE=ACTIVE_HIGH<br/>For 16 MHz quartz |
 | t167_entry_on_reset_<br/>activePullup_fastExit | 14970 | 1406 | [ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_EXT_RESET](#entry_d_minus_pullup_activated_and_entry_ext_reset-entry-condition), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), <br/>AUTO_EXIT_MS=15000 Bootloader timeout increased to 15 seconds (if connected to USB),<br/>LED_MODE=ACTIVE_HIGH.<br/>For 16 MHz quartz |
 |  |  |  |  |
 | t45_default | 2554 | 1514 |  |
@@ -136,7 +136,7 @@ In this configuration **a power up with USB disconnected or a reset will immedia
 You have a slightly bigger chance to brick the bootloader, which reqires it to be reprogrammed by [avrdude](windows_exe) and an ISP or an Arduino as ISP. Command files for this can be found [here](/utils).
 
 ## [Recommended](/firmware/configuration/t85_entry_on_powerOn_activePullup_fastExit) configuration
-For ATtiny85, ATtiny88 and ATtiny167 the recommended configuration is *t85_entry_on_powerOn_activePullup_fastExit*, *t88_entry_on_powerOn_activePullup_fastExit.hex* and *t167_entry_on_powerOn_activePullup_fastExit.hex* respectively.
+For ATtiny85, ATtiny88 and ATtiny167 the recommended configuration is [t85_entry_on_powerOn_activePullup_fastExit.hex](#t85recommended), [t88_entry_on_powerOn_activePullup_fastExit.hex](#t88recommended) and [t167_entry_on_powerOn_activePullup_fastExit.hex](#t167recommended) respectively.
 
 This configuration has the following features:
 - A hardware reset (e.g., Digispark P5 shorted to ground or brownout happened) will always immediately run the user program.

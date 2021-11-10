@@ -8,6 +8,7 @@ name: BuildBinaries
 
 on:
   workflow_dispatch: # To run it manually, since the push trigger was not reliable :-(
+    description: 'manual build of executables'
 #  push:
 #    branches:
 #      - master
