@@ -30,10 +30,12 @@ To **update** your old, flash consuming **bootloader**, you have 2 choices.
 2. Run one of the Windows [scripts](https://github.com/ArminJo/micronucleus-firmware/tree/master/utils)
 like e.g. the [Burn_upgrade-t85_default.cmd](utils/Burn_upgrade-t85_default.cmd). The internal mechanism is described [here](https://github.com/ArminJo/micronucleus-firmware/blob/master/firmware/upgrades/README.md).
 
+*NOTE: If you plan to continue using the USB interface of the board (to simulate a keyboard, or a mouse for example), you must select **Tools -> Clock Speed -> 16.5MHz** when flashing the new bootloader from the Arduino IDE GUI.*
+
 ### If you want to burn the bootloader to an **ATtiny87** or **ATtiny167** with avrdude, you must use the [avrdude.config file](https://raw.githubusercontent.com/ArminJo/micronucleus-firmware/master/windows_exe/avrdude.conf) in [the windows_exe directory](https://github.com/ArminJo/micronucleus-firmware/tree/master/windows_exe) where [ATtiny87](https://github.com/ArminJo/micronucleus-firmware/blob/master/windows_exe/avrdude.conf#L15055) and [ATtiny167](https://github.com/ArminJo/micronucleus-firmware/blob/master/windows_exe/avrdude.conf#L15247) specifications are added.
 
 # Fuse setting
-The meaning of fuses can be seen with the [Engbedded Atmel AVR® Fuse Calculator](https://www.engbedded.com/fusecalc/).
+The meaning of fuses can be seen with the [Engbedded Atmel AVRÂ® Fuse Calculator](https://www.engbedded.com/fusecalc/).
 Windows helper scripts for setting fuses can be found [here](https://github.com/ArminJo/micronucleus-firmware/tree/master/utils).
 
 The default fuses for a **Digispark** board are:<br/>
@@ -41,7 +43,7 @@ The default fuses for a **Digispark** board are:<br/>
 - ATtiny85 Hfuse: 0xDD - External Reset pin enabled (Pin5 not usable as I/O) + BOD 2.7 V + Enable Serial Program and Data Downloading
 - ATtiny85 Efuse: 0xFE - self programming enabled.
 
-BOD enabled requires additional 20 µA in sleep state and therefore may be not desirable for low power battery applications. To disable BOD, use 0xDF as Hfuse.
+BOD enabled requires additional 20 ÂµA in sleep state and therefore may be not desirable for low power battery applications. To disable BOD, use 0xDF as Hfuse.
 
 The default fuses for a **Digispark Pro** board are:<br/>
 - ATtiny167 Lfuse: 0xFF - External crystal osc. Frequency 8-16 MHz + Startup 65 ms
@@ -207,11 +209,11 @@ E.g a short beep at startup with tone(3, 2000, 200) will pull the D- line low an
 | 2.6 mA    | **3.8 V** | 1 MHz | " |
 | 2.9 mA    | 5 V |  1 MHz | All Hardware changes + empty loop |
 | 2.4 mA    | 5 V |  1 MHz | All Hardware changes + empty loop + Timer and ADC disabled |
-| 230 µA    | 5 V |  1 MHz | All Hardware changes + SLEEP_MODE_PWR_DOWN |
-| **27 µA** | 5 V |  1 MHz | All Hardware changes + SLEEP_MODE_PWR_DOWN + ADC disabled + Watchdog enabled |
-| 25 µA     | 3 V |  1 MHz | " |
-|  **7 µA** | 5 V |  1 MHz | All Hardware changes + **SLEEP_MODE_PWR_DOWN + ADC disabled + BOD disabled** + Watchdog enabled |
-| 5.5 µA   | 3.8 V | 1 MHz | " The Watchdog draws around 5 µA |
+| 230 ÂµA    | 5 V |  1 MHz | All Hardware changes + SLEEP_MODE_PWR_DOWN |
+| **27 ÂµA** | 5 V |  1 MHz | All Hardware changes + SLEEP_MODE_PWR_DOWN + ADC disabled + Watchdog enabled |
+| 25 ÂµA     | 3 V |  1 MHz | " |
+|  **7 ÂµA** | 5 V |  1 MHz | All Hardware changes + **SLEEP_MODE_PWR_DOWN + ADC disabled + BOD disabled** + Watchdog enabled |
+| 5.5 ÂµA   | 3.8 V | 1 MHz | " The Watchdog draws around 5 ÂµA |
 
 BOD can only be disabled by setting fuses via ISP programmer](https://www.google.de/search?q=arduino+as+isp) and a connecting adapter.
 For reprogramming the fuses, you can use [this script](https://github.com/ArminJo/micronucleus-firmware/blob/master/utils/Write%2085%20Fuses%20E1%20DF%20FE%20-%20Digispark%20default%20without%20BOD%20and%20Pin5.cmd).<br/>
@@ -226,14 +228,14 @@ For reprogramming the fuses, you can use [this script](https://github.com/ArminJ
 |  14 mA | CPU + timer @16 MHz |
 |   8 mA | CPU + timer @8 MHz |
 |   3 mA | CPU + timer @1 MHz |
-|  20 µA | BOD |
-| 212 µA | ADC |
-|   5 µA | Watchdog |
+|  20 ÂµA | BOD |
+| 212 ÂµA | ADC |
+|   5 ÂµA | Watchdog |
 
 With fast PLL Clock and standard fuses, the **start-up time from sleep is around 64ms and requires 2/3 of regular CPU power**!<br/>
-If we use the longest sleep time of 8 seconds and an empty loop, this result in an **average current consumption of 23 µA** (1 year with a 200 mAh button cell 2032).<br/>
+If we use the longest sleep time of 8 seconds and an empty loop, this result in an **average current consumption of 23 ÂµA** (1 year with a 200 mAh button cell 2032).<br/>
 The start-up time from sleep can be reduced (at own risk of unstable clock) to 5 ms using [this fuse settings](https://github.com/ArminJo/micronucleus-firmware/blob/master/utils/Write%2085%20Fuses%20C1%20DF%20FE%20-%20Digispark%20default%20without%20BOD%20and%20Pin5%20and%20fast%20startup.cmd).
-This results in an average current consumption of **9 µA** (2.5 years with a 200 mAh button cell 2032).<br/>
+This results in an average current consumption of **9 ÂµA** (2.5 years with a 200 mAh button cell 2032).<br/>
 This startup time can even be reduced to 6 clock cycles by [changing fuses to use the internal 8Mhz clock](https://github.com/ArminJo/micronucleus-firmware/blob/master/utils/Write%2085%20Fuses%20E2%20DF%20FF%20-%20ISP%20Mode%20%3D%208MHz%20without%20BOD%20and%20Pin5.cmd), but this **disables the possibility to program the Digispark board via USB** and and on the other hand removes the need for a bootloader and therefore leaves the whole memory for your program.
 
 ## Modifying the board
