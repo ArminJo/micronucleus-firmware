@@ -125,7 +125,7 @@ int main(int argc, char **argv) {
             puts("                    --run: Ask bootloader to run the program when finished");
             puts("                           uploading provided program");
             puts("                   --info: Print only bootloader information - no programming");
-#ifndef WIN
+#if !defined(WIN)
             puts("                --no-ansi: Don't use ANSI in terminal output");
 #endif
             puts("      --timeout [integer]: Timeout after waiting specified number of seconds");
@@ -377,7 +377,7 @@ static void printProgress(float progress) {
                 progress);
     } else {
         if (last_step == progress_step && use_ansi) {
-#ifndef WIN
+#if !defined(WIN)
             printf("\033[1F\033[2K"); // move cursor to previous line and erase last update in this progress sequence
 #else
         printf("\r"); // return carriage to start of line so we can type over existing text

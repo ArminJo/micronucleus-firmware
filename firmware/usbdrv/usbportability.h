@@ -29,7 +29,7 @@ Thanks to Oleg Semyonov for his help with the IAR tools port!
 #if defined __IAR_SYSTEMS_ICC__ || defined __IAR_SYSTEMS_ASM__  /* check for IAR */
 /* ------------------------------------------------------------------------- */
 
-#ifndef ENABLE_BIT_DEFINITIONS
+#if !defined(ENABLE_BIT_DEFINITIONS)
 #   define ENABLE_BIT_DEFINITIONS	1   /* Enable bit definitions */
 #endif
 
@@ -137,7 +137,7 @@ static inline void  sei(void)
 #endif  /* development environment */
 
 /* for conveniecne, ensure that PRG_RDB exists */
-#ifndef PRG_RDB
+#if !defined(PRG_RDB)
 #   define PRG_RDB(addr)    USB_READ_FLASH(addr)
 #endif
 #endif  /* __usbportability_h_INCLUDED__ */

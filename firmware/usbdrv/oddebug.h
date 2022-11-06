@@ -23,14 +23,14 @@ the output and a memory block to dump in hex ('data' and 'len').
 */
 
 
-#ifndef F_CPU
+#if !defined(F_CPU)
 #   define  F_CPU   12000000    /* 12 MHz */
 #endif
 
 /* make sure we have the UART defines: */
 #include "usbportability.h"
 
-#ifndef uchar
+#if !defined(uchar)
 #   define  uchar   unsigned char
 #endif
 
@@ -39,7 +39,7 @@ the output and a memory block to dump in hex ('data' and 'len').
 #   undef   DEBUG_LEVEL
 #endif
 
-#ifndef DEBUG_LEVEL
+#if !defined(DEBUG_LEVEL)
 #   define  DEBUG_LEVEL 0
 #endif
 

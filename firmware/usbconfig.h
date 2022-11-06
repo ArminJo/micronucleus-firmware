@@ -27,7 +27,7 @@
 /* Define this to 1 if the device has its own power supply. Set it to 0 if the
  * device is powered from the USB bus.
  */
-#ifndef USB_CFG_MAX_BUS_POWER   // allow bootloaderconfig.h to override
+#if !defined(USB_CFG_MAX_BUS_POWER)   // allow bootloaderconfig.h to override
 #define USB_CFG_MAX_BUS_POWER           100
 #endif
 /* Set this variable to the maximum USB bus power consumption of your device.

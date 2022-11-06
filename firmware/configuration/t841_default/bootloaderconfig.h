@@ -88,7 +88,7 @@
 #define MICRONUCLEUS_WRITE_SLEEP 128 + 5
 
 // ATtiny841 does not know OSCCAL
-#ifndef OSCCAL
+#if !defined(OSCCAL)
 #define OSCCAL OSCCAL0
 #endif
 

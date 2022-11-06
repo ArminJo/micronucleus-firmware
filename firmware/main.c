@@ -23,7 +23,7 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/gpl.html>.
+ *  along with this program. If not, see <http://www.gnu.org/licenses/gpl.html>.
  */
 
 #define MICRONUCLEUS_VERSION_MAJOR 2
@@ -51,7 +51,7 @@
 #endif
 
 // Postscript are the few bytes at the end of programmable memory which store user program reset vector and optionally OSCCAL calibration
-#ifndef POSTSCRIPT_SIZE
+#if !defined(POSTSCRIPT_SIZE)
 #  if OSCCAL_SAVE_CALIB
 #define POSTSCRIPT_SIZE TINYVECTOR_OSCCAL_OFFSET
 #  else
@@ -85,16 +85,16 @@
 
 // Device configuration reply
 // Length: 6 bytes
-//   Byte 0:  User program memory size, high byte
-//   Byte 1:  User program memory size, low byte
-//   Byte 2:  Flash Pagesize in bytes
-//   Byte 3:  Page write timing in ms.
+//   byte 0:  User program memory size, high byte
+//   byte 1:  User program memory size, low byte
+//   byte 2:  Flash Pagesize in bytes
+//   byte 3:  Page write timing in ms.
 //    Bit 7 '0': Page erase time equals page write time
 //    Bit 7 '1': Page erase time equals page write time divided by 4
-//   Byte 4:  SIGNATURE_1
-//   Byte 5:  SIGNATURE_2
-//   Byte 6:  Bootloader feature flags
-//   Byte 7:  Application major version<< 4 | Application minor version, 0 = no entry
+//   byte 4:  SIGNATURE_1
+//   byte 5:  SIGNATURE_2
+//   byte 6:  Bootloader feature flags
+//   byte 7:  Application major version<< 4 | Application minor version, 0 = no entry
 #if FAST_EXIT_NO_USB_MS > 120
 #define FAST_EXIT_FEATURE_FLAG 0x10
 #else
@@ -225,7 +225,7 @@ static inline void writeFlashPage(void) {
  */
 static void writeWordToPageBuffer(uint16_t data) {
 
-#ifndef ENABLE_UNSAFE_OPTIMIZATIONS // adds 10 bytes
+#if !defined(ENABLE_UNSAFE_OPTIMIZATIONS) // adds 10 bytes
 #  if BOOTLOADER_ADDRESS < 8192
     // rjmp
     if (currentAddress.w == RESET_VECTOR_OFFSET * 2) {
@@ -290,10 +290,10 @@ static uint8_t usbFunctionSetup(uint8_t data[8]) {
 
             // Clear temporary page buffer in SRAM as a precaution before filling the buffer
             // in case a previous write operation failed and there is still something in the buffer.
-#ifdef CTPB
+#if defined(CTPB)
             __SPM_REG = (_BV(CTPB) | _BV(__SPM_ENABLE));
 #else
-#ifdef RWWSRE
+#if defined(RWWSRE)
             __SPM_REG = (_BV(RWWSRE) | _BV(__SPM_ENABLE));
 #else
             __SPM_REG=_BV(__SPM_ENABLE);
@@ -320,22 +320,22 @@ static uint8_t usbFunctionSetup(uint8_t data[8]) {
  * Shortest watchdog timeout is 16 ms.
  */
 static void inactivateWatchdog(void) {
-#ifdef CCP
-#ifndef SAVE_MCUSR
+#if defined(CCP)
+#if !defined(SAVE_MCUSR)
     MCUSR = 0;
 #endif
     // New ATtinies841/441 use a different unlock sequence and renamed registers
     CCP = 0xD8;
     WDTCSR = _BV(WDP2) | _BV(WDP1) | _BV(WDP0);
 #elif defined(WDTCR)
-#ifndef SAVE_MCUSR
+#if !defined(SAVE_MCUSR)
     MCUSR = 0;
 #endif
     WDTCR = _BV(WDCE) | _BV(WDE); // Unlock the watchdog register
     WDTCR = _BV(WDP2) | _BV(WDP1) | _BV(WDP0); // Do not enable watchdog. Set timeout to 2 seconds, just in case, it is fused on and can not disabled.
 #else
     wdt_reset();
-#ifndef SAVE_MCUSR
+#if !defined(SAVE_MCUSR)
     MCUSR = 0;
 #endif
     WDTCSR |= _BV(WDCE) | _BV(WDE);
@@ -362,7 +362,7 @@ __attribute__((__noreturn__)) static inline void leaveBootloader(void) {
     // bootLoaderExit() is a Macro defined in bootloaderconfig.h and mainly empty except for ENTRY_JUMPER, where it resets the pullup.
     bootLoaderExit();
 
-#ifdef SAVE_MCUSR // adds 6 bytes
+#if defined(SAVE_MCUSR) // adds 6 bytes
     GPIOR0 = MCUSR;
     MCUSR = 0;
 #endif
@@ -400,6 +400,8 @@ int main(void) {
     // Adjust clock to previous calibration value, so bootloader AND User program starts with proper clock calibration, even when not connected to USB
     unsigned char stored_osc_calibration = pgm_read_byte(BOOTLOADER_ADDRESS - TINYVECTOR_OSCCAL_OFFSET);
     if (stored_osc_calibration != 0xFF) {
+        // Start with latest OSCCAL value computed for 16.5 Mhz.
+        // This is required for applications running at (F_CPU==16500000L) and discarded by the application startup code if (F_CPU!=16500000L)
         OSCCAL = stored_osc_calibration;
         // we changed clock so "wait" for one cycle
         asm volatile("nop");
@@ -591,16 +593,22 @@ int main(void) {
 #define STR_HELPER(x) #x
 #define STR(x) STR_HELPER(x)
 
-#ifdef USB_CFG_PULLUP_IOPORTNAME
-        usbDeviceDisconnect(); // Changing USB_PULLUP_OUT to input() to avoid to drive the pullup resistor, and set level to low.
+        /*
+         * To avoid periodically disconnect->connect if no sketch is loaded and to avoid an unknown
+         * USB Device (Device Descriptor Request Failed) entry in device manager when entering user program,
+         * the bootloader finishes without an active disconnect from USB.
+         * This behavior is compatible to the old v1 micronucleus versions, which also do not disconnect from the host.
+         */
+#if defined(USB_CFG_PULLUP_IOPORTNAME)
+        usbDeviceConnect(); // This enables the pull up resistor and keeps device connected.
 #else
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Waddress"
-        // with STR(), the compiler is able to optimize the if :-) but gives a warning we can ignore.
+        // with STR(), the compiler is able to optimize the if :-) (but not if USBDDR not equal ED_DDR :-() but gives a warning we can ignore.
         if (STR(USBDDR) == STR(LED_DDR) && LED_MODE != ACTIVE_LOW) {
-            USBDDR = 0; // Set all pins to input, including LED and D- pin. The latter keeps device connected.
+            USBDDR = 0; // Set all pins to input, including LED and D- pin. The latter enables the pull up resistor and keeps device connected.
         } else {
-            usbDeviceConnect(); // Changing only D- to input(). This keeps device connected.
+            usbDeviceConnect(); // Changing only D- to input(). This enables the pull up resistor and keeps device connected.
         }
 #endif
 #pragma GCC diagnostic pop

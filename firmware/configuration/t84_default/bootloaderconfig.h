@@ -86,7 +86,7 @@
 #define MICRONUCLEUS_WRITE_SLEEP 5
 
 // ATtiny84 does not know WDTCR
-#ifndef WDTCR
+#if !defined(WDTCR)
 #define WDTCR WDTCSR
 #endif
 

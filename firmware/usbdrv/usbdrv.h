@@ -122,7 +122,7 @@ extern "C" {
  * older than 2006-01-25.
  */
 
-#ifndef USB_PUBLIC
+#if !defined(USB_PUBLIC)
 #define USB_PUBLIC
 #endif
 /* USB_PUBLIC is used as declaration attribute for all functions exported by
@@ -133,10 +133,10 @@ extern "C" {
  */
 
 #ifndef __ASSEMBLER__
-#ifndef uchar
+#if !defined(uchar)
 #define uchar   unsigned char
 #endif
-#ifndef schar
+#if !defined(schar)
 #define schar   signed char
 #endif
 /* shortcuts for well defined 8 bit integer types */
@@ -150,7 +150,7 @@ extern "C" {
  */
 #define USB_NO_MSG  ((usbMsgLen_t)-1)   /* constant meaning "no message" */
 
-#ifndef usbMsgPtr_t
+#if !defined(usbMsgPtr_t)
 #define usbMsgPtr_t uchar *
 #endif
 /* Making usbMsgPtr_t a define allows the user of this library to define it to
@@ -199,7 +199,7 @@ USB_PUBLIC usbMsgLen_t usbFunctionSetup(uchar data[8]);
  */
 
 //extern uchar usbRxToken;    /* may be used in usbFunctionWriteOut() below */
-#ifdef USB_CFG_PULLUP_IOPORTNAME
+#if defined(USB_CFG_PULLUP_IOPORTNAME)
 #define usbDeviceConnect()      ((USB_PULLUP_DDR |= (1<<USB_CFG_PULLUP_BIT)), \
                                   (USB_PULLUP_OUT |= (1<<USB_CFG_PULLUP_BIT)))
 #define usbDeviceDisconnect()   ((USB_PULLUP_DDR &= ~(1<<USB_CFG_PULLUP_BIT)), \
@@ -211,7 +211,7 @@ USB_PUBLIC usbMsgLen_t usbFunctionSetup(uchar data[8]);
 /* The macros usbDeviceConnect() and usbDeviceDisconnect() (intended to look
  * like a function) connect resp. disconnect the device from the host's USB.
  * If the constants USB_CFG_PULLUP_IOPORT and USB_CFG_PULLUP_BIT are defined
- * in usbconfig.h, a disconnect consists of removing the pull-up resisitor
+ * in usbconfig.h, a disconnect consists of removing the pull-up resistor
  * from D-, otherwise the disconnect is done by brute-force pulling D- to GND.
  * This does not conform to the spec, but it works.
  * Please note that the USB interrupt must be disabled while the device is
@@ -259,28 +259,28 @@ extern uchar    usbConfiguration;
  */
 
 /* all descriptors which may have properties: */
-#ifndef USB_CFG_DESCR_PROPS_DEVICE
+#if !defined(USB_CFG_DESCR_PROPS_DEVICE)
 #define USB_CFG_DESCR_PROPS_DEVICE                  0
 #endif
-#ifndef USB_CFG_DESCR_PROPS_CONFIGURATION
+#if !defined(USB_CFG_DESCR_PROPS_CONFIGURATION)
 #define USB_CFG_DESCR_PROPS_CONFIGURATION           0
 #endif
-#ifndef USB_CFG_DESCR_PROPS_STRINGS
+#if !defined(USB_CFG_DESCR_PROPS_STRINGS)
 #define USB_CFG_DESCR_PROPS_STRINGS                 0
 #endif
-#ifndef USB_CFG_DESCR_PROPS_STRING_0
+#if !defined(USB_CFG_DESCR_PROPS_STRING_0)
 #define USB_CFG_DESCR_PROPS_STRING_0                0
 #endif
-#ifndef USB_CFG_DESCR_PROPS_STRING_VENDOR
+#if !defined(USB_CFG_DESCR_PROPS_STRING_VENDOR)
 #define USB_CFG_DESCR_PROPS_STRING_VENDOR           0
 #endif
-#ifndef USB_CFG_DESCR_PROPS_STRING_PRODUCT
+#if !defined(USB_CFG_DESCR_PROPS_STRING_PRODUCT)
 #define USB_CFG_DESCR_PROPS_STRING_PRODUCT          0
 #endif
-#ifndef USB_CFG_DESCR_PROPS_STRING_SERIAL_NUMBER
+#if !defined(USB_CFG_DESCR_PROPS_STRING_SERIAL_NUMBER)
 #define USB_CFG_DESCR_PROPS_STRING_SERIAL_NUMBER    0
 #endif
-#ifndef USB_CFG_DESCR_PROPS_UNKNOWN
+#if !defined(USB_CFG_DESCR_PROPS_UNKNOWN)
 #define USB_CFG_DESCR_PROPS_UNKNOWN                 0
 #endif
 
@@ -353,16 +353,16 @@ int usbDescriptorStringSerialNumber[];
 #endif
 
 /* make sure we have a VID and PID defined, byte order is lowbyte, highbyte */
-#ifndef USB_CFG_VENDOR_ID
+#if !defined(USB_CFG_VENDOR_ID)
 #   define  USB_CFG_VENDOR_ID   0xc0, 0x16  /* = 0x16c0 = 5824 = voti.nl */
 #endif
 
-#ifndef USB_CFG_DEVICE_ID
+#if !defined(USB_CFG_DEVICE_ID)
 #   define USB_CFG_DEVICE_ID    0xdc, 0x05  /* = 0x5dc = 1500, obdev's free PID */
 #endif
 
 /* Derive Output, Input and DataDirection ports from port names */
-#ifndef USB_CFG_IOPORTNAME
+#if !defined(USB_CFG_IOPORTNAME)
 #error "You must define USB_CFG_IOPORTNAME in usbconfig.h, see usbconfig-prototype.h"
 #endif
 
@@ -379,7 +379,7 @@ int usbDescriptorStringSerialNumber[];
 
 /* defines for backward compatibility with older driver versions: */
 #define USB_CFG_IOPORT          USB_OUTPORT(USB_CFG_IOPORTNAME)
-#ifdef USB_CFG_PULLUP_IOPORTNAME
+#if defined(USB_CFG_PULLUP_IOPORTNAME)
 #define USB_CFG_PULLUP_IOPORT   USB_OUTPORT(USB_CFG_PULLUP_IOPORTNAME)
 #endif
 
@@ -387,20 +387,20 @@ int usbDescriptorStringSerialNumber[];
 
 /* ----- Try to find registers and bits responsible for ext interrupt 0 ----- */
 
-#ifndef USB_INTR_CFG    /* allow user to override our default */
+#if !defined(USB_INTR_CFG)    /* allow user to override our default */
 #   if defined  EICRA
 #       define USB_INTR_CFG EICRA
 #   else
 #       define USB_INTR_CFG MCUCR
 #   endif
 #endif
-#ifndef USB_INTR_CFG_SET    /* allow user to override our default */
+#if !defined(USB_INTR_CFG_SET)    /* allow user to override our default */
 #endif
-#ifndef USB_INTR_CFG_CLR    /* allow user to override our default */
+#if !defined(USB_INTR_CFG_CLR)    /* allow user to override our default */
 #   define USB_INTR_CFG_CLR 0    /* no bits to clear */
 #endif
 
-#ifndef USB_INTR_ENABLE     /* allow user to override our default */
+#if !defined(USB_INTR_ENABLE)     /* allow user to override our default */
 #   if defined GIMSK
 #       define USB_INTR_ENABLE  GIMSK
 #   elif defined EIMSK
@@ -409,18 +409,18 @@ int usbDescriptorStringSerialNumber[];
 #       define USB_INTR_ENABLE  GICR
 #   endif
 #endif
-#ifndef USB_INTR_ENABLE_BIT /* allow user to override our default */
+#if !defined(USB_INTR_ENABLE_BIT) /* allow user to override our default */
 #   define USB_INTR_ENABLE_BIT  INT0
 #endif
 
-#ifndef USB_INTR_PENDING    /* allow user to override our default */
+#if !defined(USB_INTR_PENDING)    /* allow user to override our default */
 #   if defined  EIFR
 #       define USB_INTR_PENDING EIFR
 #   else
 #       define USB_INTR_PENDING GIFR
 #   endif
 #endif
-#ifndef USB_INTR_PENDING_BIT    /* allow user to override our default */
+#if !defined(USB_INTR_PENDING_BIT)    /* allow user to override our default */
 #   define USB_INTR_PENDING_BIT INTF0
 #endif
 
@@ -451,7 +451,7 @@ at90s1200, attiny11, attiny12, attiny15, attiny28: these have no RAM
 #define USBPID_NAK      0x5a
 #define USBPID_STALL    0x1e
 
-#ifndef USB_INITIAL_DATATOKEN
+#if !defined(USB_INITIAL_DATATOKEN)
 #define USB_INITIAL_DATATOKEN   USBPID_DATA1
 #endif
 

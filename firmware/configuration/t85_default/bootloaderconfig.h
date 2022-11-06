@@ -251,6 +251,8 @@
  *                            program unless "OSCCAL_RESTORE_DEFAULT" is active. This allows calibrate the internal
  *                            RC oscillator to the F_CPU target frequency +/-1% from the USB timing. Please note
  *                            that this is only true if the ambient temperature does not change.
+ *                            This is required for applications running at (F_CPU==16500000L)
+ *                            and discarded by the application startup code if (F_CPU!=16500000L).
  *                            Adds ~38 bytes.
  *
  *  OSCCAL_HAVE_XTAL          Set this to '1' if you have an external crystal oscillator. In this case no attempt

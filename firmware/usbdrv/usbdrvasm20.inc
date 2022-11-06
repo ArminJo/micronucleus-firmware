@@ -43,7 +43,7 @@ of CPU cycles, but even an exact number of cycles!
 ; x4 (leap)  is used to add a leap cycle once every three bytes received
 ; X3 (leap2) is used to add a leap cycle once every three stuff bits received
 ; bitcnt is used to determine when a stuff bit is due
-; cnt holds the number of bytes left in the receive buffer
+; cnt holds the number of bytes left in the receive sReadIDBuffer
 
 USB_handler:
 ;order of registers pushed: YL, SREG YH, [sofError], bitcnt, shift, x1, x2, x3, x4, cnt
@@ -144,7 +144,7 @@ bit7:
     rjmp    b7handle0           ;[3] when line state differs, handle "0"
     sec                         ;[4]
     ror     shift               ;[5] shift "1" into the data
-    st      y+, shift           ;[6] store the data into the buffer
+    st      y+, shift           ;[6] store the data into the sReadIDBuffer
     ldi     shift, 0x40         ;[7] reset data for receiving the next byte
     subi    leap, 0x55          ;[9] trick to introduce a leap cycle every 3 bytes
     brcc    nextInst            ;[10 or 11] it will fail after 85 bytes. However low speed can only receive 11
@@ -158,7 +158,7 @@ b7handle0:
     mov     x2,x1               ;[5] Set x2 to current line state
     ldi     bitcnt, 6           ;[6]
     lsr     shift               ;[7] shift "0" into the data
-    st      y+, shift           ;[8] store data into the buffer
+    st      y+, shift           ;[8] store data into the sReadIDBuffer
     ldi     shift, 0x40         ;[10] reset data for receiving the next byte
     subi    leap, 0x55          ;[11] trick to introduce a leap cycle every 3 bytes
     brcs    bit0                ;[12] it will fail after 85 bytes. However low speed can only receive 11

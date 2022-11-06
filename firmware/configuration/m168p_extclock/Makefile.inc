@@ -68,6 +68,6 @@ FUSEOPT_DISABLERESET = -U lfuse:w:0xff:m -U hfuse:w:0x5d:m -U efuse:w:0xf9:m
 # 0xf9 = - - - -   - 0 0 1
 #        ^ ^ ^ ^   ^ \-/ ^
 #        \---------/  |  +---- BOOTRST (Select reset vector -> start at address 0x0000)
-#             |       +------- BOOTSZ 1..0 (Bootloader flash size -> 2048 Bytes)
+#             |       +------- BOOTSZ 1..0 (Bootloader flash size -> 2048 bytes)
 #             +--------------- Unused
 ###############################################################################

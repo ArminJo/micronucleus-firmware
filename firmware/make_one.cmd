@@ -9,8 +9,8 @@ rem Set TARGET=t85_entry_on_powerOn
 rem Set TARGET=t85_entry_on_reset_activePullup
 rem Set TARGET=t85_entry_on_powerOn_activePullup_fastExit
 rem Set TARGET=t85_aggressive
-rem Set TARGET=t167_default
-Set TARGET=t4313_default
+Set TARGET=t167_default
+rem Set TARGET=t4313_default
 
 echo.
 echo **********************************************************

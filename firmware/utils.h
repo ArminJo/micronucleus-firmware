@@ -43,7 +43,6 @@ typedef unsigned char boolean;
 // turn a single pin on or off
 #define pinOn(pin) pinsOn(bit(pin))
 #define pinOff(pin) pinsOff(bit(pin))
-// TODO: Should be called pinToggle
 #define toggle(pin) pinsToggle(bit(pin))
 
 // delay a number of microseconds - or as close as we can get

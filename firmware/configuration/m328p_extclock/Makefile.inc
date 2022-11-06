@@ -51,7 +51,7 @@ FUSEOPT_DISABLERESET = -U lfuse:w:0xff:m -U hfuse:w:0x59:m -U efuse:w:0xfd:m
 # 0xd9 = 1 1 0 1   1 0 0 1
 #        ^ ^ ^ ^   ^ \-/ ^
 #        | | | |   |  |  +---- BOOTRST (Select reset vector -> start at address 0x0000)
-#        | | | |   |  +------- BOOTSZ 1..0 (Bootloader flash size -> 2048 Bytes)
+#        | | | |   |  +------- BOOTSZ 1..0 (Bootloader flash size -> 2048 bytes)
 #        | | | |   +---------- EESAVE (preserve EEPROM on Chip Erase -> not preserved)
 #        | | | +-------------- WDTON (watchdog timer always on -> disable)
 #        | | +---------------- SPIEN (enable serial programming -> enabled)
@@ -62,7 +62,7 @@ FUSEOPT_DISABLERESET = -U lfuse:w:0xff:m -U hfuse:w:0x59:m -U efuse:w:0xfd:m
 # 0x59 = 0 1 0 1   1 0 0 1
 #        ^ ^ ^ ^   ^ \-/ ^
 #        | | | |   |  |  +---- BOOTRST (Select reset vector -> start at address 0x0000)
-#        | | | |   |  +------- BOOTSZ 1..0 (Bootloader flash size -> 2048 Bytes)
+#        | | | |   |  +------- BOOTSZ 1..0 (Bootloader flash size -> 2048 bytes)
 #        | | | |   +---------- EESAVE (preserve EEPROM on Chip Erase -> not preserved)
 #        | | | +-------------- WDTON (watchdog timer always on -> disable)
 #        | | +---------------- SPIEN (enable serial programming -> enabled)

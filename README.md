@@ -2,7 +2,7 @@
 ### Version 2.6.1 - work in progress
 [![License: GPL v2](https://img.shields.io/badge/License-GPLv2-blue.svg)](https://www.gnu.org/licenses/gpl-2.0)
 [![Commits since latest](https://img.shields.io/github/commits-since/ArminJo/micronucleus-firmware/latest)](https://github.com/ArminJo/ServoEasmicronucleus-firmwareing/commits/master)
-[![Hit Counter](https://hitcounter.pythonanywhere.com/count/tag.svg?url=https://github.com/ArminJo/micronucleus-firmware)](https://github.com/brentvollebregt/hit-counter)
+![Hit Counter](https://visitor-badge.laobi.icu/badge?page_id=ArminJo_micronucleus-firmware)
 
 Micronucleus is a bootloader designed for AVR ATtiny microcontrollers with a minimal usb interface, cross platform libusb-based program upload tool, and a strong emphasis on bootloader compactness. To the authors knowledge this is, by far, the smallest USB bootloader for AVR ATtiny.<br/>
 **The V2.0 release is a complete rewrite of the firmware and offers significant improvements over V1.x.**<br/>
@@ -71,7 +71,7 @@ If not otherwise noted, the OSCCAL value is calibrated (+/- 1%) after boot for a
 | t85_fastExit | 6586 | 1554 | [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), LED_MODE=ACTIVE_HIGH |
 |  |  |  |  |
 | t88_default | 6778 | 1350 | LED_MODE=ACTIVE_HIGH<br/>For 16 MHz quartz |
-| <a id="t88recommended">**t88_entry_on_powerOn_<br/>activePullup_fastExit**</a><br/>[recommended configuration](#recommended-configuration) | 6778 | 1394 |  [ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_POWER_ON](#entry_d_minus_pullup_activated_and_entry_power_on-entry-condition), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), LED_MODE=ACTIVE_HIGH<br/>For 16 MHz quartz |
+| <a id="t88recommended"/>**t88_entry_on_powerOn_<br/>activePullup_fastExit**<br/>[recommended configuration](#recommended-configuration) | 6778 | 1394 |  [ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_POWER_ON](#entry_d_minus_pullup_activated_and_entry_power_on-entry-condition), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), LED_MODE=ACTIVE_HIGH<br/>For 16 MHz quartz |
 |  |  |  |  |
 | t167_default | 14970 | 1342 | - |
 | <a id="t167recommended"/>**t167_entry_on_powerOn_<br/>activePullup_fastExit**<br/>[recommended configuration](#recommended-configuration) | 14970 | 1406 | [ENTRY_D_MINUS_PULLUP_ACTIVATED_AND_ENTRY_POWER_ON](#entry_d_minus_pullup_activated_and_entry_power_on-entry-condition), [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit), LED_MODE=ACTIVE_HIGH<br/>For 16 MHz quartz |
@@ -279,8 +279,8 @@ Now we have 3 power supply variants:
   USB+ ADC2 (D4) PB4  3|    |6  PB1 (D1) MISO/DO/AIN1/OC0B/OC1A/PCINT1 - (Digispark) LED
                  GND  4|    |5  PB0 (D0) OC0A/AIN0
                        +----+
-  USB+ and USB- are each connected to a 3.3 volt Zener to GND and with a 68 Ohm series resistor to the ATtiny pin.
-  On boards with a micro USB connector, the series resistor is 22 Ohm instead of 68 Ohm.
+  USB+ and USB- are each connected to a 3.3 volt Zener to GND and with a 68 ohm series resistor to the ATtiny pin.
+  On boards with a micro USB connector, the series resistor is 22 ohm instead of 68 ohm.
   USB- has a 1.5k pull-up resistor to indicate a low-speed device.  
   USB+ and USB- are each terminated on the host side with 15k to 25k pull-down resistors.
 ```
@@ -301,7 +301,7 @@ INT1 9 (D3) PA3  4|    |17  PB3 (D11) 4 OC1BV USB-
     12 (D6) PA6  9|    |12  PB6 (D14) 3 INT0  USB+
      5 (D7) PA7 10|    |11  PB7 (D15)   RESET
                   +----+
-  USB+ and USB- are each connected to a 3.3 volt Zener to GND and with a 51 Ohm series resistor to the ATtiny pin.
+  USB+ and USB- are each connected to a 3.3 volt Zener to GND and with a 51 ohm series resistor to the ATtiny pin.
   USB- has a 1k5 pull-up resistor to indicate a low-speed device.
   USB+ and USB- are each terminated on the host side with 15k to 25k pull-down resistors.
 
@@ -329,7 +329,7 @@ LED           PD0   0|      |5V
 USB-          PD1   1|      |GND
 USB+  INT0    PD2   2|      |VIN
                      +------+
-  USB+ and USB- are each connected to a 3.3 volt Zener to GND and with a 68 Ohm series resistor to the ATtiny pin.
+  USB+ and USB- are each connected to a 3.3 volt Zener to GND and with a 68 ohm series resistor to the ATtiny pin.
   USB- has a 1k0 pullup resistor to indicate a low-speed device.
   USB+ and USB- are each terminated on the host side with 15k to 25k pull-down resistors.
 

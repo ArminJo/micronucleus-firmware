@@ -33,7 +33,7 @@ of CPU cycles, but even an exact number of cycles!
 ; shift assembles the byte currently being received
 ; x1 holds the D+ and D- line state
 ; x2 holds the previous line state
-; cnt holds the number of bytes left in the receive buffer
+; cnt holds the number of bytes left in the receive sReadIDBuffer
 ; x3 holds the higher crc byte (see algorithm below)
 ; x4 is used as temporary register for the crc algorithm
 ; x5 is used for unstuffing: when unstuffing the last received bit is inverted in shift (to prevent further

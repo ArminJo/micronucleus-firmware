@@ -155,7 +155,7 @@ usbCOWaitLoop:
     ; Disabled due to issues with some Win10 USB drivers, which shorten the time between reset and
     ; first datapacket to less than 20ms.
    
-#ifndef ENABLE_UNSAFE_OPTIMIZATIONS
+#if !defined(ENABLE_UNSAFE_OPTIMIZATIONS)
     sbis    USBIN, USBPLUS  ; ignore frame if data is present
     rjmp    usbCOnotdata
 

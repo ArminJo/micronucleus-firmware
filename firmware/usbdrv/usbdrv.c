@@ -156,10 +156,10 @@ USB_CFG_INTERFACE_PROTOCOL, 0, /* string index for interface */
 #endif
 
 /* ------------------ utilities for code following below ------------------- */
-#ifndef USB_RX_USER_HOOK
+#if !defined(USB_RX_USER_HOOK)
 #define USB_RX_USER_HOOK(data, len)
 #endif
-#ifndef USB_SET_ADDRESS_HOOK
+#if !defined(USB_SET_ADDRESS_HOOK)
 #define USB_SET_ADDRESS_HOOK()
 #endif
 
@@ -337,7 +337,7 @@ static inline void usbBuildTxBlock(void) {
 
 /* ------------------------------------------------------------------------- */
 
-#ifdef USB_RESET_HOOK
+#if defined(USB_RESET_HOOK)
 static inline void usbHandleResetHook(uchar notResetState)
 {
 
