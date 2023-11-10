@@ -1,8 +1,24 @@
+<div align = center>
+
 # Micronucleus USB Bootloader for ATtinies / Digisparks
-### Version 2.6.1 - work in progress
-[![License: GPL v2](https://img.shields.io/badge/License-GPLv2-blue.svg)](https://www.gnu.org/licenses/gpl-2.0)
-[![Commits since latest](https://img.shields.io/github/commits-since/ArminJo/micronucleus-firmware/latest)](https://github.com/ArminJo/ServoEasmicronucleus-firmwareing/commits/master)
-![Hit Counter](https://visitor-badge.laobi.icu/badge?page_id=ArminJo_micronucleus-firmware)
+Fork for the firmware / digispark part of the micronucleus repository.
+
+[![Badge License: GPLv3](https://img.shields.io/badge/License-GPLv2-brightgreen.svg)](https://www.gnu.org/licenses/gpl-2.0)
+ &nbsp; &nbsp; 
+[![Badge Version](https://img.shields.io/github/v/release/ArminJo/micronucleus-firmware?include_prereleases&color=yellow&logo=DocuSign&logoColor=white)](https://github.com/ArminJo/micronucleus-firmware/releases/latest)
+ &nbsp; &nbsp; 
+[![Badge Commits since latest](https://img.shields.io/github/commits-since/ArminJo/micronucleus-firmware/latest?color=yellow)](https://github.com/ArminJo/micronucleus-firmware/commits/master)
+ &nbsp; &nbsp; 
+[![Badge Build Status](https://github.com/ArminJo/micronucleus-firmware/workflows/TestCompile/badge.svg)](https://github.com/ArminJo/micronucleus-firmware/actions)
+ &nbsp; &nbsp; 
+![Badge Hit Counter](https://visitor-badge.laobi.icu/badge?page_id=ArminJo_micronucleus-firmware)
+<br/>
+<br/>
+[![Stand With Ukraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/badges/StandWithUkraine.svg)](https://stand-with-ukraine.pp.ua)
+
+</div>
+
+<br/>
 
 Micronucleus is a bootloader designed for AVR ATtiny microcontrollers with a minimal usb interface, cross platform libusb-based program upload tool, and a strong emphasis on bootloader compactness. To the authors knowledge this is, by far, the smallest USB bootloader for AVR ATtiny.<br/>
 **The V2.0 release is a complete rewrite of the firmware and offers significant improvements over V1.x.**<br/>
@@ -16,13 +32,19 @@ For proper timing, the command line tool should to be started on the host comput
 The bootloader resides in the same memory as the user program, since the ATtiny series does not support a protected bootloader section. Therefore, special care has to be taken not to overwrite the bootloader if the user program uses the self programming features. The bootloader will patch itself into the reset vector of the user program. **No other interrupt vectors are changed**.<br/>
 Please invoke the command line tool with "micronucleus -help" for a list of available options.
 
+<br/>
+
 # Driver installation
 For Windows you must install the **libusb driver** before you can program the board. Download it [here](https://github.com/digistump/DigistumpArduino/releases/download/1.6.7/Digistump.Drivers.zip), open it and run `InstallDrivers.exe`.
 Clean Micronucleus devices without uploaded user program will not time out and allow sufficient time for proper driver installation. Linux and OS X do not require custom drivers.
 
+<br/>
+
 # Updated configuration for Digispark boards
 **The new [Digistump AVR version](https://github.com/ArminJo/DigistumpArduino) shrinks generated code size by 5 to 15 percent**. Just replace the old Digispark board manager URL **http://digistump.com/package_digistump_index.json** (e.g.in Arduino *File > Preferences*) by the new  **https://raw.githubusercontent.com/ArminJo/DigistumpArduino/master/package_digistump_index.json** and install the latest **Digistump AVR Boards** version.<br/>
 ![Boards Manager](https://github.com/ArminJo/DigistumpArduino/blob/master/pictures/Digistump1.6.8.jpg)<br/>
+
+<br/>
 
 # Update the bootloader to a new version
 To **update** your old, flash consuming **bootloader**, you have 2 choices.
@@ -32,8 +54,10 @@ like e.g. the [Burn_upgrade-t85_default.cmd](utils/Burn_upgrade-t85_default.cmd)
 
 ### If you want to burn the bootloader to an **ATtiny87** or **ATtiny167** with avrdude, you must use the [avrdude.config file](https://raw.githubusercontent.com/ArminJo/micronucleus-firmware/master/windows_exe/avrdude.conf) in [the windows_exe directory](https://github.com/ArminJo/micronucleus-firmware/tree/master/windows_exe) where [ATtiny87](https://github.com/ArminJo/micronucleus-firmware/blob/master/windows_exe/avrdude.conf#L15055) and [ATtiny167](https://github.com/ArminJo/micronucleus-firmware/blob/master/windows_exe/avrdude.conf#L15247) specifications are added.
 
+<br/>
+
 # Fuse setting
-The meaning of fuses can be seen with the [Engbedded Atmel AVR® Fuse Calculator](https://www.engbedded.com/fusecalc/).
+The meaning of fuses can be seen with the [Engbedded Atmel AVRï¿½ Fuse Calculator](https://www.engbedded.com/fusecalc/).
 Windows helper scripts for setting fuses can be found [here](https://github.com/ArminJo/micronucleus-firmware/tree/master/utils).
 
 The default fuses for a **Digispark** board are:<br/>
@@ -41,7 +65,7 @@ The default fuses for a **Digispark** board are:<br/>
 - ATtiny85 Hfuse: 0xDD - External Reset pin enabled (Pin5 not usable as I/O) + BOD 2.7 V + Enable Serial Program and Data Downloading
 - ATtiny85 Efuse: 0xFE - self programming enabled.
 
-BOD enabled requires additional 20 µA in sleep state and therefore may be not desirable for low power battery applications. To disable BOD, use 0xDF as Hfuse.
+BOD enabled requires additional 20 ï¿½A in sleep state and therefore may be not desirable for low power battery applications. To disable BOD, use 0xDF as Hfuse.
 
 The default fuses for a **Digispark Pro** board are:<br/>
 - ATtiny167 Lfuse: 0xFF - External crystal osc. Frequency 8-16 MHz + Startup 65 ms
@@ -55,10 +79,12 @@ This can only be done by means of a [High Voltage programmer](https://github.com
 Try another **Cable**, try another **USB-Port**, try another **Board**, try another **Bootloader-variant**, try another **Computer**, try another **OS**.<br/>
 In this order.
 
+<br/>
+
 # Configuration overview
 If not otherwise noted, the OSCCAL value is calibrated (+/- 1%) after boot for all ATtiny85 configurations
 | Configuration | Free FLASH | Boot-<br/>loader size | Non default config flags set |
-|---------------|-----------------|-----------------|------------------------------|
+|-|-|-|-|
 | t85_agressive<br/><br/>It works for my Digispark boards without any problems :-) | 6778 | 1362 | [Do not provide calibrated OSCCAL, if no USB attached](/firmware/configuration/t85_agressive/bootloaderconfig.h#L220), [ENABLE_UNSAFE_OPTIMIZATIONS](#enable_unsafe_optimizations)<br/>Relying on calibrated 16MHz internal clock stability, not using the 16.5 MHz USB driver version with integrated PLL. This causes the main memory saving. |
 |  |  |  |  |
 | t85_default | 6650 | 1514 | - |
@@ -93,7 +119,9 @@ If not otherwise noted, the OSCCAL value is calibrated (+/- 1%) after boot for a
 - [FAST_EXIT_NO_USB_MS=300](#fast_exit_no_usb_ms-for-fast-bootloader-exit) - If not connected to USB (e.g. powered via VIN) the user program starts after 300 ms (+ initial 300 ms) -> 600 ms. If connected to USB but no upload happens the user program starts after around 1.5 seconds.
 - [LED_MODE=ACTIVE_HIGH](https://github.com/ArminJo/micronucleus-firmware/blob/master/firmware/main.c#L527) - The built in LED flashes during the 5 seconds of the bootloader waiting for commands.
 
-# Configuration Options
+<br/>
+
+# Descripion of the configuration options
 
 ## [`FAST_EXIT_NO_USB_MS`](/firmware/configuration/t85_fastExit/bootloaderconfig.h#L195) for fast bootloader exit
 If the bootloader is entered, it requires minimum 300 ms to initialize USB connection (disconnect and reconnect). 
@@ -103,7 +131,7 @@ This configuration waits for 200 ms after initialization for a reset and if no r
 With this configuration the **user program is started with a 500 ms delay after power up or reset** if no USB is attached, even if we do not specify a special entry condition.<br/>
 IF USB is attached, we wait another 1200 ms (to cover slow hosts, otherwise 500 would be OK) after the reset for the host upload program (micronucleus.exe) to request the configuration information. If no upload program is detected, we start the user program.
 
-## [`ENTRY_POWER_ON`](/firmware/configuration/t85_entry_on_powerOn/bootloaderconfig.h#L108) entry condition
+## Entry condition [`ENTRY_POWER_ON`](/firmware/configuration/t85_entry_on_powerOn/bootloaderconfig.h#L108).
 The `ENTRY_POWER_ON` configuration adds 18 bytes to the ATtiny85 default configuration.<br/>
 The content of the `MCUSR` is copied to the `GPIOR0` register to enable the user program to evaluate it and then cleared to prepare for next boot.<br/>
 In this configuration **a reset will immediately start your user program** without any delay.
@@ -153,7 +181,9 @@ You can easily create your own configuration by adding a new *firmware/configura
 If changes to the configuration lead to an increase in bootloader size, i.e. you see errors like `address 0x2026 of main.bin section '.text' is not within region 'text'`, it may be necessary to change/decrease the bootloader start address as described [below](https://github.com/ArminJo/micronucleus-firmware#computing-the-bootloader-start-address) and in the *Makefile.inc*.<br/>
 Feel free to supply a pull request, if you added and tested a previously unsupported device.
 
-# Compile instructions for the bootloader are [here](firmware#compiling-the-bootloader-firmware)
+<br/>
+
+# Compile [instructions](firmware#compiling-the-bootloader-firmware) for the bootloader
 
 ## Computing the bootloader start address
 The actual memory footprint for each configuration can be found in the file [*firmware/build.log*](firmware/build.log).<br/>
@@ -169,6 +199,8 @@ For data size from 1470 up to 1536 the address is 1A00 (6650 free), for 1538 to 
 For *t167_default.hex* (as well as for the other t167 configurations) with the new compiler we get 1436 as data size. The next multiple of 128 is 1536 (12 * 128) => (16384 - (1536 + 6)) = 14842 bytes are free.<br/>
 For data from 1281 to 1408 the address is 3A80, for size from 1409 to 1536 the address is 3A00
 
+<br/>
+
 # Bootloader memory comparison of different releases for [*t85_default.hex*](firmware/releases/t85_default.hex).
 - V1.6  6012 bytes free
 - V1.11 6330 bytes free
@@ -176,12 +208,16 @@ For data from 1281 to 1408 the address is 3A80, for size from 1409 to 1536 the a
 - V2.04 6522 bytes free
 - V2.5  **6650** bytes free
 
+<br/>
+
 # USB device manager entry / disconnect from USB
 To avoid periodically disconnect->connect if no sketch is loaded and to avoid an unknown USB Device (Device Descriptor Request Failed) entry in device manager when entering user program, **the bootloader finishes without an active disconnect from USB**.<br/>
 This means that you still can see a libusb-win32 decive / Digispark Bootloader in the Device manager, even when it is not alive, since your program has taken over the control of the CPU.<br/>
 This behavior is compatible to the old v1 micronucleus versions, which also do not disconnect from the host.
 **You can avoid this by actively disconnecting from the host by pulling the D- line to low for up to 300 milliseconds.**<br/>
 E.g a short beep at startup with tone(3, 2000, 200) will pull the D- line low and keep the module disconnected.
+
+<br/>
 
 # Reducing current of digispark bords for low power applications
 
@@ -207,11 +243,11 @@ E.g a short beep at startup with tone(3, 2000, 200) will pull the D- line low an
 | 2.6 mA    | **3.8 V** | 1 MHz | " |
 | 2.9 mA    | 5 V |  1 MHz | All Hardware changes + empty loop |
 | 2.4 mA    | 5 V |  1 MHz | All Hardware changes + empty loop + Timer and ADC disabled |
-| 230 µA    | 5 V |  1 MHz | All Hardware changes + SLEEP_MODE_PWR_DOWN |
-| **27 µA** | 5 V |  1 MHz | All Hardware changes + SLEEP_MODE_PWR_DOWN + ADC disabled + Watchdog enabled |
-| 25 µA     | 3 V |  1 MHz | " |
-|  **7 µA** | 5 V |  1 MHz | All Hardware changes + **SLEEP_MODE_PWR_DOWN + ADC disabled + BOD disabled** + Watchdog enabled |
-| 5.5 µA   | 3.8 V | 1 MHz | " The Watchdog draws around 5 µA |
+| 230 ï¿½A    | 5 V |  1 MHz | All Hardware changes + SLEEP_MODE_PWR_DOWN |
+| **27 ï¿½A** | 5 V |  1 MHz | All Hardware changes + SLEEP_MODE_PWR_DOWN + ADC disabled + Watchdog enabled |
+| 25 ï¿½A     | 3 V |  1 MHz | " |
+|  **7 ï¿½A** | 5 V |  1 MHz | All Hardware changes + **SLEEP_MODE_PWR_DOWN + ADC disabled + BOD disabled** + Watchdog enabled |
+| 5.5 ï¿½A   | 3.8 V | 1 MHz | " The Watchdog draws around 5 ï¿½A |
 
 BOD can only be disabled by setting fuses via ISP programmer](https://www.google.de/search?q=arduino+as+isp) and a connecting adapter.
 For reprogramming the fuses, you can use [this script](https://github.com/ArminJo/micronucleus-firmware/blob/master/utils/Write%2085%20Fuses%20E1%20DF%20FE%20-%20Digispark%20default%20without%20BOD%20and%20Pin5.cmd).<br/>
@@ -226,14 +262,14 @@ For reprogramming the fuses, you can use [this script](https://github.com/ArminJ
 |  14 mA | CPU + timer @16 MHz |
 |   8 mA | CPU + timer @8 MHz |
 |   3 mA | CPU + timer @1 MHz |
-|  20 µA | BOD |
-| 212 µA | ADC |
-|   5 µA | Watchdog |
+|  20 ï¿½A | BOD |
+| 212 ï¿½A | ADC |
+|   5 ï¿½A | Watchdog |
 
 With fast PLL Clock and standard fuses, the **start-up time from sleep is around 64ms and requires 2/3 of regular CPU power**!<br/>
-If we use the longest sleep time of 8 seconds and an empty loop, this result in an **average current consumption of 23 µA** (1 year with a 200 mAh button cell 2032).<br/>
+If we use the longest sleep time of 8 seconds and an empty loop, this result in an **average current consumption of 23 ï¿½A** (1 year with a 200 mAh button cell 2032).<br/>
 The start-up time from sleep can be reduced (at own risk of unstable clock) to 5 ms using [this fuse settings](https://github.com/ArminJo/micronucleus-firmware/blob/master/utils/Write%2085%20Fuses%20C1%20DF%20FE%20-%20Digispark%20default%20without%20BOD%20and%20Pin5%20and%20fast%20startup.cmd).
-This results in an average current consumption of **9 µA** (2.5 years with a 200 mAh button cell 2032).<br/>
+This results in an average current consumption of **9 ï¿½A** (2.5 years with a 200 mAh button cell 2032).<br/>
 This startup time can even be reduced to 6 clock cycles by [changing fuses to use the internal 8Mhz clock](https://github.com/ArminJo/micronucleus-firmware/blob/master/utils/Write%2085%20Fuses%20E2%20DF%20FF%20-%20ISP%20Mode%20%3D%208MHz%20without%20BOD%20and%20Pin5.cmd), but this **disables the possibility to program the Digispark board via USB** and and on the other hand removes the need for a bootloader and therefore leaves the whole memory for your program.
 
 ## Modifying the board
@@ -268,8 +304,9 @@ Now we have 3 power supply variants:
 2 Use 5V - GND to test the device with D- pull-up (the green LED is lighted) - Disconnect USB and VIN.
 3 Use VIN - GND for standard operation in low current consumption. The power supply can be 3V to 5V (the green LED can be used as debug output of PB3). - Disconnect USB and 5V.
 
+<br/>
 
-# Pin layout
+# Pin layouts
 ### ATtiny85 on Digispark
 
 ```
@@ -311,24 +348,24 @@ INT1 9 (D3) PA3  4|    |17  PB3 (D11) 4 OC1BV USB-
 Digital Pin numbers in parenthesis are for ATTinyCore library
 
 ```
-                       USB
-                     +-\__/-+
-              PA2  15|      |14  PB7
-              PA3  16|      |13  PB5 SCK
-           17 PA0  A6|      |12  PB4 MISO
-           18 PA1  A7|      |11  PB3 MOSI
-     (D17) 19 PC0  A0|      |10  PB2 OC1B/PWM SS
-     (D18) 20 PC1  A1|      |9   PB1 OC1A/PWM
-     (D19) 21 PC2  A2|      |8   PB0
-     (D20) 22 PC3  A3|      |7   PD7 RX
-SDA  (D21) 23 PC4  A4|      |6   PD6 TX
-SCL  (D22) 24 PC5  A5|      |5   PD5
-     (D23)    PC1  25|      |4   PD4
-RESET         PC6 RST|      |3   PD3 INT1
-LED           PD0   0|      |5V
-USB-          PD1   1|      |GND
-USB+  INT0    PD2   2|      |VIN
-                     +------+
+                        USB
+                      +-\__/-+
+               PA2  15|      |14  PB7
+               PA3  16|      |13  PB5 SCK
+           D17 PA0  A6|      |12  PB4 MISO
+           D18 PA1  A7|      |11  PB3 MOSI
+     (D17) D19 PC0  A0|      |10  PB2 OC1B/PWM SS
+     (D18) D20 PC1  A1|      |9   PB1 OC1A/PWM
+     (D19) D21 PC2  A2|      |8   PB0
+     (D20) D22 PC3  A3|      |7   PD7 RX
+SDA  (D21) D23 PC4  A4|      |6   PD6 TX
+SCL  (D22) D24 PC5  A5|      |5   PD5
+     (D23)     PC7  25|      |4   PD4
+RESET          PC6 RST|      |3   PD3 INT1
+LED            PD0   0|      |5V
+USB-           PD1   1|      |GND
+USB+  INT0     PD2   2|      |VIN
+                      +------+
   USB+ and USB- are each connected to a 3.3 volt Zener to GND and with a 68 ohm series resistor to the ATtiny pin.
   USB- has a 1k0 pullup resistor to indicate a low-speed device.
   USB+ and USB- are each terminated on the host side with 15k to 25k pull-down resistors.
@@ -336,9 +373,10 @@ USB+  INT0    PD2   2|      |VIN
   Pins not available: PB6 is CLOCK_IN, PC7 is 25
 
 ```
-# Revision History
-### Version 2.6.1 - work in progress
 
+<br/>
+
+# Revision History
 ### Version 2.6.0
 - Added compile flag `STORE_CONFIGURATION_REPLY_IN_RAM`.
 - Added 2 bytes USB config data for Bootloader feature flags and application version.
