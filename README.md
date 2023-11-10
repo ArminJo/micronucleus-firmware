@@ -9,8 +9,6 @@ Fork for the firmware / digispark part of the micronucleus repository.
  &nbsp; &nbsp; 
 [![Badge Commits since latest](https://img.shields.io/github/commits-since/ArminJo/micronucleus-firmware/latest?color=yellow)](https://github.com/ArminJo/micronucleus-firmware/commits/master)
  &nbsp; &nbsp; 
-[![Badge Build Status](https://github.com/ArminJo/micronucleus-firmware/workflows/TestCompile/badge.svg)](https://github.com/ArminJo/micronucleus-firmware/actions)
- &nbsp; &nbsp; 
 ![Badge Hit Counter](https://visitor-badge.laobi.icu/badge?page_id=ArminJo_micronucleus-firmware)
 <br/>
 <br/>
@@ -46,6 +44,7 @@ Clean Micronucleus devices without uploaded user program will not time out and a
 
 <br/>
 
+
 # Update the bootloader to a new version
 To **update** your old, flash consuming **bootloader**, you have 2 choices.
 1. Use the new Digistump board manager URL (see above), choose a bootloader with *Tools > Micronucleus variant* and then burn it with *Tools > Burn Bootloader*.<br/>
@@ -57,7 +56,7 @@ like e.g. the [Burn_upgrade-t85_default.cmd](utils/Burn_upgrade-t85_default.cmd)
 <br/>
 
 # Fuse setting
-The meaning of fuses can be seen with the [Engbedded Atmel AVR� Fuse Calculator](https://www.engbedded.com/fusecalc/).
+The meaning of fuses can be seen with the [Engbedded Atmel AVR Fuse Calculator](https://www.engbedded.com/fusecalc/).
 Windows helper scripts for setting fuses can be found [here](https://github.com/ArminJo/micronucleus-firmware/tree/master/utils).
 
 The default fuses for a **Digispark** board are:<br/>
@@ -65,7 +64,7 @@ The default fuses for a **Digispark** board are:<br/>
 - ATtiny85 Hfuse: 0xDD - External Reset pin enabled (Pin5 not usable as I/O) + BOD 2.7 V + Enable Serial Program and Data Downloading
 - ATtiny85 Efuse: 0xFE - self programming enabled.
 
-BOD enabled requires additional 20 �A in sleep state and therefore may be not desirable for low power battery applications. To disable BOD, use 0xDF as Hfuse.
+BOD enabled requires additional 20 &micro;A in sleep state and therefore may be not desirable for low power battery applications. To disable BOD, use 0xDF as Hfuse.
 
 The default fuses for a **Digispark Pro** board are:<br/>
 - ATtiny167 Lfuse: 0xFF - External crystal osc. Frequency 8-16 MHz + Startup 65 ms
@@ -131,7 +130,7 @@ This configuration waits for 200 ms after initialization for a reset and if no r
 With this configuration the **user program is started with a 500 ms delay after power up or reset** if no USB is attached, even if we do not specify a special entry condition.<br/>
 IF USB is attached, we wait another 1200 ms (to cover slow hosts, otherwise 500 would be OK) after the reset for the host upload program (micronucleus.exe) to request the configuration information. If no upload program is detected, we start the user program.
 
-## Entry condition [`ENTRY_POWER_ON`](/firmware/configuration/t85_entry_on_powerOn/bootloaderconfig.h#L108).
+## [`ENTRY_POWER_ON`](/firmware/configuration/t85_entry_on_powerOn/bootloaderconfig.h#L108) entry condition
 The `ENTRY_POWER_ON` configuration adds 18 bytes to the ATtiny85 default configuration.<br/>
 The content of the `MCUSR` is copied to the `GPIOR0` register to enable the user program to evaluate it and then cleared to prepare for next boot.<br/>
 In this configuration **a reset will immediately start your user program** without any delay.
@@ -159,11 +158,11 @@ The content of the `MCUSR` is copied to the `GPIOR0` register to enable the user
 In this configuration **a power up with USB disconnected or a reset will immediately start your user program** without any delay.<br/>
 
 ## [`ENABLE_UNSAFE_OPTIMIZATIONS`](/firmware/crt1.S#L99)
-- The bootloader reset vector is written by the host and not by the bootloader itself. In case of an disturbed communication the reset vector may be wrong -but I have never experienced it.
+The bootloader reset vector is written by the host and not by the bootloader itself. In case of an disturbed communication the reset vector may be wrong -but I have never experienced it.
 
 You have a slightly bigger chance to brick the bootloader, which reqires it to be reprogrammed by [avrdude](windows_exe) and an ISP or an Arduino as ISP. Command files for this can be found [here](/utils).
 
-## [Recommended](/firmware/configuration/t85_entry_on_powerOn_activePullup_fastExit) configuration
+## Recommendedconfiguration
 For ATtiny85, ATtiny88 and ATtiny167 the recommended configuration is [t85_entry_on_powerOn_activePullup_fastExit.hex](#t85recommended), [t88_entry_on_powerOn_activePullup_fastExit.hex](#t88recommended) and [t167_entry_on_powerOn_activePullup_fastExit.hex](#t167recommended) respectively.
 
 This configuration has the following features:
@@ -183,7 +182,7 @@ Feel free to supply a pull request, if you added and tested a previously unsuppo
 
 <br/>
 
-# Compile [instructions](firmware#compiling-the-bootloader-firmware) for the bootloader
+# [Compile instructions for the bootloader](firmware#compiling-the-bootloader-firmware)
 
 ## Computing the bootloader start address
 The actual memory footprint for each configuration can be found in the file [*firmware/build.log*](firmware/build.log).<br/>
@@ -201,12 +200,12 @@ For data from 1281 to 1408 the address is 3A80, for size from 1409 to 1536 the a
 
 <br/>
 
-# Bootloader memory comparison of different releases for [*t85_default.hex*](firmware/releases/t85_default.hex).
+# Bootloader memory comparison of different releases for t85_default.hex
 - V1.6  6012 bytes free
 - V1.11 6330 bytes free
 - V2.3  6522 bytes free
 - V2.04 6522 bytes free
-- V2.5  **6650** bytes free
+- [V2.5](firmware/releases/t85_default.hex) **6650** bytes free
 
 <br/>
 
@@ -243,11 +242,11 @@ E.g a short beep at startup with tone(3, 2000, 200) will pull the D- line low an
 | 2.6 mA    | **3.8 V** | 1 MHz | " |
 | 2.9 mA    | 5 V |  1 MHz | All Hardware changes + empty loop |
 | 2.4 mA    | 5 V |  1 MHz | All Hardware changes + empty loop + Timer and ADC disabled |
-| 230 �A    | 5 V |  1 MHz | All Hardware changes + SLEEP_MODE_PWR_DOWN |
-| **27 �A** | 5 V |  1 MHz | All Hardware changes + SLEEP_MODE_PWR_DOWN + ADC disabled + Watchdog enabled |
-| 25 �A     | 3 V |  1 MHz | " |
-|  **7 �A** | 5 V |  1 MHz | All Hardware changes + **SLEEP_MODE_PWR_DOWN + ADC disabled + BOD disabled** + Watchdog enabled |
-| 5.5 �A   | 3.8 V | 1 MHz | " The Watchdog draws around 5 �A |
+| 230 &micro;A    | 5 V |  1 MHz | All Hardware changes + SLEEP_MODE_PWR_DOWN |
+| **27 &micro;A** | 5 V |  1 MHz | All Hardware changes + SLEEP_MODE_PWR_DOWN + ADC disabled + Watchdog enabled |
+| 25 &micro;A     | 3 V |  1 MHz | " |
+|  **7 &micro;A** | 5 V |  1 MHz | All Hardware changes + **SLEEP_MODE_PWR_DOWN + ADC disabled + BOD disabled** + Watchdog enabled |
+| 5.5 &micro;A   | 3.8 V | 1 MHz | " The Watchdog draws around 5 &micro;A |
 
 BOD can only be disabled by setting fuses via ISP programmer](https://www.google.de/search?q=arduino+as+isp) and a connecting adapter.
 For reprogramming the fuses, you can use [this script](https://github.com/ArminJo/micronucleus-firmware/blob/master/utils/Write%2085%20Fuses%20E1%20DF%20FE%20-%20Digispark%20default%20without%20BOD%20and%20Pin5.cmd).<br/>
@@ -262,14 +261,14 @@ For reprogramming the fuses, you can use [this script](https://github.com/ArminJ
 |  14 mA | CPU + timer @16 MHz |
 |   8 mA | CPU + timer @8 MHz |
 |   3 mA | CPU + timer @1 MHz |
-|  20 �A | BOD |
-| 212 �A | ADC |
-|   5 �A | Watchdog |
+|  20 &micro;A | BOD |
+| 212 &micro;A | ADC |
+|   5 &micro;A | Watchdog |
 
 With fast PLL Clock and standard fuses, the **start-up time from sleep is around 64ms and requires 2/3 of regular CPU power**!<br/>
-If we use the longest sleep time of 8 seconds and an empty loop, this result in an **average current consumption of 23 �A** (1 year with a 200 mAh button cell 2032).<br/>
+If we use the longest sleep time of 8 seconds and an empty loop, this result in an **average current consumption of 23 &micro;A** (1 year with a 200 mAh button cell 2032).<br/>
 The start-up time from sleep can be reduced (at own risk of unstable clock) to 5 ms using [this fuse settings](https://github.com/ArminJo/micronucleus-firmware/blob/master/utils/Write%2085%20Fuses%20C1%20DF%20FE%20-%20Digispark%20default%20without%20BOD%20and%20Pin5%20and%20fast%20startup.cmd).
-This results in an average current consumption of **9 �A** (2.5 years with a 200 mAh button cell 2032).<br/>
+This results in an average current consumption of **9 &micro;A** (2.5 years with a 200 mAh button cell 2032).<br/>
 This startup time can even be reduced to 6 clock cycles by [changing fuses to use the internal 8Mhz clock](https://github.com/ArminJo/micronucleus-firmware/blob/master/utils/Write%2085%20Fuses%20E2%20DF%20FF%20-%20ISP%20Mode%20%3D%208MHz%20without%20BOD%20and%20Pin5.cmd), but this **disables the possibility to program the Digispark board via USB** and and on the other hand removes the need for a bootloader and therefore leaves the whole memory for your program.
 
 ## Modifying the board
