@@ -16,6 +16,10 @@ Fork for the firmware / digispark part of the micronucleus repository.
 
 </div>
 
+#### If you find this library useful, please give it a star.
+
+&#x1F30E; [Google Translate](https://translate.google.com/translate?sl=en&u=https://github.com/ArminJo/micronucleus-firmware)
+
 <br/>
 
 Micronucleus is a bootloader designed for AVR ATtiny microcontrollers with a minimal usb interface, cross platform libusb-based program upload tool, and a strong emphasis on bootloader compactness. To the authors knowledge this is, by far, the smallest USB bootloader for AVR ATtiny.<br/>
@@ -33,15 +37,14 @@ Please invoke the command line tool with "micronucleus -help" for a list of avai
 <br/>
 
 # Driver installation
+If the Digispark board is not recognized by Microsoft Windows you must install the appropriate driver.<br/>
 For Windows you must install the **libusb driver** before you can program the board. Download it [here](https://github.com/digistump/DigistumpArduino/releases/download/1.6.7/Digistump.Drivers.zip), open it and run `InstallDrivers.exe`.
 Clean Micronucleus devices without uploaded user program will not time out and allow sufficient time for proper driver installation. Linux and OS X do not require custom drivers.
 
 <br/>
 
 # Updated configuration for Digispark boards
-**The new [Digistump AVR version](https://github.com/ArminJo/DigistumpArduino) shrinks generated code size by 5 to 15 percent**. Just replace the old Digispark board manager URL **http://digistump.com/package_digistump_index.json** (e.g.in Arduino *File > Preferences*) by the new  **https://raw.githubusercontent.com/ArminJo/DigistumpArduino/master/package_digistump_index.json** and install the latest **Digistump AVR Boards** version.<br/>
-![Boards Manager](https://github.com/ArminJo/DigistumpArduino/blob/master/pictures/Digistump1.6.8.jpg)<br/>
-
+**The new [ATTinyCore by Spence Konde](https://github.com/SpenceKonde/ATTinyCore) shrinks generated code size by 5 to 15 percent**. Just replace the old Digispark board manager URL **http://digistump.com/package_digistump_index.json** (e.g.in Arduino *File > Preferences*) by the new  **http://drazzy.com/package_drazzy.com_index.json** and install the latest version.
 <br/>
 
 
@@ -49,26 +52,26 @@ Clean Micronucleus devices without uploaded user program will not time out and a
 To **update** your old, flash consuming **bootloader**, you have 2 choices.
 1. Use the new Digistump board manager URL (see above), choose a bootloader with *Tools > Micronucleus variant* and then burn it with *Tools > Burn Bootloader*.<br/>
 2. Run one of the Windows [scripts](https://github.com/ArminJo/micronucleus-firmware/tree/master/utils)
-like e.g. the [Burn_upgrade-t85_default.cmd](utils/Burn_upgrade-t85_default.cmd). The internal mechanism is described [here](https://github.com/ArminJo/micronucleus-firmware/blob/master/firmware/upgrades/README.md).
+like e.g. the [1_Upgrade-t85_default.cmd](utils/1_Upgrade-t85_default.cmd). The internal mechanism is described [here](https://github.com/ArminJo/micronucleus-firmware/blob/master/firmware/upgrades/README.md).
 
 ### If you want to burn the bootloader to an **ATtiny87** or **ATtiny167** with avrdude, you must use the [avrdude.config file](https://raw.githubusercontent.com/ArminJo/micronucleus-firmware/master/windows_exe/avrdude.conf) in [the windows_exe directory](https://github.com/ArminJo/micronucleus-firmware/tree/master/windows_exe) where [ATtiny87](https://github.com/ArminJo/micronucleus-firmware/blob/master/windows_exe/avrdude.conf#L15055) and [ATtiny167](https://github.com/ArminJo/micronucleus-firmware/blob/master/windows_exe/avrdude.conf#L15247) specifications are added.
 
 <br/>
 
 # Fuse setting
-The meaning of fuses can be seen with the [Engbedded Atmel AVR Fuse Calculator](https://www.engbedded.com/fusecalc/).
+The meaning of fuses can be seen with the [Engbedded Atmel AVR Fuse Calculator](https://www.engbedded.com/fusecalc/).<br/>
 Windows helper scripts for setting fuses can be found [here](https://github.com/ArminJo/micronucleus-firmware/tree/master/utils).
 
 The default fuses for a **Digispark** board are:<br/>
-- ATtiny85 Lfuse: 0xE1 - (digispark default) PLL Clock + Startup 64 ms
-- ATtiny85 Hfuse: 0xDD - External Reset pin enabled (Pin5 not usable as I/O) + BOD 2.7 V + Enable Serial Program and Data Downloading
+- ATtiny85 Lfuse: 0xE1 - (digispark default) 64 MHZ high speed PLL Clock + Startup 64 ms. CPU clock = 64 MHz / 4 = 16 MHz. CPU clock speed can later be reduced by core or user by using the `System Clock Prescaler` register.
+- ATtiny85 Hfuse: 0xDD - External Reset pin enabled (Pin5 not usable as I/O) + BOD 2.7 V + Enable Serial Program and Data Downloading.
 - ATtiny85 Efuse: 0xFE - self programming enabled.
 
 BOD enabled requires additional 20 &micro;A in sleep state and therefore may be not desirable for low power battery applications. To disable BOD, use 0xDF as Hfuse.
 
 The default fuses for a **Digispark Pro** board are:<br/>
-- ATtiny167 Lfuse: 0xFF - External crystal osc. Frequency 8-16 MHz + Startup 65 ms
-- ATtiny167 Hfuse: 0xDC - External Reset pin enabled + BOD 4.3Volt + Enable Serial Program and Data Downloading
+- ATtiny167 Lfuse: 0xFF - External crystal osc. Frequency 8-16 MHz + Startup 65 ms. The Pro has a 16 MHz crystal.
+- ATtiny167 Hfuse: 0xDC - External Reset pin enabled + BOD 4.3Volt + Enable Serial Program and Data Downloading.
 - ATtiny167 Efuse: 0xFE - self programming enabled.
 
 # Flash the bootloader to a bricked device
@@ -176,8 +179,8 @@ This configuration has the following features:
 ### Hex files for these configuration are available in the [releases](/firmware/releases) and [upgrades](/firmware/upgrades) folders.
 
 ## Create your own configuration
-You can easily create your own configuration by adding a new *firmware/configuration* directory and adjusting *bootloaderconfig.h* and *Makefile.inc*. Before you run the *firmware/make_all.cmd* script, check the arduino directory path in the [`firmware/SetPath.cmd`](https://github.com/ArminJo/micronucleus-firmware/firmware/SetPath.cmd#L1) file.<br/>
-If changes to the configuration lead to an increase in bootloader size, i.e. you see errors like `address 0x2026 of main.bin section '.text' is not within region 'text'`, it may be necessary to change/decrease the bootloader start address as described [below](https://github.com/ArminJo/micronucleus-firmware#computing-the-bootloader-start-address) and in the *Makefile.inc*.<br/>
+You can easily create your own configuration by adding a new *firmware/configuration* directory and adjusting *bootloaderconfig.h* and *Makefile.inc*. Before you run the *firmware/make_all.cmd* script, check the arduino directory path in the [`firmware/SetPath.cmd`](https://github.com/ArminJo/micronucleus-firmware/blob/master/utils/SetPath.cmd#L1) file.<br/>
+If changes to the configuration lead to an increase in bootloader size, i.e. you see errors like `address 0x2026 of main.bin section '.text' is not within region 'text'`, it may be necessary to change/decrease the bootloader start address as described in the next section and in the *Makefile.inc*.<br/>
 Feel free to supply a pull request, if you added and tested a previously unsupported device.
 
 <br/>

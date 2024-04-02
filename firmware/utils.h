@@ -32,7 +32,7 @@ typedef unsigned char boolean;
 #define multiplyDecimal(a,b) (((a) * (b)) / 256)
 
 // set a pin on DDRB to be an input or an output - i.e. becomeOutput(pin(3));
-#define inputs(pinmap) DDRB &= ~(pinmap)
+#define inputs(pinmap) DDRB &= ~(pinmap) // unused
 #define outputs(pinmap) DDRB |= (pinmap)
 
 // turn some pins on or off

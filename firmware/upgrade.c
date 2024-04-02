@@ -41,11 +41,11 @@ void write_page(uint16_t address, uint16_t words[SPM_PAGESIZE / 2]);
 #define TINYVECTOR_RESET_OFFSET     4 // the exact value does not matter since we erase the whole page
 
 int main(void) {
-  pinsOff(0xFF); // pull down all pins
-  outputs(0xFF); // all to ground - force usb disconnect
-  delay(250); // milliseconds
-  inputs(0xFF); // let them float
-  delay(250);
+  PORTB &= ~(0xFF); // pull down all pins
+  DDRB |= (0xFF);   // all to ground - force usb disconnect
+  delay(250);       // wait 1/4 second
+  DDRB &= ~(0xFF);  // let them float
+  delay(250);       // wait 1/4 second
   cli();
 
   secure_interrupt_vector_table(); // reset our vector table to it's original state

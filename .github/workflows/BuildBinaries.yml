@@ -74,7 +74,7 @@ jobs:
           GIT_DIR=$GITHUB_WORKSPACE
         fi
 
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@master
 
     - name: install Linux 64 dependencies and run make
       if: runner.os == 'Linux' && matrix.target-dir == 'x86_64-linux-gnu'
