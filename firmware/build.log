@@ -130,3 +130,7 @@ Building Micronucleus configuration: t85_default
 8K  Device -- Codesize: 1514 bytes, BOOTLOADER_ADDRESS: 0x1A00, Free user memory 6650 bytes.
 16K Device -- Codesize: 1514 bytes, BOOTLOADER_ADDRESS: 0x3A00, Free user memory 14842 bytes.
 - 
+Building Micronucleus configuration: t85_default 
+8K  Device -- Codesize: 1514 bytes, BOOTLOADER_ADDRESS: 0x1A00, Free user memory 6650 bytes.
+16K Device -- Codesize: 1514 bytes, BOOTLOADER_ADDRESS: 0x3A00, Free user memory 14842 bytes.
+- 

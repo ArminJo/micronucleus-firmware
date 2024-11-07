@@ -32,7 +32,7 @@ Due to the many changes, also the upload tool had to be updated. The V2.0 upload
 The bootloader allows **uploading of new firmware via USB**. In its usual configuration it is invoked at device power or on reset and will identify to the host computer. If no communication is initiated by the host machine within a given time (default are 6 seconds), the bootloader will time out and enter the user program, if one is present.<br/>
 For proper timing, the command line tool should to be started on the host computer **before** the bootloader is invoked / the board attached.<br/>
 The bootloader resides in the same memory as the user program, since the ATtiny series does not support a protected bootloader section. Therefore, special care has to be taken not to overwrite the bootloader if the user program uses the self programming features. The bootloader will patch itself into the reset vector of the user program. **No other interrupt vectors are changed**.<br/>
-Please invoke the command line tool with "micronucleus -help" for a list of available options.
+Please invoke the command line tool with "micronucleus --help" for a list of available options.
 
 <br/>
 
